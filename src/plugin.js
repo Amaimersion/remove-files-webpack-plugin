@@ -91,10 +91,11 @@ class RemoveFilesWebpackPlugin {
     }
 
     /**
-     * "This method is called once by the webpack compiler while installing the plugin".
+     * "This method is called once by the webpack 
+     * compiler while installing the plugin.".
      *
      * @param {Object} compiler
-     * "Represents the fully configured webpack environment".
+     * "Represents the fully configured webpack environment.".
      */
     apply(compiler) {
         /**

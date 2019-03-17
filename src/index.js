@@ -80,8 +80,8 @@ class RemoveFilesWebpackPlugin {
         this.pluginName = 'remove-files-plugin';
         this.warnings = [];
         this.errors = [];
-        this.beforeParams = {...defaultParams, ...params.before};
-        this.afterParams = {...defaultParams, ...params.after};
+        this.beforeParams = { ...defaultParams, ...params.before };
+        this.afterParams = { ...defaultParams, ...params.after };
     }
 
     /**
@@ -157,7 +157,7 @@ class RemoveFilesWebpackPlugin {
                         message,
                         messageParams.if
                     ));
-                // if main === compiler.
+                    // if main === compiler.
                 } else {
                     console.log(
                         this.generateMessage(
@@ -528,12 +528,14 @@ class RemoveFilesWebpackPlugin {
      * A modified message.
      */
     generateMessage(message, params) {
-        params = {...{
-            pluginName: true,
-            endDot: true,
-            newLine: false,
-            color: 'white'
-        }, ...params};
+        params = {
+            ...{
+                pluginName: true,
+                endDot: true,
+                newLine: false,
+                color: 'white'
+            }, ...params
+        };
 
         if (params.pluginName) {
             message = `${this.pluginName}: ${message}`;
@@ -553,7 +555,7 @@ class RemoveFilesWebpackPlugin {
          * @see https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color#answer-41407246
          * @see http://bluesock.org/~willkg/dev/ansi.html
          */
-        switch(params.color) {
+        switch (params.color) {
             case 'red':
                 message = `\x1b[31m${message}\x1b[0m`;
                 break;
@@ -636,13 +638,13 @@ class RemoveFilesWebpackPlugin {
 
             console.log(this.generateMessage(
                 `${tab}${name}:`,
-                {...commonParams, color: 'yellow'}
+                { ...commonParams, color: 'yellow' }
             ));
 
             for (let item of itms) {
                 console.log(this.generateMessage(
                     `${tab}${tab}${item}`,
-                    {...commonParams, color: 'green'}
+                    { ...commonParams, color: 'green' }
                 ));
             }
         };

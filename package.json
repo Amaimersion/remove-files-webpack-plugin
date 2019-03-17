@@ -3,6 +3,9 @@
     "version": "1.1.0",
     "description": "A plugin for webpack which removes files and folders before and after compilation.",
     "main": "index.js",
+    "peerDependencies": {
+        "webpack": "*"
+    },
     "homepage": "https://github.com/Amaimersion/remove-files-webpack-plugin/blob/master/README.md",
     "author": {
         "name": "Sergey Kuznetsov",

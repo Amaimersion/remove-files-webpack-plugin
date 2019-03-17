@@ -1,7 +1,9 @@
 'use strict';
 
+
 const fs = require('fs');
 const path = require('path');
+
 
 /**
  * Contains directories and files.
@@ -13,27 +15,30 @@ class Items {
     }
 }
 
+
 class RemoveFilesWebpackPlugin {
     /**
      * Creates an instance of RemoveFilesWebpackPlugin.
      *
      * @param {Object} params
+     * Contains two keys: `before` (compilation) and `after` (compilation).
+     * All next properties are the same for these two keys.
      *
      * @param {String} params.root
-     * The root directory.
-     * A not absolute paths will appends to this.
-     * Defaults to `__dirname`.
+     * A root directory.
+     * Not absolute paths will be appended to this.
+     * Defaults to `.` (from which directory is called).
      *
      * @param {Array<String>} params.include
-     * The folders/fils for remove.
+     * A folders/files for remove.
      * Defaults to `[]`.
      *
      * @param {Array<String>} params.exclude
-     * The files for exclude.
+     * A files for exclude.
      * Defaults to `[]`.
      *
      * @param {Array<{folder: String, method: (filePath) => Boolean, recursive: Boolean}>} params.test
-     * The folders for custom testing.
+     * A folders for custom testing.
      * Defaults to `[]`.
      *
      * @param {Boolean} params.log
@@ -41,21 +46,29 @@ class RemoveFilesWebpackPlugin {
      * Defaults to `true`.
      *
      * @param {Boolean} params.emulate
-     * Emulate remove.
+     * Emulate remove process.
      * Print which folders/files will be removed without actually removing them.
      * Ignores `params.log`.
      * Defaults to `false`.
      *
      * @param {Boolean} params.allowRootAndOutside
-     * Allow remove a root directory and outside the root directory.
+     * Allow remove of a `root` directory or outside the `root` directory.
      * It's kinda safe mode.
-     * Don't turn on it, if you don't know what you actually want!
+     * Don't turn it on, if you don't know what you actually do!
      * Defaults to `false`.
      */
     constructor(params) {
         params = params || {};
+
+        if (!params.before && !params.after) {
+            throw new Error(
+                `No "before" or "after" parameters specified. ` +
+                'See https://github.com/Amaimersion/remove-files-webpack-plugin#options'
+            );
+        }
+
         const defaultParams = {
-            root: __dirname,
+            root: path.resolve('.'),
             include: [],
             exclude: [],
             test: [],
@@ -64,15 +77,17 @@ class RemoveFilesWebpackPlugin {
             allowRootAndOutside: false
         };
 
-        if (!params.before && !params.after) {
-            throw new Error(`No "before" or "after" parameters specified.`)
-        }
-
         this.pluginName = 'remove-files-plugin';
         this.warnings = [];
         this.errors = [];
-        this.beforeParams = { ...defaultParams, ...params.before };
-        this.afterParams = { ...defaultParams, ...params.after };
+        this.beforeParams = {
+            ...defaultParams,
+            ...params.before
+        };
+        this.afterParams = {
+            ...defaultParams,
+            ...params.after
+        };
     }
 
     /**

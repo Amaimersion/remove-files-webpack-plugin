@@ -3,20 +3,8 @@
 
 const fs = require('fs');
 const path = require('path');
-
-
-/**
- * Contains directories and files.
- * 
- * Available through `dicts` and 
- * `files` property respectively.
- */
-class Items {
-    constructor() {
-        this.dicts = [];
-        this.files = [];
-    }
-}
+const Items = require('./items');
+const Utils = require('./utils');
 
 
 class RemoveFilesWebpackPlugin {
@@ -283,85 +271,9 @@ class RemoveFilesWebpackPlugin {
             items[group].push(item);
         }
 
-        items = this.cropUnnecessaryItems(items);
+        items.cropUnnecessaryItems();
 
         return items;
-    }
-
-    /**
-     * Crops unecessary folders/files.
-     *
-     * It's clears childrens dicts/files,
-     * whose parents will be removing.
-     *
-     * @param {Items} items
-     * A folders/files.
-     *
-     * @example
-     * items = {
-     *  dicts: [
-     *    'D:/dist/styles/css',
-     *    'D:/dist/js/scripts',
-     *    'D:/dist/styles'
-     *  ];
-     *  files: [
-     *    'D:/dist/styles/popup.css',
-     *    'D:/dist/styles/popup.css.map',
-     *    'D:/dist/manifest.json'
-     *  ];
-     * };
-     *
-     * Returns:
-     * items = {
-     *  dicts: [
-     *    'D:/dist/js/scripts',
-     *    'D:/dist/styles'
-     *  ];
-     *  files: [
-     *    'D:/dist/manifest.json'
-     *  ];
-     * };
-     *
-     * Because full styles folder will be removed.
-     */
-    cropUnnecessaryItems(items) {
-        if (!items.dicts.length) {
-            return items;
-        }
-
-        const rightItems = new Items();
-        let unnecessaryIndexes = new Set();
-
-        const addToUnnecessaryIndexes = (firstGroup, secondGroup, indexes) => {
-            for (let item of firstGroup) {
-                item = this.escapeString(item);
-                const regexp = new RegExp(`(^${item})(.+)`, 'm');
-
-                for (let i in secondGroup) {
-                    if (regexp.test(secondGroup[i])) {
-                        indexes.add(i);
-                    }
-                }
-            }
-        };
-
-        const addToRightGroup = (rightGroup, itemsGroup, indexes) => {
-            for (let index in itemsGroup) {
-                if (!indexes.has(index)) {
-                    rightGroup.push(itemsGroup[index]);
-                }
-            }
-        };
-
-        addToUnnecessaryIndexes(items.dicts, items.dicts, unnecessaryIndexes);
-        addToRightGroup(rightItems.dicts, items.dicts, unnecessaryIndexes);
-
-        unnecessaryIndexes.clear();
-
-        addToUnnecessaryIndexes(rightItems.dicts, items.files, unnecessaryIndexes);
-        addToRightGroup(rightItems.files, items.files, unnecessaryIndexes);
-
-        return rightItems;
     }
 
     /**
@@ -462,19 +374,6 @@ class RemoveFilesWebpackPlugin {
     }
 
     /**
-     * Escapes a string
-     *
-     * @param {String} string
-     * A string for escaping.
-     *
-     * @returns {String}
-     * Escaped string.
-     */
-    escapeString(string) {
-        return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
-    }
-
-    /**
      * Checks a path for safety.
      *
      * Checking for either exit beyond the root 
@@ -505,7 +404,7 @@ class RemoveFilesWebpackPlugin {
      * Returns – false
      */
     isSave(root, pth) {
-        return new RegExp(`(^${this.escapeString(root)})(.+)`, 'm').test(pth);
+        return new RegExp(`(^${Utils.escapeString(root)})(.+)`, 'm').test(pth);
     }
 
     /**

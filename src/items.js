@@ -61,7 +61,7 @@ class Items {
 
         const addToUnnecessaryIndexes = (firstGroup, secondGroup, indexes) => {
             for (let item of firstGroup) {
-                item = Utils.escapeString(item);
+                item = Utils.escape(item);
                 const regexp = new RegExp(`(^${item})(.+)`, 'm');
 
                 for (let i in secondGroup) {

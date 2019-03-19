@@ -1,6 +1,9 @@
 'use strict';
 
 
+/**
+ * Some utils.
+ */
 class Utils {
     /**
      * Escapes a string
@@ -11,7 +14,7 @@ class Utils {
      * @returns {String}
      * Escaped string.
      */
-    static escapeString(string) {
+    static escape(string) {
         return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
     }
 }

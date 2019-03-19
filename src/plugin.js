@@ -446,7 +446,7 @@ class Plugin {
      * Returns – false
      */
     isSave(root, pth) {
-        return new RegExp(`(^${Utils.escapeString(root)})(.+)`, 'm').test(pth);
+        return new RegExp(`(^${Utils.escape(root)})(.+)`, 'm').test(pth);
     }
 }
 

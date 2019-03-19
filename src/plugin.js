@@ -149,7 +149,7 @@ class RemoveFilesWebpackPlugin {
      * Either `this.beforeParams` or `this.afterParams`.
      */
     handleRemove(params) {
-        const items = this.getItemsForRemove(params);
+        const items = this.getItemsForRemoving(params);
 
         if (
             !Object.keys(items.dicts).length &&
@@ -184,69 +184,34 @@ class RemoveFilesWebpackPlugin {
     }
 
     /**
-     * Gets sorted folders/files for removing.
+     * Gets sorted folders and files for removing.
      *
      * @param {Object} params
-     * The parameters for remove.
+     * A parameters for remove.
      * Either `this.beforeParams` or `this.afterParams`.
      */
-    getItemsForRemove(params) {
+    getItemsForRemoving(params) {
         let items = new Items();
 
         params.include = this.toAbsolutePaths(params.root, params.include);
         params.exclude = this.toAbsolutePaths(params.root, params.exclude);
 
-        if (params.test && params.test.length) {
-            for (let test of params.test) {
-                if (!path.isAbsolute(test.folder)) {
-                    test.folder = path.join(params.root, test.folder);
-                }
+        // handle unexplicit files or folders and add it to explicit.
+        params.include = params.include.concat(
+            this.handleTest(params)
+        );
 
-                if (!params.allowRootAndOutside && !this.isSave(params.root, test.folder)) {
-                    continue;
-                }
-
-                let itemStat = this.getStatSync(test.folder);
-
-                if (!itemStat) {
-                    continue;
-                } else if (!itemStat.isDirectory()) {
-                    this.warnings.push(`Test folder is not directory - ${test.folder}`)
-                    continue;
-                } else if (!itemStat.isDirectory() && !itemStat.isFile()) {
-                    this.warnings.push(`Invalid stat for the ${test.folder}`);
-                    continue;
-                }
-
-                const getFilesRecursiveSync = (dict) => {
-                    const files = fs.readdirSync(dict);
-
-                    for (let file of files) {
-                        file = path.join(dict, file);
-                        const stat = this.getStatSync(file);
-
-                        if (!stat) {
-                            continue;
-                        } else if (stat.isFile() && test.method(file)) {
-                            params.include.push(file);
-                        } else if (stat.isDirectory() && test.recursive) {
-                            getFilesRecursiveSync(file);
-                        } else if (!stat.isDirectory() && !stat.isFile()) {
-                            this.warnings.push(`Invalid stat for the ${file}`);
-                        }
-                    }
-                };
-
-                getFilesRecursiveSync(test.folder);
-            }
-        }
-
+        // handle explicit files or folders.
         for (let item of params.include) {
             if (params.exclude.includes(item)) {
                 continue;
             }
 
-            if (!params.allowRootAndOutside && !this.isSave(params.root, item)) {
+            if (
+                !params.allowRootAndOutside &&
+                !this.isSave(params.root, item)
+            ) {
+                this.warnings.push(`Unsafe removig of ${item}. Skipped.`);
                 continue;
             }
 
@@ -260,7 +225,7 @@ class RemoveFilesWebpackPlugin {
             } else if (stat.isDirectory()) {
                 group = 'dicts';
             } else {
-                this.warnings.push(`Invalid stat for the ${item}`);
+                this.warnings.push(`Invalid stat for ${item}`);
                 continue;
             }
 
@@ -274,6 +239,75 @@ class RemoveFilesWebpackPlugin {
         items.cropUnnecessaryItems();
 
         return items;
+    }
+
+    /**
+     * Performs a testing of files or folders for removing.
+     *
+     * @param {Object} params
+     * A parameters for remove.
+     * Either `this.beforeParams` or `this.afterParams`.
+     * 
+     * @returns {Array<String>}
+     * An array of absolute paths of folders or files that 
+     * should be removed.
+     */
+    handleTest(params) {
+        const paths = [];
+
+        if (!params.test || !params.test.length) {
+            return paths;
+        }
+
+        for (let test of params.test) {
+            if (!path.isAbsolute(test.folder)) {
+                test.folder = path.join(params.root, test.folder);
+            }
+
+            if (
+                !params.allowRootAndOutside &&
+                !this.isSave(params.root, test.folder)
+            ) {
+                this.warnings.push(`Unsafe removig of ${item}. Skipped.`);
+
+                continue;
+            }
+
+            let itemStat = this.getStatSync(test.folder);
+
+            if (!itemStat) {
+                continue;
+            } else if (!itemStat.isDirectory()) {
+                this.warnings.push(`Test folder is not a directory – ${test.folder}. Skipped.`);
+                continue;
+            } else if (!itemStat.isDirectory() && !itemStat.isFile()) {
+                this.warnings.push(`Invalid stat for ${test.folder}`);
+                continue;
+            }
+
+            const getFilesRecursiveSync = (dictPath) => {
+                const files = fs.readdirSync(dictPath);
+
+                for (let file of files) {
+                    file = path.join(dictPath, file);
+                    const stat = this.getStatSync(file);
+
+                    if (!stat) {
+                        continue;
+                    } else if (stat.isFile() && test.method(file)) {
+                        paths.push(file);
+                    } else if (stat.isDirectory() && test.recursive) {
+                        getFilesRecursiveSync(file);
+                    } else if (!stat.isDirectory() && !stat.isFile()) {
+                        this.warnings.push(`Invalid stat for ${file}`);
+                    }
+                }
+            };
+
+            getFilesRecursiveSync(test.folder);
+        }
+
+        return paths;
     }
 
     /**

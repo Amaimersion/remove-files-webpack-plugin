@@ -123,67 +123,27 @@ class RemoveFilesWebpackPlugin {
     }
 
     /**
-     * Handles "beforeRun/afterEmit" hook.
+     * Handles `beforeRun` and `afterEmit` hooks.
      *
      * @param {Object} main
-     * Can be "compiler/compilation" object.
+     * Can be `compiler` or `compilation` object.
      *
      * @param {Function} callback
      * "Some compilation plugin steps are asynchronous,
      * and pass a callback function that must be invoked
-     * when your plugin is finished running".
+     * when your plugin is finished running.".
      *
      * @param {Object} params
-     * The parameters for remove
+     * A parameters for remove.
      * Either `this.beforeParams` or `this.afterParams`.
      */
     handleHook(main, callback, params) {
         this.handleRemove(params);
 
-        const addMessagesToGroup = (main, messages, groupName, logName) => {
-            if (!messages.length) {
-                return;
-            }
+        this.printMessages(main, this.warnings, 'warnings');
+        this.printMessages(main, this.errors, 'errors');
 
-            const messageParams = {
-                if: {
-                    endDot: false,
-                    color: logName.toUpperCase() === 'ERROR' ? 'red' : 'yellow'
-                },
-                else: {
-                    pluginName: false,
-                    endDot: false,
-                    color: logName.toUpperCase() === 'ERROR' ? 'red' : 'yellow'
-                }
-            };
-
-            for (let message of messages) {
-                // if main === compilation.
-                if (main[groupName]) {
-                    main[groupName].push(this.generateMessage(
-                        message,
-                        messageParams.if
-                    ));
-                    // if main === compiler.
-                } else {
-                    console.log(
-                        this.generateMessage(
-                            `${logName} in ${this.pluginName}: `,
-                            messageParams.else
-                        ) +
-                        this.generateMessage(
-                            message,
-                            messageParams.else
-                        )
-                    );
-                }
-            }
-        }
-
-        addMessagesToGroup(main, this.warnings, 'warnings', 'WARNING');
-        addMessagesToGroup(main, this.errors, 'errors', 'ERROR');
-
-        // This can be executed later if specified both before and after params.
+        // This function will executed later if specified both `before` and `after` params.
         this.warnings = [];
         this.errors = [];
 
@@ -520,6 +480,63 @@ class RemoveFilesWebpackPlugin {
      */
     isSave(root, pth) {
         return new RegExp(`(^${this.toEscapeString(root)})(.+)`, 'm').test(pth);
+    }
+
+    /**
+     * Prints a messages in terminal.
+     * 
+     * @param {Object} main
+     * Can be `compiler` or `compilation` object.
+     * 
+     * @param {Array<String>} messages
+     * A messages for printing.
+     * 
+     * @param {('warnings' | 'errors')} groupName
+     * A group of messages. 
+     * Can be either `warnings` or `errors`.
+     * If `main` contains this property, then all
+     * messages will be apended to `main[groupName]`.
+     * This allow us to use standard webpack log, instead of custom.
+     */
+    printMessages(main, messages, groupName) {
+        if (!messages.length) {
+            return;
+        }
+
+        const logName = (groupName === "errors" ? 'ERROR' : 'WARNING');
+        const mainIsCompilation = !!main[groupName];
+
+        const messageParams = {
+            compilation: {
+                endDot: false,
+                color: logName === 'ERROR' ? 'red' : 'yellow'
+            },
+            compiler: {
+                pluginName: false,
+                endDot: false,
+                color: logName === 'ERROR' ? 'red' : 'yellow'
+            }
+        };
+
+        for (let message of messages) {
+            if (mainIsCompilation) {
+                main[groupName].push(this.generateMessage(
+                    message,
+                    messageParams.compilation
+                ));
+            } else {
+                console.log(
+                    this.generateMessage(
+                        `${logName} in ${this.pluginName}: `,
+                        messageParams.compiler
+                    ) +
+                    this.generateMessage(
+                        message,
+                        messageParams.compiler
+                    )
+                );
+            }
+        }
     }
 
     /**

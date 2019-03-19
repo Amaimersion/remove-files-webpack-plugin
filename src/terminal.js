@@ -43,7 +43,10 @@ const os = require('os');
 const Info = require('./info');
 
 
-class Console {
+/**
+ * Operations with terminal.
+ */
+class Terminal {
     /**
      * Generates a message for terminal using specified parameters.
      *
@@ -182,7 +185,7 @@ class Console {
                 endDot: false
             };
 
-            console.log(Console.generateMessage(
+            console.log(this.generateMessage(
                 `${tab}${name}:`,
                 {
                     ...commonParams,
@@ -191,7 +194,7 @@ class Console {
             ));
 
             for (let item of itms) {
-                console.log(Console.generateMessage(
+                console.log(this.generateMessage(
                     `${tab}${tab}${item}`,
                     {
                         ...commonParams,
@@ -264,4 +267,4 @@ class Console {
 }
 
 
-module.exports = Console;
+module.exports = Terminal;

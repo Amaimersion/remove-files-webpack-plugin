@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const Items = require('./items');
 const Utils = require('./utils');
-const Console = require('./console');
+const Terminal = require('./terminal');
 const Info = require('./info');
 
 
@@ -132,8 +132,8 @@ class Plugin {
     handleHook(main, callback, params) {
         this.handleRemove(params);
 
-        Console.printMessages(main, this.warnings, 'warnings');
-        Console.printMessages(main, this.errors, 'errors');
+        Terminal.printMessages(main, this.warnings, 'warnings');
+        Terminal.printMessages(main, this.errors, 'errors');
 
         // This function will executed later if specified both `before` and `after` params.
         this.warnings = [];
@@ -168,7 +168,7 @@ class Plugin {
         }
 
         if (params.emulate) {
-            Console.printMessage(
+            Terminal.printMessage(
                 'The following items will be removed in case of not emulate: ',
                 items
             );
@@ -184,7 +184,7 @@ class Plugin {
         }
 
         if (params.log) {
-            Console.printMessage(
+            Terminal.printMessage(
                 'The following items has been removed: ',
                 items
             );

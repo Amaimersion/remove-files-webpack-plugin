@@ -154,7 +154,7 @@ class RemoveFilesWebpackPlugin {
     }
 
     /**
-     * Removes folders or files.
+     * Synchronously removes folders or files.
      *
      * @param {Object} params
      * A parameters for remove.
@@ -365,28 +365,6 @@ class RemoveFilesWebpackPlugin {
     }
 
     /**
-     * Gets a stat for an item.
-     *
-     * @param {String} path
-     * An absolute path to the folder/file.
-     *
-     * @returns {fs.Stats}
-     *
-     * @see https://nodejs.org/api/fs.html#fs_fs_lstatsync_path
-     */
-    getStatSync(path) {
-        let stat = undefined;
-
-        try {
-            stat = fs.lstatSync(path);
-        } catch (error) {
-            this.errors.push(error.message);
-        }
-
-        return stat;
-    }
-
-    /**
      * Removes a folder.
      *
      * Expects that the check for exists has already been done.
@@ -413,6 +391,28 @@ class RemoveFilesWebpackPlugin {
         }
 
         fs.rmdirSync(folderPath);
+    }
+
+    /**
+     * Gets a stat for an item.
+     *
+     * @param {String} path
+     * An absolute path to the folder/file.
+     *
+     * @returns {fs.Stats}
+     *
+     * @see https://nodejs.org/api/fs.html#fs_fs_lstatsync_path_options
+     */
+    getStatSync(path) {
+        let stat = undefined;
+
+        try {
+            stat = fs.lstatSync(path);
+        } catch (error) {
+            this.errors.push(error.message || error);
+        }
+
+        return stat;
     }
 
     /**

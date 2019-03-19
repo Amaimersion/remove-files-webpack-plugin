@@ -331,7 +331,7 @@ class RemoveFilesWebpackPlugin {
 
         const addToUnnecessaryIndexes = (firstGroup, secondGroup, indexes) => {
             for (let item of firstGroup) {
-                item = this.toEscapeString(item);
+                item = this.escapeString(item);
                 const regexp = new RegExp(`(^${item})(.+)`, 'm');
 
                 for (let i in secondGroup) {
@@ -442,12 +442,12 @@ class RemoveFilesWebpackPlugin {
      * Escapes a string
      *
      * @param {String} string
-     * The string for escaping.
+     * A string for escaping.
      *
      * @returns {String}
      * Escaped string.
      */
-    toEscapeString(string) {
+    escapeString(string) {
         return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
     }
 
@@ -479,7 +479,7 @@ class RemoveFilesWebpackPlugin {
      * Returns - false
      */
     isSave(root, pth) {
-        return new RegExp(`(^${this.toEscapeString(root)})(.+)`, 'm').test(pth);
+        return new RegExp(`(^${this.escapeString(root)})(.+)`, 'm').test(pth);
     }
 
     /**

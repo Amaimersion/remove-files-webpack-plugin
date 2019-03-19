@@ -454,29 +454,32 @@ class RemoveFilesWebpackPlugin {
     /**
      * Checks a path for safety.
      *
-     * Checking for either exit or in of the root.
+     * Checking for either exit beyond the root 
+     * or similarity with the root.
+     * A paths before checking should be normalized!
      *
      * @param {String} root
-     * The main directory.
+     * The root directory.
      *
      * @param {String} pth
      * The path for checking.
      *
      * @returns {Boolean}
-     * True - save, False - not save.
+     * `True` – save, 
+     * `False` – not save.
      *
      * @example
-     * root - 'D:/dist'
-     * pth - 'D:/dist/chromium'
-     * Returns - true
+     * root – 'D:/dist'
+     * pth – 'D:/dist/chromium'
+     * Returns – true
      *
-     * root - 'D:/dist'
-     * pth - 'D:/dist'
-     * Returns - false
+     * root – 'D:/dist'
+     * pth – 'D:/dist'
+     * Returns – false
      *
-     * root - 'D:/dist'
-     * pth - 'D:/'
-     * Returns - false
+     * root – 'D:/dist'
+     * pth – 'D:/'
+     * Returns – false
      */
     isSave(root, pth) {
         return new RegExp(`(^${this.escapeString(root)})(.+)`, 'm').test(pth);

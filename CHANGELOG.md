@@ -13,6 +13,7 @@
 ## Changed
 
 - Plugin name that used in terminal now contains a version.
+- If `allowRootAndOutside` option is off, then in terminal a paths will be printed without the root.
 - Improved cross-platform properties.
 
 

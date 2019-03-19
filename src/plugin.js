@@ -183,6 +183,14 @@ class Plugin {
             fs.unlinkSync(file);
         }
 
+        // trim root for pretty printing.
+        if (!params.allowRootAndOutside) {
+            const method = (value) => value.replace(params.root, '');
+
+            items.dicts = items.dicts.map(method);
+            items.files = items.files.map(method);
+        }
+
         if (params.log) {
             Terminal.printMessage(
                 'The following items has been removed: ',

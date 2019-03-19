@@ -7,6 +7,9 @@ const path = require('path');
 
 /**
  * Contains directories and files.
+ * 
+ * Available through `dicts` and 
+ * `files` property respectively.
  */
 class Items {
     constructor() {

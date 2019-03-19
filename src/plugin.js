@@ -100,7 +100,7 @@ class Plugin {
             }
 
             if (compiler.hooks) {
-                compiler.hooks[hook].tapAsync(Info.pluginName, method);
+                compiler.hooks[hook].tapAsync(Info.fullName, method);
             } else {
                 compiler.plugin(hook, method);
             }
@@ -168,7 +168,7 @@ class Plugin {
         }
 
         if (params.emulate) {
-            Console.printLogMessage(
+            Console.printMessage(
                 'The following items will be removed in case of not emulate: ',
                 items
             );
@@ -184,7 +184,7 @@ class Plugin {
         }
 
         if (params.log) {
-            Console.printLogMessage(
+            Console.printMessage(
                 'The following items has been removed: ',
                 items
             );

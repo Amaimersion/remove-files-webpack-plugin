@@ -1,18 +1,57 @@
 'use strict';
 
 
+/**
+ * @typedef {('red' | 'green' | 'yellow' | 'blue' | 'magenta' | 'cyan' | 'white')} TerminalColor
+ * Available color that can be used in terminal.
+ */
+
+/**
+ * @typedef {Object} TerminalProperties
+ * A properties for formatting of a message that will be printed in terminal.
+ * 
+ * @property {boolean} pluginName 
+ * In the start of a message will be appended a plugin name.
+ * Defaults to `true`.
+ * 
+ * @property {boolean} endDot
+ * In the end of a message will be appended a dot, if not present.
+ * Defaults to `true`.
+ * 
+ * @property {boolean} newLine
+ * In the end of a message will be appended a new line symbol.
+ * Defaults to `false`.
+ * 
+ * @property {TerminalColor} color
+ * A desired color of a message.
+ * Defaults to `white`.
+ */
+
+/**
+ * @typedef {Object} Items
+ * Contains a files and folders paths.
+ * 
+ * @property {Array<String>} files
+ * Files paths.
+ * 
+ * @property {Array<String>} dicts
+ * A folders paths.
+ */
+
+
+const os = require('os');
 const Info = require('./info');
 
 
 class Console {
     /**
-     * Generates a message for terminal.
+     * Generates a message for terminal using specified parameters.
      *
      * @param {String} message
-     * The raw message.
+     * A raw message.
      *
-     * @param {{pluginName: true, endDot: true, newLine: false, color: 'white'}} params
-     * The modifications for a message.
+     * @param {TerminalProperties} params
+     * A modifications for the message.
      *
      * @returns {String}
      * A modified message.
@@ -24,28 +63,47 @@ class Console {
                 endDot: true,
                 newLine: false,
                 color: 'white'
-            }, ...params
+            },
+            ...params
         };
 
         if (params.pluginName) {
-            message = `${Info.pluginName}: ${message}`;
+            message = `${Info.fullName}: ${message}`;
         }
 
-        if (params.endDot && message.charAt(message.length - 1) !== '.') {
+        if (
+            params.endDot &&
+            message.charAt(message.length - 1) !== '.'
+        ) {
             message += '.';
         }
 
         if (params.newLine) {
-            message += '\n';
+            message += os.EOL;
         }
 
-        /**
-         * ANSI escape sequences for colors.
-         *
-         * @see https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color#answer-41407246
-         * @see http://bluesock.org/~willkg/dev/ansi.html
-         */
-        switch (params.color) {
+        message = this.colorize(message, params.color);
+
+        return message;
+    }
+
+    /**
+     * Colorizes a message using ANSI escape sequences for colors.
+     * 
+     * @param {String} message
+     * A message for colorizing.
+     * 
+     * @param {TerminalColor} color
+     * A desired color.
+     * 
+     * @returns {String}
+     * A colorized string.
+     * 
+     * @see https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color#answer-41407246
+     * @see http://bluesock.org/~willkg/dev/ansi.html
+     */
+    static colorize(message, color) {
+        switch (color) {
             case 'red':
                 message = `\x1b[31m${message}\x1b[0m`;
                 break;
@@ -75,23 +133,21 @@ class Console {
     }
 
     /**
-     * Prints a message.
+     * Prints a message in terminal.
      *
      * @param {String} message
-     * The message for printing.
+     * A message for printing.
      *
      * @param {Array<Items>} items
      * Optionally.
-     * The items for printing.
+     * An items for printing.
      */
-    static printLogMessage(message, items) {
+    static printMessage(message, items) {
         console.log(
-            '\n' +
-            Console.generateMessage(Info.pluginName, {
-                pluginName: false, endDot: false, newLine: false, color: 'cyan'
-            }) +
+            os.EOL +
+            this.colorize(Info.fullName, 'cyan') +
             ': ' +
-            `${message}`
+            message
         );
 
         if (items) {
@@ -102,17 +158,17 @@ class Console {
     }
 
     /**
-     * Prints an items.
+     * Prints an items in terminal.
      *
      * @param {Array<Items>} items
-     * The items for printing.
+     * An items for printing.
      */
     static printItems(items) {
         let tabSymbol = ' ';
-        let tabNumber = 2;
+        let tabCount = 2;
         let tab = '';
 
-        for (let i = 0; i != tabNumber; i++) {
+        for (let i = 0; i != tabCount; i++) {
             tab += tabSymbol;
         }
 
@@ -128,13 +184,19 @@ class Console {
 
             console.log(Console.generateMessage(
                 `${tab}${name}:`,
-                { ...commonParams, color: 'yellow' }
+                {
+                    ...commonParams,
+                    color: 'yellow'
+                }
             ));
 
             for (let item of itms) {
                 console.log(Console.generateMessage(
                     `${tab}${tab}${item}`,
-                    { ...commonParams, color: 'green' }
+                    {
+                        ...commonParams,
+                        color: 'green'
+                    }
                 ));
             }
         };
@@ -181,17 +243,17 @@ class Console {
 
         for (let message of messages) {
             if (mainIsCompilation) {
-                main[groupName].push(Console.generateMessage(
+                main[groupName].push(this.generateMessage(
                     message,
                     messageParams.compilation
                 ));
             } else {
                 console.log(
-                    Console.generateMessage(
-                        `${logName} in ${Info.pluginName}: `,
+                    this.generateMessage(
+                        `${logName} in ${Info.fullName}: `,
                         messageParams.compiler
                     ) +
-                    Console.generateMessage(
+                    this.generateMessage(
                         message,
                         messageParams.compiler
                     )

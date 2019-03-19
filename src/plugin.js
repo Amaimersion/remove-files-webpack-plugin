@@ -367,12 +367,16 @@ class RemoveFilesWebpackPlugin {
     /**
      * Removes a folder.
      *
-     * Expects that the check for exists has already been done.
-     *
      * @param {String} folderPath
      * An absolute path to the folder.
      */
     unlinkFolderSync(folderPath) {
+        if (!fs.existsSync(folderPath)) {
+            this.warnings.push(`Folder ${folderPath} doesn't exists.`);
+
+            return;
+        }
+
         let files = fs.readdirSync(folderPath);
         files = this.toAbsolutePaths(folderPath, files);
 
@@ -380,17 +384,32 @@ class RemoveFilesWebpackPlugin {
             const stat = this.getStatSync(file);
 
             if (!stat) {
+                // error message already writed.
                 continue;
-            } else if (stat.isFile()) {
-                fs.unlinkSync(file);
-            } else if (stat.isDirectory()) {
+            }
+
+            else if (stat.isFile()) {
+                try {
+                    fs.unlinkSync(file);
+                } catch (error) {
+                    this.errors.push(error.message || error);
+                }
+            }
+
+            else if (stat.isDirectory()) {
                 this.unlinkFolderSync(file);
-            } else {
-                this.warnings.push(`Invalid stat for the ${file}`)
+            }
+
+            else {
+                this.warnings.push(`Invalid stat for ${file}`);
             }
         }
 
-        fs.rmdirSync(folderPath);
+        try {
+            fs.rmdirSync(folderPath);
+        } catch (error) {
+            this.errors.push(error.message || error);
+        }
     }
 
     /**
@@ -400,6 +419,7 @@ class RemoveFilesWebpackPlugin {
      * An absolute path to the folder/file.
      *
      * @returns {fs.Stats}
+     * An item stat or `undefined` if cannot get.
      *
      * @see https://nodejs.org/api/fs.html#fs_fs_lstatsync_path_options
      */

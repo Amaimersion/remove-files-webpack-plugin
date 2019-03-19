@@ -151,10 +151,10 @@ class RemoveFilesWebpackPlugin {
     }
 
     /**
-     * Removes folders/files.
+     * Removes folders or files.
      *
      * @param {Object} params
-     * The parameters for remove.
+     * A parameters for remove.
      * Either `this.beforeParams` or `this.afterParams`.
      */
     handleRemove(params) {
@@ -416,13 +416,13 @@ class RemoveFilesWebpackPlugin {
      * Converts all paths to absolute paths.
      *
      * @param {String} root
-     * The root that will be appended to non absolute paths.
+     * A root that will be appended to non absolute paths.
      *
      * @param {Array<String>} paths
      * A paths for converting.
      *
      * @returns {Array<String>}
-     * An absolute  paths.
+     * An absolute paths.
      */
     toAbsolutePaths(root, paths) {
         const newPaths = [];

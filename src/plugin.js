@@ -9,9 +9,9 @@ const Console = require('./console');
 const Info = require('./info');
 
 
-class RemoveFilesWebpackPlugin {
+class Plugin {
     /**
-     * Creates an instance of RemoveFilesWebpackPlugin.
+     * Creates an instance of Plugin.
      *
      * @param {Object} params
      * Contains two keys: `before` (compilation) and `after` (compilation).
@@ -451,4 +451,4 @@ class RemoveFilesWebpackPlugin {
 }
 
 
-module.exports = RemoveFilesWebpackPlugin;
+module.exports = Plugin;

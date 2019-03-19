@@ -2,7 +2,8 @@
 
 ## Fixed
 
-- No longer necessary set `__dirname` to `root` in order to specify an actual root directory. 
+- No longer necessary set `__dirname` to `root` in order to specify an actual root directory.
+- If you not set `include` and `test` parameters, there will be no more message `An items for removing not found.`. 
 
 ## Added
 

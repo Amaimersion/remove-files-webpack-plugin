@@ -145,17 +145,24 @@ class RemoveFilesWebpackPlugin {
      * Synchronously removes folders or files.
      *
      * @param {Object} params
-     * A parameters for remove.
+     * A parameters for removing.
      * Either `this.beforeParams` or `this.afterParams`.
      */
     handleRemove(params) {
+        if (
+            !params.include.length &&
+            !params.test.length
+        ) {
+            return;
+        }
+
         const items = this.getItemsForRemoving(params);
 
         if (
             !Object.keys(items.dicts).length &&
             !Object.keys(items.files).length
         ) {
-            this.warnings.push('The items for remove is not found.');
+            this.warnings.push('An items for removing not found.');
             return;
         }
 

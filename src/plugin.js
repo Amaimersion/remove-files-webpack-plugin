@@ -226,7 +226,7 @@ class Plugin {
 
         // trim root for pretty printing.
         if (!params.allowRootAndOutside) {
-            items.trimRoot();
+            items.trimRoot(params.root);
         }
 
         if (params.log) {

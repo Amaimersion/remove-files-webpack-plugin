@@ -1,3 +1,8 @@
+# 1.1.1 (March 20, 2019)
+
+Nothing changed. Had to change the version because of problems with `npm`. See changelog for 1.1.0 version.
+
+
 # 1.1.0 (March 20, 2019)
 
 ## Fixed

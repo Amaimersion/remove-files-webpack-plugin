@@ -6,11 +6,19 @@
     A plugin for webpack which removes files and folders before and after compilation.
 </p>
 
+
 ## Installation
 
+- With `npm`:
 ```javascript
-npm install remove-files-webpack-plugin --save-dev
+npm install remove-files-webpack-plugin
 ```
+
+- With `Yarn`:
+```javascript
+yarn add remove-files-webpack-plugin
+```
+
 
 ## Usage
 
@@ -31,28 +39,30 @@ module.exports = {
 }
 ```
 
-**Be aware!** You cannot undo deletion of folders/files. Use the `emulate` option if you not sure about correctness of the parameters.
+**Be aware!** You cannot undo deletion of folders or files. Use the `emulate` option if you not sure about correctness of the parameters.
 
-## Options
 
-| Name        | Type            | Default                   | Description |
-| :---------: |:---------------:| :------------------------:|:------------|
-| root | `String` | `__dirname` | The root directory. A not absolute paths will appends to this. |
-| include | `Array<String>` | `[]` | The folders/fils for remove. |
-| exclude | `Array<String>` | `[]` | The files for exclude. |
-| test | `Array<TestObject>` | `[]` | The custom testing. |
-| TestObject.folder | `String` | Required | The folder for custom testing. |
-| TestObject.method | `(filePath: String) => Boolean` | Required | The method for custom testing. |
-| TestObject.recursive | `Boolean` | `false` | Test in all subfolders, not just in TestObject.folder. |
-| log | `Boolean` | `true` | Print which folders/files has been removed. |
-| emulate | `Boolean` | `false` | Emulate remove. Print which folders/files will be removed without actually removing them. Ignores `log` value. |
-| allowRootAndOutside | `Boolean` | `false` | Allow remove the root directory and outside the root directory. It's kinda safe mode. **Don't turn on it if you don't know what you actually want!** |
+## Parameters
+
+|         Name         |              Type               | Default  | Description                                                                                                                                             |
+| :------------------: | :-----------------------------: | :------: | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|         root         |            `String`             |   `.`    | A root directory. Not absolute paths will be appended to this. Defaults to from which directory is called.                                              |
+|       include        |         `Array<String>`         |   `[]`   | A folders or files for removing.                                                                                                                        |
+|       exclude        |         `Array<String>`         |   `[]`   | A files for excluding.                                                                                                                                  |
+|         test         |       `Array<TestObject>`       |   `[]`   | A folders for custom testing.                                                                                                                           |
+|  TestObject.folder   |            `String`             | Required | A path to the folder.                                                                                                                                   |
+|  TestObject.method   | `(filePath: String) => Boolean` | Required | A method that accepts an absolute file path and must return boolean value that indicates should be removed that file or not.                            |
+| TestObject.recursive |            `Boolean`            | `false`  | Test in all subfolders, not just in `TestObject.folder`.                                                                                                |
+|         log          |            `Boolean`            |  `true`  | Print which folders or files has been removed.                                                                                                          |
+|       emulate        |            `Boolean`            | `false`  | Emulate remove process. Print which folders or files will be removed without actually removing them. Ignores `log` value.                               |
+| allowRootAndOutside  |            `Boolean`            | `false`  | Allow remove of a `root` directory or outside the `root` directory. It's kinda safe mode. **Don't turn it on, if you don't know what you actually do!** |
 
 #### Example how to set these options:
 
 You can pass the options into both `before` and `after` keys. Each key is optional, but at least one should be specified. 
 
-`before` - before compilation, `after` - after compilation.
+- `before` - executes before compilation; 
+- `after` - executes after compilation.
 
 ```javascript
 const RemovePlugin = require('remove-files-webpack-plugin');
@@ -60,17 +70,25 @@ const RemovePlugin = require('remove-files-webpack-plugin');
 module.exports = {
     plugins: [
         new RemovePlugin({
+            /**
+             * Before compilation removes entire `dist` folder.
+             */
             before: {
                 include: ['dist']
             },
+
+            /**
+             * After compilation removes all files in `dist/styles` folder,
+             * that have `.map` type.
+             */
             after: {
                 test: [
-                  {
-                    folder: 'dist/styles',
-                    method: (filePath) => {
-                        return new RegExp(/\.map$/, 'm').test(filePath);
-                    }
-                  } 
+                    {
+                        folder: 'dist/styles',
+                        method: (filePath) => {
+                            return new RegExp(/\.map$/, 'm').test(filePath);
+                        }
+                    } 
                 ]
             }
         })
@@ -78,21 +96,22 @@ module.exports = {
 }
 ```
 
+
 ## Examples
 
 ```javascript
-/**
- * Before compilation:
- * - delete the "dist" folder.
- * 
- * After compilation:
- * - remove all css maps in the "dist/styles" folder except the "popup.css.map".
- */
-
 new RemovePlugin({
+    /**
+     * Before compilation removes entire `dist` folder.
+     */ 
     before: {
         include: ['dist']
     },
+
+    /**
+     * After compilation removes all css maps 
+     * in `dist/styles` folder except `popup.css.map` file.
+     */
     after: {
         exclude: ['dist/styles/popup.css.map'],
         test: [
@@ -108,12 +127,12 @@ new RemovePlugin({
 ```
 
 ```javascript
-/**
- * After compilation:
- * - remove all css maps in "dist/styles" folder and all subfolders (e.g. "dist/styles/a").
- */
-
 new RemovePlugin({
+    /**
+     * After compilation removes all css maps in 
+     * `dist/styles` folder and all subfolders 
+     * (e.g. `dist/styles/header`).
+     */
     after: {
         test: [
             {
@@ -129,37 +148,37 @@ new RemovePlugin({
 ```
 
 ```javascript
-/**
- * Before compilation:
- * - remove the "manifest.json" file;
- * - remove the "dist/js" folder.
- */
-
 new RemovePlugin({
+    /**
+     * Before compilation removes `manifest.json` file and 
+     * removes `js` folder.
+     */
     before: {
-        include: ['dist/manifest.json', 'dist/js']
+        root: './dist',
+        include: ['manifest.json', 'js']
     }
 })
 ```
 
 ```javascript
-/**
- * After compilation:
- * - remove all css maps in the "dist/styles" folder;
- * - remove all js maps in the "dist/scripts" folder and all subfolders (e.g. "dist/styles/a").
- */
-
 new RemovePlugin({
+    /**
+     * After compilation:
+     * - removes all css maps in `dist/styles` folder.
+     * - removes all js maps in `dist/scripts` folder and 
+     * all subfolders (e.g. `dist/scripts/header`).
+     */
     after: {
+        root: './dist',
         test: [
             {
-                folder: 'dist/styles',
+                folder: './styles',
                 method: (filePath) => {
                     return new RegExp(/\.map$/, 'm').test(filePath);
                 }
             },
             {
-                folder: 'dist/scripts',
+                folder: './scripts',
                 method: (filePath) => {
                     return new RegExp(/\.js.map$/, 'm').test(filePath);
                 },
@@ -169,6 +188,7 @@ new RemovePlugin({
     }
 })
 ```
+
 
 ## Issues and requests
 

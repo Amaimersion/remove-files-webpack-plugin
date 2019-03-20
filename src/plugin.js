@@ -16,6 +16,55 @@
  * Should the method be applied to files in subdirectories.
  */
 
+/**
+ * @typedef {Object} RemoveParameters
+ * A parameters for removing.
+ * 
+ * @property {String} root
+ * A root directory.
+ * Not absolute paths will be appended to this.
+ * Defaults to `.` (from which directory is called).
+ * 
+ * @property {Array<String>} include
+ * A folders or files for removing.
+ * Defaults to `[]`.
+ * 
+ * @property {Array<String>} exclude
+ * A files for excluding.
+ * Defaults to `[]`.
+ * 
+ * @property {Array<TestObject>} test
+ * A folders for custom testing.
+ * Defaults to `[]`.
+ * 
+ * @property {Boolean} log
+ * Print which folders or files has been removed.
+ * Defaults to `true`.
+ * 
+ * @property {Boolean} emulate
+ * Emulate remove process.
+ * Print which folders or files will be removed without actually removing them.
+ * Ignores `params.log`.
+ * Defaults to `false`.
+ * 
+ * @property {Boolean} allowRootAndOutside
+ * Allow remove of a `root` directory or outside the `root` directory.
+ * It's kinda safe mode.
+ * Don't turn it on, if you don't know what you actually do!
+ * Defaults to `false`.
+ */
+
+/**
+ * @typedef {Object} PluginParameters
+ * A parameters for plugin.
+ * 
+ * @property {RemoveParameters} before
+ * Removing before compilation.
+ * 
+ * @property {RemoveParameters} after
+ * Removing after compilation.
+ */
+
 
 const fs = require('fs');
 const path = require('path');
@@ -31,44 +80,12 @@ const Info = require('./info');
 class Plugin {
     /**
      * Creates an instance of `Plugin`.
-     *
-     * @param {Object} params
+     * 
+     * @param {PluginParameters} params
+     * A parameters for plugin.
      * Contains two keys: `before` (compilation) and `after` (compilation).
      * At least one should be presented.
-     * All next properties are the same for these two keys.
-     *
-     * @param {String} params.root
-     * A root directory.
-     * Not absolute paths will be appended to this.
-     * Defaults to `.` (from which directory is called).
-     *
-     * @param {Array<String>} params.include
-     * A folders or files for removing.
-     * Defaults to `[]`.
-     *
-     * @param {Array<String>} params.exclude
-     * A files for excluding.
-     * Defaults to `[]`.
-     *
-     * @param {Array<TestObject>} params.test
-     * A folders for custom testing.
-     * Defaults to `[]`.
-     *
-     * @param {Boolean} params.log
-     * Print which folders or files has been removed.
-     * Defaults to `true`.
-     *
-     * @param {Boolean} params.emulate
-     * Emulate remove process.
-     * Print which folders or files will be removed without actually removing them.
-     * Ignores `params.log`.
-     * Defaults to `false`.
-     *
-     * @param {Boolean} params.allowRootAndOutside
-     * Allow remove of a `root` directory or outside the `root` directory.
-     * It's kinda safe mode.
-     * Don't turn it on, if you don't know what you actually do!
-     * Defaults to `false`.
+     * All properties are the same for these two keys.
      */
     constructor(params) {
         params = params || {};
@@ -80,6 +97,7 @@ class Plugin {
             );
         }
 
+        /** @type {RemoveParameters} */
         const defaultParams = {
             root: path.resolve('.'),
             include: [],
@@ -92,10 +110,13 @@ class Plugin {
 
         this.warnings = [];
         this.errors = [];
+
+        /** @type {RemoveParameters} */
         this.beforeParams = {
             ...defaultParams,
             ...params.before
         };
+        /** @type {RemoveParameters} */
         this.afterParams = {
             ...defaultParams,
             ...params.after
@@ -145,7 +166,7 @@ class Plugin {
      * and pass a callback function that must be invoked
      * when your plugin is finished running.".
      *
-     * @param {Object} params
+     * @param {RemoveParameters} params
      * A parameters for remove.
      * Either `this.beforeParams` or `this.afterParams`.
      */
@@ -165,7 +186,7 @@ class Plugin {
     /**
      * Synchronously removes folders or files.
      *
-     * @param {Object} params
+     * @param {RemoveParameters} params
      * A parameters for removing.
      * Either `this.beforeParams` or `this.afterParams`.
      */
@@ -219,7 +240,7 @@ class Plugin {
     /**
      * Gets sorted folders and files for removing.
      *
-     * @param {Object} params
+     * @param {RemoveParameters} params
      * A parameters for remove.
      * Either `this.beforeParams` or `this.afterParams`.
      */
@@ -277,7 +298,7 @@ class Plugin {
     /**
      * Performs a testing of files or folders for removing.
      *
-     * @param {Object} params
+     * @param {RemoveParameters} params
      * A parameters for remove.
      * Either `this.beforeParams` or `this.afterParams`.
      * 

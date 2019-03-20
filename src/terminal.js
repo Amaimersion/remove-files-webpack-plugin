@@ -141,8 +141,8 @@ class Terminal {
      * @param {String} message
      * A message for printing.
      *
-     * @param {Array<Items>} items
-     * Optionally.
+     * @param {Array<Items>} [items]
+     * Optional.
      * An items for printing.
      */
     static printMessage(message, items) {

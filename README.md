@@ -109,7 +109,8 @@ new RemovePlugin({
     },
 
     /**
-     * After compilation removes all css maps in `dist/styles` folder except `popup.css.map` file.
+     * After compilation removes all css maps 
+     * in `dist/styles` folder except `popup.css.map` file.
      */
     after: {
         exclude: ['dist/styles/popup.css.map'],
@@ -128,7 +129,9 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * After compilation removes all css maps in `dist/styles` folder and all subfolders (e.g. `dist/styles/header`).
+     * After compilation removes all css maps in 
+     * `dist/styles` folder and all subfolders 
+     * (e.g. `dist/styles/header`).
      */
     after: {
         test: [
@@ -147,7 +150,8 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * Before compilation removes `manifest.json` file and removes `js` folder.
+     * Before compilation removes `manifest.json` file and 
+     * removes `js` folder.
      */
     before: {
         root: './dist',
@@ -161,7 +165,8 @@ new RemovePlugin({
     /**
      * After compilation:
      * - removes all css maps in `dist/styles` folder.
-     * - removes all js maps in `dist/scripts` folder and all subfolders (e.g. `dist/scripts/header`).
+     * - removes all js maps in `dist/scripts` folder and 
+     * all subfolders (e.g. `dist/scripts/header`).
      */
     after: {
         root: './dist',

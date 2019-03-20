@@ -189,7 +189,7 @@ class Plugin {
 
         if (params.emulate) {
             Terminal.printMessage(
-                'The following items will be removed in case of not emulation: ',
+                'Following items will be removed in case of not emulation: ',
                 items
             );
             return;
@@ -210,7 +210,7 @@ class Plugin {
 
         if (params.log) {
             Terminal.printMessage(
-                'The following items have been removed: ',
+                'Following items have been removed: ',
                 items
             );
         }

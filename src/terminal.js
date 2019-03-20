@@ -129,7 +129,7 @@ class Terminal {
                 message = `\x1b[37m${message}\x1b[0m`;
                 break;
             default:
-                throw new Error('Invalid color.')
+                throw new Error('Invalid color.');
         }
 
         return message;

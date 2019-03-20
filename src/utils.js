@@ -6,7 +6,7 @@
  */
 class Utils {
     /**
-     * Escapes a string
+     * Escapes a string.
      *
      * @param {String} string
      * A string for escaping.

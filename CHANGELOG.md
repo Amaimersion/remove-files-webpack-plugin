@@ -15,6 +15,7 @@
 - Plugin name that used in terminal now contains a version.
 - If `allowRootAndOutside` option is off, then in terminal a paths will be printed without the root.
 - Improved cross-platform properties.
+- Improved readability of log messages.
 
 
 # 1.0.0 (June 5, 2018)

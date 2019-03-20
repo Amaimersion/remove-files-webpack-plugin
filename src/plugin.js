@@ -8,7 +8,7 @@
  * @property {String} folder
  * A path to the folder.
  * 
- * @property {(filePath) => Boolean} method
+ * @property {(filePath: String) => Boolean} method
  * A method that accepts an absolute file path and must return 
  * boolean value that indicates should be removed that file or not.
  * 
@@ -244,7 +244,7 @@ class Plugin {
                 !params.allowRootAndOutside &&
                 !this.isSave(params.root, item)
             ) {
-                this.warnings.push(`Unsafe removig of ${item}. Skipped.`);
+                this.warnings.push(`Unsafe removig of "${item}". Skipped.`);
                 continue;
             }
 
@@ -258,7 +258,7 @@ class Plugin {
             } else if (stat.isDirectory()) {
                 group = 'dicts';
             } else {
-                this.warnings.push(`Invalid stat for ${item}`);
+                this.warnings.push(`Invalid stat for "${item}". Skipped.`);
                 continue;
             }
 
@@ -301,7 +301,7 @@ class Plugin {
                 !params.allowRootAndOutside &&
                 !this.isSave(params.root, test.folder)
             ) {
-                this.warnings.push(`Unsafe removig of ${item}. Skipped.`);
+                this.warnings.push(`Unsafe removig of "${item}". Skipped.`);
                 continue;
             }
 
@@ -310,7 +310,7 @@ class Plugin {
             if (!itemStat) {
                 continue;
             } else if (!itemStat.isDirectory()) {
-                this.warnings.push(`Test folder is not a directory – ${test.folder}. Skipped.`);
+                this.warnings.push(`Test folder is not a directory – "${test.folder}". Skipped.`);
                 continue;
             }
 
@@ -328,7 +328,7 @@ class Plugin {
                     } else if (stat.isDirectory() && test.recursive) {
                         getFilesRecursiveSync(file);
                     } else if (!stat.isDirectory() && !stat.isFile()) {
-                        this.warnings.push(`Invalid stat for ${file}`);
+                        this.warnings.push(`Invalid stat for "${file}". Skipped.`);
                     }
                 }
             };
@@ -347,7 +347,7 @@ class Plugin {
      */
     unlinkFolderSync(folderPath) {
         if (!fs.existsSync(folderPath)) {
-            this.warnings.push(`Folder ${folderPath} doesn't exists.`);
+            this.warnings.push(`Folder doesn't exists – "${folderPath}". Skipped.`);
             return;
         }
 
@@ -358,10 +358,8 @@ class Plugin {
             const stat = this.getStatSync(file);
 
             if (!stat) {
-                // error message already writed.
                 continue;
             }
-
             else if (stat.isFile()) {
                 try {
                     fs.unlinkSync(file);
@@ -369,13 +367,11 @@ class Plugin {
                     this.errors.push(error.message || error);
                 }
             }
-
             else if (stat.isDirectory()) {
                 this.unlinkFolderSync(file);
             }
-
             else {
-                this.warnings.push(`Invalid stat for ${file}`);
+                this.warnings.push(`Invalid stat for "${file}". Skipped.`);
             }
         }
 

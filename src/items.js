@@ -91,6 +91,23 @@ class Items {
         this.dicts = rightItems.dicts.slice();
         this.files = rightItems.files.slice();
     }
+
+    /**
+     * Trims a root.
+     * 
+     * Used only for pretty printing!
+     * 
+     * Warning: it changes `this.dicts` and `this.files`.
+     * 
+     * @param {String} root
+     * A root value that should be trimmed.
+     */
+    trimRoot(root) {
+        const method = (value) => value.replace(root, '');
+
+        this.dicts = this.dicts.map(method);
+        this.files = this.files.map(method);
+    }
 }
 
 

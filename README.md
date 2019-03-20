@@ -33,20 +33,20 @@ module.exports = {
 
 **Be aware!** You cannot undo deletion of folders/files. Use the `emulate` option if you not sure about correctness of the parameters.
 
-## Options
+## Parameters
 
-| Name        | Type            | Default                   | Description |
-| :---------: |:---------------:| :------------------------:|:------------|
-| root | `String` | `__dirname` | The root directory. A not absolute paths will appends to this. |
-| include | `Array<String>` | `[]` | The folders/fils for remove. |
-| exclude | `Array<String>` | `[]` | The files for exclude. |
-| test | `Array<TestObject>` | `[]` | The custom testing. |
-| TestObject.folder | `String` | Required | The folder for custom testing. |
-| TestObject.method | `(filePath: String) => Boolean` | Required | The method for custom testing. |
-| TestObject.recursive | `Boolean` | `false` | Test in all subfolders, not just in TestObject.folder. |
-| log | `Boolean` | `true` | Print which folders/files has been removed. |
-| emulate | `Boolean` | `false` | Emulate remove. Print which folders/files will be removed without actually removing them. Ignores `log` value. |
-| allowRootAndOutside | `Boolean` | `false` | Allow remove the root directory and outside the root directory. It's kinda safe mode. **Don't turn on it if you don't know what you actually want!** |
+|         Name         |              Type               |   Default   | Description                                                                                                                                          |
+| :------------------: | :-----------------------------: | :---------: | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+|         root         |            `String`             | `__dirname` | The root directory. A not absolute paths will appends to this.                                                                                       |
+|       include        |         `Array<String>`         |    `[]`     | The folders/fils for remove.                                                                                                                         |
+|       exclude        |         `Array<String>`         |    `[]`     | The files for exclude.                                                                                                                               |
+|         test         |       `Array<TestObject>`       |    `[]`     | The custom testing.                                                                                                                                  |
+|  TestObject.folder   |            `String`             |  Required   | The folder for custom testing.                                                                                                                       |
+|  TestObject.method   | `(filePath: String) => Boolean` |  Required   | The method for custom testing.                                                                                                                       |
+| TestObject.recursive |            `Boolean`            |   `false`   | Test in all subfolders, not just in TestObject.folder.                                                                                               |
+|         log          |            `Boolean`            |   `true`    | Print which folders/files has been removed.                                                                                                          |
+|       emulate        |            `Boolean`            |   `false`   | Emulate remove. Print which folders/files will be removed without actually removing them. Ignores `log` value.                                       |
+| allowRootAndOutside  |            `Boolean`            |   `false`   | Allow remove the root directory and outside the root directory. It's kinda safe mode. **Don't turn on it if you don't know what you actually want!** |
 
 #### Example how to set these options:
 

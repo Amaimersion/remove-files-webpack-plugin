@@ -1,6 +1,22 @@
 'use strict';
 
 
+/**
+ * @typedef {Object} TestObject
+ * A folder for custom testing of files that should be removed.
+ * 
+ * @property {String} folder
+ * A path to the folder.
+ * 
+ * @property {(filePath) => Boolean} method
+ * A method that accepts an absolute file path and must return 
+ * boolean value that indicates should be removed that file or not.
+ * 
+ * @property {Boolean} recursive
+ * Should the method be applied to files in subdirectories.
+ */
+
+
 const fs = require('fs');
 const path = require('path');
 const Items = require('./items');
@@ -9,12 +25,16 @@ const Terminal = require('./terminal');
 const Info = require('./info');
 
 
+/**
+ * A plugin for webpack which removes files and folders before and after compilation.
+ */
 class Plugin {
     /**
-     * Creates an instance of Plugin.
+     * Creates an instance of `Plugin`.
      *
      * @param {Object} params
      * Contains two keys: `before` (compilation) and `after` (compilation).
+     * At least one should be presented.
      * All next properties are the same for these two keys.
      *
      * @param {String} params.root
@@ -23,24 +43,24 @@ class Plugin {
      * Defaults to `.` (from which directory is called).
      *
      * @param {Array<String>} params.include
-     * A folders/files for remove.
+     * A folders or files for removing.
      * Defaults to `[]`.
      *
      * @param {Array<String>} params.exclude
-     * A files for exclude.
+     * A files for excluding.
      * Defaults to `[]`.
      *
-     * @param {Array<{folder: String, method: (filePath) => Boolean, recursive: Boolean}>} params.test
+     * @param {Array<TestObject>} params.test
      * A folders for custom testing.
      * Defaults to `[]`.
      *
      * @param {Boolean} params.log
-     * Print which folders/files has been removed.
+     * Print which folders or files has been removed.
      * Defaults to `true`.
      *
      * @param {Boolean} params.emulate
      * Emulate remove process.
-     * Print which folders/files will be removed without actually removing them.
+     * Print which folders or files will be removed without actually removing them.
      * Ignores `params.log`.
      * Defaults to `false`.
      *
@@ -56,7 +76,7 @@ class Plugin {
         if (!params.before && !params.after) {
             throw new Error(
                 `No "before" or "after" parameters specified. ` +
-                'See https://github.com/Amaimersion/remove-files-webpack-plugin#options'
+                'See https://github.com/Amaimersion/remove-files-webpack-plugin#parameters'
             );
         }
 
@@ -169,7 +189,7 @@ class Plugin {
 
         if (params.emulate) {
             Terminal.printMessage(
-                'The following items will be removed in case of not emulate: ',
+                'The following items will be removed in case of not emulation: ',
                 items
             );
             return;
@@ -185,15 +205,12 @@ class Plugin {
 
         // trim root for pretty printing.
         if (!params.allowRootAndOutside) {
-            const method = (value) => value.replace(params.root, '');
-
-            items.dicts = items.dicts.map(method);
-            items.files = items.files.map(method);
+            items.trimRoot();
         }
 
         if (params.log) {
             Terminal.printMessage(
-                'The following items has been removed: ',
+                'The following items have been removed: ',
                 items
             );
         }
@@ -265,8 +282,8 @@ class Plugin {
      * Either `this.beforeParams` or `this.afterParams`.
      * 
      * @returns {Array<String>}
-     * An array of absolute paths of folders or files that 
-     * should be removed.
+     * An array of absolute paths of folders or files 
+     * that should be removed.
      */
     handleTest(params) {
         const paths = [];
@@ -285,7 +302,6 @@ class Plugin {
                 !this.isSave(params.root, test.folder)
             ) {
                 this.warnings.push(`Unsafe removig of ${item}. Skipped.`);
-
                 continue;
             }
 
@@ -295,9 +311,6 @@ class Plugin {
                 continue;
             } else if (!itemStat.isDirectory()) {
                 this.warnings.push(`Test folder is not a directory – ${test.folder}. Skipped.`);
-                continue;
-            } else if (!itemStat.isDirectory() && !itemStat.isFile()) {
-                this.warnings.push(`Invalid stat for ${test.folder}`);
                 continue;
             }
 
@@ -335,7 +348,6 @@ class Plugin {
     unlinkFolderSync(folderPath) {
         if (!fs.existsSync(folderPath)) {
             this.warnings.push(`Folder ${folderPath} doesn't exists.`);
-
             return;
         }
 
@@ -378,7 +390,7 @@ class Plugin {
      * Gets a stat for an item.
      *
      * @param {String} path
-     * An absolute path to the folder/file.
+     * An absolute path to the folder or file.
      *
      * @returns {fs.Stats}
      * An item stat or `undefined` if cannot get.
@@ -431,10 +443,10 @@ class Plugin {
      * A paths before checking should be normalized!
      *
      * @param {String} root
-     * The root directory.
+     * A root directory.
      *
      * @param {String} pth
-     * The path for checking.
+     * A path for checking.
      *
      * @returns {Boolean}
      * `True` – save, 

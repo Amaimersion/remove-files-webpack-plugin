@@ -1,3 +1,10 @@
+# 1.1.2 (April 4, 2019)
+
+## Fixed
+
+- Fix compatibility with webpack 3.x [#3](Amaimersion/remove-files-webpack-plugin#3).
+
+
 # 1.1.1 (March 20, 2019)
 
 Nothing changed. Had to change the version because of problems with `npm`. See changelog for 1.1.0 version.

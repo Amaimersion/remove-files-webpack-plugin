@@ -2,7 +2,7 @@
 
 ## Fixed
 
-- Fix compatibility with webpack 3.x [#3](Amaimersion/remove-files-webpack-plugin#3).
+- Fix compatibility with webpack 3.x [#3](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/3).
 
 
 # 1.1.1 (March 20, 2019)

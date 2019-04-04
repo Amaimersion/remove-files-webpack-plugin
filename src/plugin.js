@@ -135,22 +135,22 @@ class Plugin {
          * webpack 4+ comes with a new plugin system.
          * Check for hooks in order to support old plugin system.
          */
-        const applyHook = (compiler, hook, params, method) => {
+        const applyHook = (compiler, v4Hook, v3Hook, params, method) => {
             if (!params || !Object.keys(params).length) {
                 return;
             }
 
             if (compiler.hooks) {
-                compiler.hooks[hook].tapAsync(Info.fullName, method);
+                compiler.hooks[v4Hook].tapAsync(Info.fullName, method);
             } else {
-                compiler.plugin(hook, method);
+                compiler.plugin(v3Hook, method);
             }
         };
 
-        applyHook(compiler, 'beforeRun', this.beforeParams, (compiler, callback) => {
+        applyHook(compiler, 'beforeRun', 'before-run', this.beforeParams, (compiler, callback) => {
             this.handleHook(compiler, callback, this.beforeParams);
         });
-        applyHook(compiler, 'afterEmit', this.afterParams, (compilation, callback) => {
+        applyHook(compiler, 'afterEmit', 'after-emit', this.afterParams, (compilation, callback) => {
             this.handleHook(compilation, callback, this.afterParams);
         });
     }

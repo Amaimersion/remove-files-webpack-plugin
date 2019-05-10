@@ -1,3 +1,10 @@
+# 1.1.3 (May 10, 2019)
+
+## Fixed
+
+- Fix a bug when folder path in warning message was `undefined`. [#5](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/5).
+
+
 # 1.1.2 (April 4, 2019)
 
 ## Fixed

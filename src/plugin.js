@@ -322,7 +322,7 @@ class Plugin {
                 !params.allowRootAndOutside &&
                 !this.isSave(params.root, test.folder)
             ) {
-                this.warnings.push(`Unsafe removig of "${item}". Skipped.`);
+                this.warnings.push(`Unsafe removig of "${test.folder}". Skipped.`);
                 continue;
             }
 

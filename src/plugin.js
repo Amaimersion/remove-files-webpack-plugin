@@ -495,7 +495,12 @@ class Plugin {
         root = path.join(root);
         pth = path.join(pth);
 
-        return new RegExp(`(^${Utils.escape(root)})(.+)`, 'm').test(pth);
+        /**
+         * Other formatting.
+         */
+        root = Utils.escape(root);
+
+        return new RegExp(`(^${root})(.+)`, 'm').test(pth);
     }
 }
 

@@ -457,7 +457,6 @@ class Plugin {
      *
      * Checking for either exit beyond the root 
      * or similarity with the root.
-     * A paths before checking should be normalized!
      *
      * @param {String} root
      * A root directory.
@@ -481,8 +480,21 @@ class Plugin {
      * root – 'D:/dist'
      * pth – 'D:/'
      * Returns – false
+     * 
+     * root – './dist'
+     * pth – 'dist/scripts'
+     * Returns – true
      */
     isSave(root, pth) {
+        /**
+         * Normalize any path in order to match properly structure.
+         * e.g., `./dist` becomes `dist`.
+         * If there will be `./` at the start of a string, 
+         * then regexp will not work properly.
+         */
+        root = path.join(root);
+        pth = path.join(pth);
+
         return new RegExp(`(^${Utils.escape(root)})(.+)`, 'm').test(pth);
     }
 }

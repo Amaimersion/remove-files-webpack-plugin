@@ -216,11 +216,11 @@ class Plugin {
             return;
         }
 
-        for (let dict of items.dicts) {
+        for (const dict of items.dicts) {
             this.unlinkFolderSync(dict);
         }
 
-        for (let file of items.files) {
+        for (const file of items.files) {
             fs.unlinkSync(file);
         }
 
@@ -256,7 +256,7 @@ class Plugin {
         );
 
         // handle explicit files or folders.
-        for (let item of params.include) {
+        for (const item of params.include) {
             if (params.exclude.includes(item)) {
                 continue;
             }
@@ -313,7 +313,7 @@ class Plugin {
             return paths;
         }
 
-        for (let test of params.test) {
+        for (const test of params.test) {
             if (!path.isAbsolute(test.folder)) {
                 test.folder = path.join(params.root, test.folder);
             }
@@ -326,7 +326,7 @@ class Plugin {
                 continue;
             }
 
-            let itemStat = this.getStatSync(test.folder);
+            const itemStat = this.getStatSync(test.folder);
 
             if (!itemStat) {
                 continue;
@@ -375,23 +375,20 @@ class Plugin {
         let files = fs.readdirSync(folderPath);
         files = this.toAbsolutePaths(folderPath, files);
 
-        for (let file of files) {
+        for (const file of files) {
             const stat = this.getStatSync(file);
 
             if (!stat) {
                 continue;
-            }
-            else if (stat.isFile()) {
+            } else if (stat.isFile()) {
                 try {
                     fs.unlinkSync(file);
                 } catch (error) {
                     this.errors.push(error.message || error);
                 }
-            }
-            else if (stat.isDirectory()) {
+            } else if (stat.isDirectory()) {
                 this.unlinkFolderSync(file);
-            }
-            else {
+            } else {
                 this.warnings.push(`Invalid stat for "${file}". Skipped.`);
             }
         }
@@ -469,20 +466,20 @@ class Plugin {
      * `False` – not save.
      *
      * @example
-     * root – 'D:/dist'
-     * pth – 'D:/dist/chromium'
+     * root = 'D:/dist'
+     * pth = 'D:/dist/chromium'
      * Returns – true
      *
-     * root – 'D:/dist'
-     * pth – 'D:/dist'
+     * root = 'D:/dist'
+     * pth = 'D:/dist'
      * Returns – false
      *
-     * root – 'D:/dist'
-     * pth – 'D:/'
+     * root = 'D:/dist'
+     * pth = 'D:/'
      * Returns – false
      * 
-     * root – './dist'
-     * pth – 'dist/scripts'
+     * root = './dist'
+     * pth = 'dist/scripts'
      * Returns – true
      */
     isSave(root, pth) {

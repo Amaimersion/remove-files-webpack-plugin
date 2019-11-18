@@ -1,2 +1,5 @@
+node_modules
 .vscode
 .prettierrc.yaml
+.gitignore
+yarn.lock

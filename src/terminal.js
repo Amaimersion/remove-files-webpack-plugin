@@ -42,7 +42,7 @@
  * @property {string[]} files
  * Files paths.
  *
- * @property {string[]} dicts
+ * @property {string[]} directories
  * Folders paths.
  */
 
@@ -233,7 +233,7 @@ class Terminal {
             }
         };
 
-        prntItms(items.dicts, 'folders');
+        prntItms(items.directories, 'folders');
         prntItms(items.files, 'files');
     }
 

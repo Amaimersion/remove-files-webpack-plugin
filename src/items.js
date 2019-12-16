@@ -6,106 +6,121 @@ const Utils = require('./utils');
 
 /**
  * Contains directories and files.
- * 
- * Available through `dicts` and 
+ *
+ * - available through `directories` and
  * `files` properties respectively.
  */
 class Items {
     constructor() {
-        this.dicts = [];
+        /**
+         * @type {string[]}
+         * */
+        this.directories = [];
+
+        /**
+         * @type {string[]}
+         * */
         this.files = [];
     }
 
     /**
-     * Crops unecessary folders or files.
+     * Crops unecessary folders and files.
      *
-     * It's clears childrens dicts or files,
-     * whose parents will be removed.
-     * 
-     * Warning: it changes `this.dicts` and `this.files`.
+     * - it's clears childrens directories or files,
+     * whose parents will be removed;
+     * - changes `this.directories` and `this.files`.
      *
      * @example
      * this = {
-     *   dicts: [
+     *   directories: [
      *     'D:/dist/styles/css',
      *     'D:/dist/js/scripts',
      *     'D:/dist/styles'
-     *   ];
+     *   ],
      *   files: [
      *     'D:/dist/styles/popup.css',
      *     'D:/dist/styles/popup.css.map',
      *     'D:/dist/manifest.json'
-     *   ];
+     *   ]
      * };
      *
      * After cropUnnecessaryItems() will be:
      * this = {
-     *   dicts: [
+     *   directories: [
      *     'D:/dist/js/scripts',
      *     'D:/dist/styles'
-     *   ];
+     *   ],
      *   files: [
      *     'D:/dist/manifest.json'
-     *   ];
+     *   ]
      * };
      *
-     * Because full styles folder will be removed.
+     * because entire styles folder will be removed.
      */
     cropUnnecessaryItems() {
-        if (!this.dicts.length) {
+        if (!this.directories.length) {
             return;
         }
 
         const rightItems = new Items();
-        let unnecessaryIndexes = new Set();
+        const unnecessaryIndexes = new Set();
 
+        /**
+         * @param {string[]} firstGroup
+         * @param {string[]} secondGroup
+         * @param {Set<string>} indexes
+         */
         const addToUnnecessaryIndexes = (firstGroup, secondGroup, indexes) => {
-            for (let item of firstGroup) {
-                item = Utils.escape(item);
-                const regexp = new RegExp(`(^${item})(.+)`, 'm');
+            for (let itemFirst of firstGroup) {
+                itemFirst = Utils.escape(itemFirst);
+                const regexp = new RegExp(`(^${itemFirst})(.+)`, 'm');
 
-                for (let i in secondGroup) {
-                    if (regexp.test(secondGroup[i])) {
-                        indexes.add(i);
+                for (const itemSecond in secondGroup) {
+                    if (regexp.test(secondGroup[itemSecond])) {
+                        indexes.add(itemSecond);
                     }
                 }
             }
         };
 
+        /**
+         * @param {string[]} firstGroup
+         * @param {string[]} secondGroup
+         * @param {Set<string>} indexes
+         */
         const addToRightGroup = (rightGroup, itemsGroup, indexes) => {
-            for (let index in itemsGroup) {
+            for (const index in itemsGroup) {
                 if (!indexes.has(index)) {
                     rightGroup.push(itemsGroup[index]);
                 }
             }
         };
 
-        addToUnnecessaryIndexes(this.dicts, this.dicts, unnecessaryIndexes);
-        addToRightGroup(rightItems.dicts, this.dicts, unnecessaryIndexes);
+        addToUnnecessaryIndexes(this.directories, this.directories, unnecessaryIndexes);
+        addToRightGroup(rightItems.directories, this.directories, unnecessaryIndexes);
 
         unnecessaryIndexes.clear();
 
-        addToUnnecessaryIndexes(rightItems.dicts, this.files, unnecessaryIndexes);
+        addToUnnecessaryIndexes(rightItems.directories, this.files, unnecessaryIndexes);
         addToRightGroup(rightItems.files, this.files, unnecessaryIndexes);
 
-        this.dicts = rightItems.dicts.slice();
+        this.directories = rightItems.directories.slice();
         this.files = rightItems.files.slice();
     }
 
     /**
      * Trims a root.
-     * 
-     * Used only for pretty printing!
-     * 
-     * Warning: it changes `this.dicts` and `this.files`.
-     * 
-     * @param {String} root
+     *
+     * - should be used only for pretty printing;
+     * - changes `this.directories` and `this.files`.
+     *
+     * @param {string} root
      * A root value that should be trimmed.
      */
     trimRoot(root) {
         const method = (value) => value.replace(root, '');
 
-        this.dicts = this.dicts.map(method);
+        this.directories = this.directories.map(method);
         this.files = this.files.map(method);
     }
 }

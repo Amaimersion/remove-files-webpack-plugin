@@ -2,7 +2,7 @@
 
 
 /**
- * Information about the plugin.
+ * Information about plugin.
  */
 class Info {
     /**

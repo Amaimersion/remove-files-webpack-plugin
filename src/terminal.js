@@ -2,40 +2,48 @@
 
 
 /**
- * @typedef {('red' | 'green' | 'yellow' | 'blue' | 'magenta' | 'cyan' | 'white')} TerminalColor
+ * @typedef {(
+ * 'red' |
+ * 'green' |
+ * 'yellow' |
+ * 'blue' |
+ * 'magenta' |
+ * 'cyan' |
+ * 'white'
+ * )} TerminalColor
  * Available color that can be used in terminal.
  */
 
 /**
  * @typedef {Object} TerminalProperties
  * A properties for formatting of a message that will be printed in terminal.
- * 
- * @property {boolean} pluginName 
- * In the start of a message will be appended a plugin name.
+ *
+ * @property {boolean} pluginName
+ * Plugin name will be appended to the start of message.
  * Defaults to `true`.
- * 
+ *
  * @property {boolean} endDot
- * In the end of a message will be appended a dot, if not present.
+ * Dot character will be appended to the end of message, if not already presented.
  * Defaults to `true`.
- * 
+ *
  * @property {boolean} newLine
- * In the end of a message will be appended a new line symbol.
+ * New line character will be appended to the end of message.
  * Defaults to `false`.
- * 
+ *
  * @property {TerminalColor} color
- * A desired color of a message.
+ * A desired color of message.
  * Defaults to `white`.
  */
 
 /**
  * @typedef {Object} Items
- * Contains a files and folders paths.
- * 
- * @property {Array<String>} files
+ * Contains both files and folders paths.
+ *
+ * @property {string[]} files
  * Files paths.
- * 
- * @property {Array<String>} dicts
- * A folders paths.
+ *
+ * @property {string[]} dicts
+ * Folders paths.
  */
 
 
@@ -48,15 +56,22 @@ const Info = require('./info');
  */
 class Terminal {
     /**
-     * Generates a message for terminal using specified parameters.
+     * Tab symbol.
+     */
+    static get tab() {
+        return ' ';
+    }
+
+    /**
+     * Generates a message for terminal.
      *
-     * @param {String} message
+     * @param {string} message
      * A raw message.
      *
      * @param {TerminalProperties} params
-     * A modifications for the message.
+     * A properties of the message.
      *
-     * @returns {String}
+     * @returns {string}
      * A modified message.
      */
     static generateMessage(message, params) {
@@ -91,46 +106,57 @@ class Terminal {
     }
 
     /**
-     * Colorizes a message using ANSI escape sequences for colors.
-     * 
-     * @param {String} message
+     * Colorizes a message.
+     *
+     * - ANSI escape sequences is used for colors.
+     *
+     * @param {string} message
      * A message for colorizing.
-     * 
+     *
      * @param {TerminalColor} color
      * A desired color.
-     * 
-     * @returns {String}
+     *
+     * @returns {string}
      * A colorized string.
-     * 
+     *
      * @see https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color#answer-41407246
      * @see http://bluesock.org/~willkg/dev/ansi.html
      */
     static colorize(message, color) {
+        message = `m${message}`;
+
         switch (color) {
             case 'red':
-                message = `\x1b[31m${message}\x1b[0m`;
+                message = `31${message}`;
                 break;
+
             case 'green':
-                message = `\x1b[32m${message}\x1b[0m`;
+                message = `32${message}`;
                 break;
+
             case 'yellow':
-                message = `\x1b[33m${message}\x1b[0m`;
+                message = `33${message}`;
                 break;
+
             case 'blue':
-                message = `\x1b[34m${message}\x1b[0m`;
+                message = `34${message}`;
                 break;
+
             case 'magenta':
-                message = `\x1b[35m${message}\x1b[0m`;
+                message = `35${message}`;
                 break;
+
             case 'cyan':
-                message = `\x1b[36m${message}\x1b[0m`;
+                message = `36${message}`;
                 break;
-            case 'white':
-                message = `\x1b[37m${message}\x1b[0m`;
-                break;
+
             default:
-                throw new Error('Invalid color.');
+            case 'white':
+                message = `37${message}`;
+                break;
         }
+
+        message = `\x1b[${message}\x1b[0m`;
 
         return message;
     }
@@ -138,19 +164,16 @@ class Terminal {
     /**
      * Prints a message in terminal.
      *
-     * @param {String} message
+     * @param {string} message
      * A message for printing.
      *
-     * @param {Array<Items>} [items]
+     * @param {Items[]} [items]
      * Optional.
      * An items for printing.
      */
     static printMessage(message, items) {
         console.log(
-            os.EOL +
-            this.colorize(Info.fullName, 'cyan') +
-            ': ' +
-            message
+            `${os.EOL + this.colorize(Info.fullName, 'cyan')}: ${message}`
         );
 
         if (items) {
@@ -163,23 +186,29 @@ class Terminal {
     /**
      * Prints an items in terminal.
      *
-     * @param {Array<Items>} items
+     * @param {Items[]} items
      * An items for printing.
      */
     static printItems(items) {
-        let tabSymbol = ' ';
-        let tabCount = 2;
+        const tabCount = 2;
         let tab = '';
 
-        for (let i = 0; i != tabCount; i++) {
-            tab += tabSymbol;
+        for (let i = 0; i !== tabCount; i++) {
+            tab += this.tab;
         }
 
+        /**
+         * @param {string[]} itms
+         * @param {string} name
+         */
         const prntItms = (itms, name) => {
             if (!itms.length) {
                 return;
             }
 
+            /**
+             * @type {TerminalProperties}
+             */
             const commonParams = {
                 pluginName: false,
                 endDot: false
@@ -193,7 +222,7 @@ class Terminal {
                 }
             ));
 
-            for (let item of itms) {
+            for (const item of itms) {
                 console.log(this.generateMessage(
                     `${tab}${tab}${item}`,
                     {
@@ -210,28 +239,31 @@ class Terminal {
 
     /**
      * Prints a messages in terminal.
-     * 
+     *
      * @param {Object} main
      * Can be `compiler` or `compilation` object.
-     * 
-     * @param {Array<String>} messages
+     *
+     * @param {string[]} messages
      * A messages for printing.
-     * 
-     * @param {('warnings' | 'errors')} groupName
-     * A group of messages. 
+     *
+     * @param {'warnings' | 'errors'} group
+     * A group of messages.
      * Can be either `warnings` or `errors`.
      * If `main` contains this property, then all
-     * messages will be apended to `main[groupName]`.
-     * This allow us to use standard webpack log, instead of custom.
+     * messages will be apended to `main[group]`.
+     * This allow to use standard webpack log, instead of custom.
      */
-    static printMessages(main, messages, groupName) {
+    static printMessages(main, messages, group) {
         if (!messages.length) {
             return;
         }
 
-        const logName = (groupName === "errors" ? 'ERROR' : 'WARNING');
-        const mainIsCompilation = !!main[groupName];
+        const logName = (group === 'errors' ? 'ERROR' : 'WARNING');
+        const mainIsCompilation = !!main[group];
 
+        /**
+         * @type {Object.<string, TerminalProperties>}
+         */
         const messageParams = {
             compilation: {
                 endDot: false,
@@ -244,9 +276,9 @@ class Terminal {
             }
         };
 
-        for (let message of messages) {
+        for (const message of messages) {
             if (mainIsCompilation) {
-                main[groupName].push(this.generateMessage(
+                main[group].push(this.generateMessage(
                     message,
                     messageParams.compilation
                 ));

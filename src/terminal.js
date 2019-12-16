@@ -206,9 +206,7 @@ class Terminal {
                 return;
             }
 
-            /**
-             * @type {TerminalProperties}
-             */
+            /** @type {TerminalProperties} */
             const commonParams = {
                 pluginName: false,
                 endDot: false
@@ -261,9 +259,7 @@ class Terminal {
         const logName = (group === 'errors' ? 'ERROR' : 'WARNING');
         const mainIsCompilation = !!main[group];
 
-        /**
-         * @type {Object.<string, TerminalProperties>}
-         */
+        /** @type {Object.<string, TerminalProperties>} */
         const messageParams = {
             compilation: {
                 endDot: false,

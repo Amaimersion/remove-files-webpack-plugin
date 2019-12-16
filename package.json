@@ -30,7 +30,11 @@
     "keywords": [
         "webpack",
         "webpack-plugin",
+        "webpack-compilation",
+        "webpack-files",
+        "compilation",
         "plugin",
+        "files",
         "build-automation",
         "clean",
         "cleanup",
@@ -49,6 +53,10 @@
         "delete-files-plugin",
         "delete-files-webpack-plugin",
         "вебпак",
+        "вебпак-автоматизация",
+        "вебпак-файлы",
+        "вебпак-компиляция",
+        "компиляция",
         "удалить",
         "удаление",
         "очистка"

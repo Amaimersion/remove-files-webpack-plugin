@@ -1,3 +1,6 @@
+'use strict';
+
+
 /**
  * @module RemoveFilesWebpackPlugin
  * @version 1.1.4

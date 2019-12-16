@@ -4,3 +4,4 @@ node_modules
 .eslintrc.yaml
 .gitignore
 yarn.lock
+*.log

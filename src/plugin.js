@@ -1,55 +1,60 @@
+/* eslint-disable no-sync */
+
+
 'use strict';
 
 
+//#region Types
+
 /**
  * @typedef {Object} TestObject
- * A folder for custom testing of files that should be removed.
- * 
- * @property {String} folder
+ * A folder for testing of files that should be removed.
+ *
+ * @property {string} folder
  * A path to the folder.
- * 
- * @property {(filePath: String) => Boolean} method
- * A method that accepts an absolute file path and must return 
- * boolean value that indicates should be removed that file or not.
- * 
- * @property {Boolean} recursive
- * Should the method be applied to files in subdirectories.
+ *
+ * @property {(filePath: string) => boolean} method
+ * A method that accepts an absolute file path and returns
+ * value that indicates should this file be removed or not.
+ *
+ * @property {boolean} recursive
+ * Apply this method to files in subdirectories.
  */
 
 /**
- * @typedef {Object} RemoveParameters
- * A parameters for removing.
- * 
- * @property {String} root
+ * @typedef {Object} RemovingParameters
+ * A parameters of removing.
+ *
+ * @property {string} root
  * A root directory.
  * Not absolute paths will be appended to this.
  * Defaults to `.` (from which directory is called).
- * 
- * @property {Array<String>} include
+ *
+ * @property {string[]} include
  * A folders or files for removing.
  * Defaults to `[]`.
- * 
- * @property {Array<String>} exclude
+ *
+ * @property {string[]} exclude
  * A files for excluding.
  * Defaults to `[]`.
- * 
- * @property {Array<TestObject>} test
- * A folders for custom testing.
+ *
+ * @property {TestObject[]} test
+ * A folders for testing.
  * Defaults to `[]`.
- * 
- * @property {Boolean} log
- * Print which folders or files has been removed.
+ *
+ * @property {boolean} log
+ * Print which folders or files have been removed.
  * Defaults to `true`.
- * 
- * @property {Boolean} emulate
+ *
+ * @property {boolean} emulate
  * Emulate remove process.
  * Print which folders or files will be removed without actually removing them.
- * Ignores `params.log`.
+ * Ignores `log`.
  * Defaults to `false`.
- * 
- * @property {Boolean} allowRootAndOutside
- * Allow remove of a `root` directory or outside the `root` directory.
- * It's kinda safe mode.
+ *
+ * @property {boolean} allowRootAndOutside
+ * Allow removing of the `root` directory or outside the `root` directory.
+ * It's kind of safe mode.
  * Don't turn it on, if you don't know what you actually do!
  * Defaults to `false`.
  */
@@ -57,13 +62,23 @@
 /**
  * @typedef {Object} PluginParameters
  * A parameters for plugin.
- * 
- * @property {RemoveParameters} before
+ *
+ * @property {RemovingParameters} before
  * Removing before compilation.
- * 
- * @property {RemoveParameters} after
+ *
+ * @property {RemovingParameters} after
  * Removing after compilation.
  */
+
+/**
+ * @typedef {Object} Compiler
+ */
+
+/**
+ * @typedef {Object} Compilation
+ */
+
+//#endregion
 
 
 const fs = require('fs');
@@ -75,14 +90,15 @@ const Info = require('./info');
 
 
 /**
- * A plugin for webpack which removes files and folders before and after compilation.
+ * A plugin for webpack which removes files and
+ * folders before and after compilation.
  */
 class Plugin {
     /**
      * Creates an instance of `Plugin`.
-     * 
+     *
      * @param {PluginParameters} params
-     * A parameters for plugin.
+     * A plugin parameters.
      * Contains two keys: `before` (compilation) and `after` (compilation).
      * At least one should be presented.
      * All properties are the same for these two keys.
@@ -92,12 +108,12 @@ class Plugin {
 
         if (!params.before && !params.after) {
             throw new Error(
-                `No "before" or "after" parameters specified. ` +
+                'No "before" or "after" parameters specified. ' +
                 'See https://github.com/Amaimersion/remove-files-webpack-plugin#parameters'
             );
         }
 
-        /** @type {RemoveParameters} */
+        /** @type {RemovingParameters} */
         const defaultParams = {
             root: path.resolve('.'),
             include: [],
@@ -111,12 +127,13 @@ class Plugin {
         this.warnings = [];
         this.errors = [];
 
-        /** @type {RemoveParameters} */
+        /** @type {RemovingParameters} */
         this.beforeParams = {
             ...defaultParams,
             ...params.before
         };
-        /** @type {RemoveParameters} */
+
+        /** @type {RemovingParameters} */
         this.afterParams = {
             ...defaultParams,
             ...params.after
@@ -124,16 +141,16 @@ class Plugin {
     }
 
     /**
-     * "This method is called once by the webpack 
+     * "This method is called once by the webpack
      * compiler while installing the plugin.".
      *
-     * @param {Object} compiler
+     * @param {Compiler} cmplr
      * "Represents the fully configured webpack environment.".
      */
-    apply(compiler) {
+    apply(cmplr) {
         /**
          * webpack 4+ comes with a new plugin system.
-         * Check for hooks in order to support old plugin system.
+         * Checking for hooks in order to support old plugin system.
          */
         const applyHook = (compiler, v4Hook, v3Hook, params, method) => {
             if (!params || !Object.keys(params).length) {
@@ -147,10 +164,10 @@ class Plugin {
             }
         };
 
-        applyHook(compiler, 'beforeRun', 'before-run', this.beforeParams, (compiler, callback) => {
+        applyHook(cmplr, 'beforeRun', 'before-run', this.beforeParams, (compiler, callback) => {
             this.handleHook(compiler, callback, this.beforeParams);
         });
-        applyHook(compiler, 'afterEmit', 'after-emit', this.afterParams, (compilation, callback) => {
+        applyHook(cmplr, 'afterEmit', 'after-emit', this.afterParams, (compilation, callback) => {
             this.handleHook(compilation, callback, this.afterParams);
         });
     }
@@ -158,7 +175,7 @@ class Plugin {
     /**
      * Handles `beforeRun` and `afterEmit` hooks.
      *
-     * @param {Object} main
+     * @param {Compiler | Compilation} main
      * Can be `compiler` or `compilation` object.
      *
      * @param {Function} callback
@@ -166,8 +183,8 @@ class Plugin {
      * and pass a callback function that must be invoked
      * when your plugin is finished running.".
      *
-     * @param {RemoveParameters} params
-     * A parameters for remove.
+     * @param {RemovingParameters} params
+     * A parameters of removing.
      * Either `this.beforeParams` or `this.afterParams`.
      */
     handleHook(main, callback, params) {
@@ -176,7 +193,8 @@ class Plugin {
         Terminal.printMessages(main, this.warnings, 'warnings');
         Terminal.printMessages(main, this.errors, 'errors');
 
-        // This function will executed later if specified both `before` and `after` params.
+        // this function will executed later if
+        // specified both `before` and `after` params.
         this.warnings = [];
         this.errors = [];
 
@@ -186,8 +204,8 @@ class Plugin {
     /**
      * Synchronously removes folders or files.
      *
-     * @param {RemoveParameters} params
-     * A parameters for removing.
+     * @param {RemovingParameters} params
+     * A parameters of removing.
      * Either `this.beforeParams` or `this.afterParams`.
      */
     handleRemove(params) {
@@ -201,10 +219,11 @@ class Plugin {
         const items = this.getItemsForRemoving(params);
 
         if (
-            !Object.keys(items.dicts).length &&
+            !Object.keys(items.directories).length &&
             !Object.keys(items.files).length
         ) {
             this.warnings.push('An items for removing not found.');
+
             return;
         }
 
@@ -213,10 +232,11 @@ class Plugin {
                 'Following items will be removed in case of not emulation: ',
                 items
             );
+
             return;
         }
 
-        for (const dict of items.dicts) {
+        for (const dict of items.directories) {
             this.unlinkFolderSync(dict);
         }
 
@@ -238,19 +258,19 @@ class Plugin {
     }
 
     /**
-     * Gets sorted folders and files for removing.
+     * Returns sorted folders and files for removing.
      *
-     * @param {RemoveParameters} params
-     * A parameters for remove.
+     * @param {RemovingParameters} params
+     * A parameters of removing.
      * Either `this.beforeParams` or `this.afterParams`.
      */
     getItemsForRemoving(params) {
-        let items = new Items();
+        const items = new Items();
 
         params.include = this.toAbsolutePaths(params.root, params.include);
         params.exclude = this.toAbsolutePaths(params.root, params.exclude);
 
-        // handle unexplicit files or folders and add it to explicit.
+        // handle unexplicit files or folders, and add it to explicit.
         params.include = params.include.concat(
             this.handleTest(params)
         );
@@ -277,7 +297,7 @@ class Plugin {
             } else if (stat.isFile()) {
                 group = 'files';
             } else if (stat.isDirectory()) {
-                group = 'dicts';
+                group = 'directories';
             } else {
                 this.warnings.push(`Invalid stat for "${item}". Skipped.`);
                 continue;
@@ -298,13 +318,13 @@ class Plugin {
     /**
      * Performs a testing of files or folders for removing.
      *
-     * @param {RemoveParameters} params
-     * A parameters for remove.
+     * @param {RemovingParameters} params
+     * A parameters of removing.
      * Either `this.beforeParams` or `this.afterParams`.
-     * 
-     * @returns {Array<String>}
-     * An array of absolute paths of folders or files 
-     * that should be removed.
+     *
+     * @returns {string[]}
+     * An array of absolute paths of folders or
+     * files that should be removed.
      */
     handleTest(params) {
         const paths = [];
@@ -363,12 +383,13 @@ class Plugin {
     /**
      * Removes a folder.
      *
-     * @param {String} folderPath
+     * @param {string} folderPath
      * An absolute path to the folder.
      */
     unlinkFolderSync(folderPath) {
         if (!fs.existsSync(folderPath)) {
             this.warnings.push(`Folder doesn't exists – "${folderPath}". Skipped.`);
+
             return;
         }
 
@@ -403,7 +424,7 @@ class Plugin {
     /**
      * Gets a stat for an item.
      *
-     * @param {String} path
+     * @param {string} pth
      * An absolute path to the folder or file.
      *
      * @returns {fs.Stats}
@@ -411,11 +432,11 @@ class Plugin {
      *
      * @see https://nodejs.org/api/fs.html#fs_fs_lstatsync_path_options
      */
-    getStatSync(path) {
+    getStatSync(pth) {
         let stat = undefined;
 
         try {
-            stat = fs.lstatSync(path);
+            stat = fs.lstatSync(pth);
         } catch (error) {
             this.errors.push(error.message || error);
         }
@@ -426,13 +447,13 @@ class Plugin {
     /**
      * Converts all paths to absolute paths.
      *
-     * @param {String} root
+     * @param {string} root
      * A root that will be appended to non absolute paths.
      *
-     * @param {Array<String>} paths
+     * @param {string[]} paths
      * A paths for converting.
      *
-     * @returns {Array<String>}
+     * @returns {string[]}
      * An absolute paths.
      */
     toAbsolutePaths(root, paths) {
@@ -452,18 +473,18 @@ class Plugin {
     /**
      * Checks a path for safety.
      *
-     * Checking for either exit beyond the root 
+     * Checking for either exit beyond the root
      * or similarity with the root.
      *
-     * @param {String} root
+     * @param {string} root
      * A root directory.
      *
-     * @param {String} pth
+     * @param {string} pth
      * A path for checking.
      *
-     * @returns {Boolean}
-     * `True` – save, 
-     * `False` – not save.
+     * @returns {boolean}
+     * `true` – save,
+     * `false` – not save.
      *
      * @example
      * root = 'D:/dist'
@@ -477,7 +498,7 @@ class Plugin {
      * root = 'D:/dist'
      * pth = 'D:/'
      * Returns – false
-     * 
+     *
      * root = './dist'
      * pth = 'dist/scripts'
      * Returns – true
@@ -486,7 +507,7 @@ class Plugin {
         /**
          * Normalize any path in order to match properly structure.
          * e.g., `./dist` becomes `dist`.
-         * If there will be `./` at the start of a string, 
+         * If there will be `./` at the start of a string,
          * then regexp will not work properly.
          */
         root = path.join(root);

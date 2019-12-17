@@ -18,26 +18,28 @@ class Items {
         /**
          * @type {string[]}
          * */
-        this.directories = [];
+        this._directories = [];
 
         /**
          * @type {string[]}
          * */
-        this.files = [];
+        this._files = [];
     }
 
     /**
+     * @returns {string[]}
      * Directories.
      */
     static get directories() {
-        return this.directories;
+        return this._directories;
     }
 
     /**
+     * @returns {string[]}
      * Files.
      */
     static get files() {
-        return this.files;
+        return this._files;
     }
 
     /**
@@ -75,7 +77,7 @@ class Items {
      * because entire styles folder will be removed.
      */
     cropUnnecessaryItems() {
-        if (!this.directories.length) {
+        if (!this._directories.length) {
             return;
         }
 
@@ -113,16 +115,16 @@ class Items {
             }
         };
 
-        addToUnnecessaryIndexes(this.directories, this.directories, unnecessaryIndexes);
-        addToRightGroup(rightItems.directories, this.directories, unnecessaryIndexes);
+        addToUnnecessaryIndexes(this._directories, this._directories, unnecessaryIndexes);
+        addToRightGroup(rightItems.directories, this._directories, unnecessaryIndexes);
 
         unnecessaryIndexes.clear();
 
-        addToUnnecessaryIndexes(rightItems.directories, this.files, unnecessaryIndexes);
-        addToRightGroup(rightItems.files, this.files, unnecessaryIndexes);
+        addToUnnecessaryIndexes(rightItems.directories, this._files, unnecessaryIndexes);
+        addToRightGroup(rightItems.files, this._files, unnecessaryIndexes);
 
-        this.directories = rightItems.directories.slice();
-        this.files = rightItems.files.slice();
+        this._directories = rightItems.directories.slice();
+        this._files = rightItems.files.slice();
     }
 
     /**
@@ -137,8 +139,8 @@ class Items {
     trimRoot(root) {
         const method = (value) => value.replace(root, '');
 
-        this.directories = this.directories.map(method);
-        this.files = this.files.map(method);
+        this._directories = this._directories.map(method);
+        this._files = this._files.map(method);
     }
 }
 

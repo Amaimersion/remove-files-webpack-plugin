@@ -1,6 +1,8 @@
 'use strict';
 
 
+//#region Types
+
 /**
  * @typedef {(
  * 'red' |
@@ -45,6 +47,8 @@
  * @property {string[]} directories
  * Folders paths.
  */
+
+//#endregion
 
 
 const os = require('os');

@@ -11,6 +11,9 @@ const Utils = require('./utils');
  * `files` properties respectively.
  */
 class Items {
+    /**
+     * Creates an instance of `Items`.
+     */
     constructor() {
         /**
          * @type {string[]}
@@ -21,6 +24,20 @@ class Items {
          * @type {string[]}
          * */
         this.files = [];
+    }
+
+    /**
+     * Directories.
+     */
+    static get directories() {
+        return this.directories;
+    }
+
+    /**
+     * Files.
+     */
+    static get files() {
+        return this.files;
     }
 
     /**

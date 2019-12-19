@@ -17,24 +17,34 @@
  */
 
 /**
- * @typedef {Object} TerminalProperties
- * A properties for formatting of a message that will be printed in terminal.
- *
- * @property {boolean} pluginName
- * Plugin name will be appended to the start of message.
- * Defaults to `true`.
+ * @typedef {Object} GenerateProperties
+ * A properties for formatting of a message what will be generated.
  *
  * @property {boolean} endDot
  * Dot character will be appended to the end of message, if not already presented.
- * Defaults to `true`.
- *
- * @property {boolean} newLine
- * New line character will be appended to the end of message.
  * Defaults to `false`.
  *
  * @property {TerminalColor} color
  * A desired color of message.
  * Defaults to `white`.
+ */
+
+/**
+ * @typedef {Object} PrintProperties
+ * A properties for formatting of print process.
+ *
+ * @property {boolean} pluginName
+ * Plugin name will be appended to the start of message.
+ * Plugin name will be in `cyan` color.
+ * Defaults to `true`.
+
+ * @property {boolean} newLineStart
+ * New line character will be appended to the start of message.
+ * Defaults to `true`.
+ *
+ * @property {boolean} newLineEnd
+ * New line character will be appended to the end of message.
+ * Defaults to `true`.
  */
 
 /**
@@ -51,7 +61,6 @@
 //#endregion
 
 
-const os = require('os');
 const Info = require('./info');
 
 
@@ -64,49 +73,6 @@ class Terminal {
      */
     static get tab() {
         return ' ';
-    }
-
-    /**
-     * Generates a message for terminal.
-     *
-     * @param {string} message
-     * A raw message.
-     *
-     * @param {TerminalProperties} params
-     * A properties of the message.
-     *
-     * @returns {string}
-     * A modified message.
-     */
-    static generateMessage(message, params) {
-        params = {
-            ...{
-                pluginName: true,
-                endDot: true,
-                newLine: false,
-                color: 'white'
-            },
-            ...params
-        };
-
-        if (params.pluginName) {
-            message = `${Info.fullName}: ${message}`;
-        }
-
-        if (
-            params.endDot &&
-            message.charAt(message.length - 1) !== '.'
-        ) {
-            message += '.';
-        }
-
-        if (params.newLine) {
-            message += os.EOL;
-        }
-
-        message = this.colorize(message, params.color);
-
-        return message;
     }
 
     /**
@@ -166,34 +132,51 @@ class Terminal {
     }
 
     /**
-     * Prints a message in terminal.
+     * Generates a message for terminal.
      *
      * @param {string} message
-     * A message for printing.
+     * A raw message.
      *
-     * @param {Items[]} [items]
-     * Optional.
-     * An items for printing.
+     * @param {GenerateProperties} [params]
+     * A properties of the message.
+     *
+     * @returns {string}
+     * A modified message.
      */
-    static printMessage(message, items) {
-        console.log(
-            `${os.EOL + this.colorize(Info.fullName, 'cyan')}: ${message}`
-        );
+    static generateMessage(message, params = {}) {
+        params = {
+            ...{
+                endDot: false,
+                color: 'white'
+            },
+            ...params
+        };
 
-        if (items) {
-            this.printItems(items);
+        if (
+            params.endDot &&
+            message.charAt(message.length - 1) !== '.'
+        ) {
+            message += '.';
         }
 
-        console.log('');
+        if (params.color) {
+            message = this.colorize(message, params.color);
+        }
+
+        return message;
     }
 
     /**
-     * Prints an items in terminal.
+     * Generates an items message for
+     * printing in terminal.
      *
-     * @param {Items[]} items
+     * @param {Items} items
      * An items for printing.
+     *
+     * @returns {string[]}
+     * Generated messages.
      */
-    static printItems(items) {
+    static generateItemsMessage(items) {
         const tabCount = 2;
         let tab = '';
 
@@ -201,22 +184,24 @@ class Terminal {
             tab += this.tab;
         }
 
+        const messages = [];
+
         /**
          * @param {string[]} itms
          * @param {string} name
          */
-        const prntItms = (itms, name) => {
+        const gnrtItmsMssg = (itms, name) => {
             if (!itms.length) {
                 return;
             }
 
-            /** @type {TerminalProperties} */
+            /** @type {GenerateProperties} */
             const commonParams = {
                 pluginName: false,
                 endDot: false
             };
 
-            console.log(this.generateMessage(
+            messages.push(this.generateMessage(
                 `${tab}${name}:`,
                 {
                     ...commonParams,
@@ -225,7 +210,7 @@ class Terminal {
             ));
 
             for (const item of itms) {
-                console.log(this.generateMessage(
+                messages.push(this.generateMessage(
                     `${tab}${tab}${item}`,
                     {
                         ...commonParams,
@@ -235,8 +220,10 @@ class Terminal {
             }
         };
 
-        prntItms(items.directories, 'folders');
-        prntItms(items.files, 'files');
+        gnrtItmsMssg(items.directories, 'folders');
+        gnrtItmsMssg(items.files, 'files');
+
+        return messages;
     }
 
     /**
@@ -248,52 +235,76 @@ class Terminal {
      * @param {string[]} messages
      * A messages for printing.
      *
-     * @param {'warnings' | 'errors'} group
+     * @param {Logger.MessageGroup} group
      * A group of messages.
-     * Can be either `warnings` or `errors`.
-     * If `main` contains this property, then all
-     * messages will be apended to `main[group]`.
-     * This allow to use standard webpack log, instead of custom.
+     *
+     * @param {PrintProperties} [params]
+     * A properties of the print process.
      */
-    static printMessages(main, messages, group) {
+    static printMessages(_main, messages, group, params = {}) {
         if (!messages.length) {
             return;
         }
 
-        const logName = (group === 'errors' ? 'ERROR' : 'WARNING');
-        const mainIsCompilation = !!main[group];
-
-        /** @type {Object.<string, TerminalProperties>} */
-        const messageParams = {
-            compilation: {
-                endDot: false,
-                color: logName === 'ERROR' ? 'red' : 'yellow'
+        params = {
+            ...{
+                pluginName: true,
+                newLineStart: true,
+                newLineEnd: true
             },
-            compiler: {
-                pluginName: false,
-                endDot: false,
-                color: logName === 'ERROR' ? 'red' : 'yellow'
-            }
+            ...params
         };
 
+        /** @type {Console} */
+        let logger = {};
+
+        /* https://github.com/Amaimersion/remove-files-webpack-plugin/issues/12
+        if (main.getLogger) {
+            logger = main.getLogger(Info.fullName);
+        } else if (main.getInfrastructureLogger) {
+            logger = main.getInfrastructureLogger(Info.fullName);
+        } else {
+            logger = console;
+        }
+        */
+
+        logger = console;
+        let loggerMethod = 'log';
+
+        switch (group) {
+            case 'info':
+                loggerMethod = 'info';
+                break;
+
+            case 'debug':
+                loggerMethod = 'log';
+                break;
+
+            case 'warning':
+                loggerMethod = 'warn';
+                break;
+
+            case 'error':
+                loggerMethod = 'error';
+                break;
+        }
+
+        if (params.newLineStart) {
+            logger[loggerMethod]('');
+        }
+
+        if (params.pluginName) {
+            logger[loggerMethod](
+                `${this.colorize(`${Info.fullName}:`, 'cyan')}`
+            );
+        }
+
         for (const message of messages) {
-            if (mainIsCompilation) {
-                main[group].push(this.generateMessage(
-                    message,
-                    messageParams.compilation
-                ));
-            } else {
-                console.log(
-                    this.generateMessage(
-                        `${logName} in ${Info.fullName}: `,
-                        messageParams.compiler
-                    ) +
-                    this.generateMessage(
-                        message,
-                        messageParams.compiler
-                    )
-                );
-            }
+            logger[loggerMethod](message);
+        }
+
+        if (params.newLineEnd) {
+            logger[loggerMethod]('');
         }
     }
 }

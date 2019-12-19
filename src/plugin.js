@@ -195,6 +195,12 @@ class Plugin {
             this.loggerDebug.add('Ended beforeRun hook');
             this.log(compiler, this.beforeParams);
         });
+        applyHook(cmplr, 'watchRun', 'watch-run', this.beforeParams, (compiler, callback) => {
+            this.loggerDebug.add('Started watchRun hook');
+            this.handleHook(this.beforeParams, callback);
+            this.loggerDebug.add('Ended watchRun hook');
+            this.log(compiler, this.beforeParams);
+        });
         applyHook(cmplr, 'afterEmit', 'after-emit', this.afterParams, (compilation, callback) => {
             this.loggerDebug.add('Started afterEmit hook');
             this.handleHook(this.afterParams, callback);

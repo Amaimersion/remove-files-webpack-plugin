@@ -91,6 +91,9 @@ rules:
   # Variables
   no-label-var: "error"
   no-shadow: "error"
+  no-unused-vars:
+    - "error"
+    - "argsIgnorePattern": "^_"
   no-use-before-define: "error"
 
   # Node.js and CommonJS

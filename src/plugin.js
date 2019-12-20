@@ -182,29 +182,29 @@ class Plugin {
 
             if (compiler.hooks) {
                 compiler.hooks[v4Hook].tapAsync(Info.fullName, method);
-                this.loggerDebug.add(`Registered v4 hook: ${v4Hook}`);
+                this.loggerDebug.add(`v4 hook registered – "${v4Hook}"`);
             } else {
                 compiler.plugin(v3Hook, method);
-                this.loggerDebug.add(`Registered v3 hook: ${v3Hook}`);
+                this.loggerDebug.add(`v3 hook registered – "${v3Hook}"`);
             }
         };
 
         applyHook(cmplr, 'beforeRun', 'before-run', this.beforeParams, (compiler, callback) => {
-            this.loggerDebug.add('Started beforeRun hook');
+            this.loggerDebug.add('Hook started – "beforeRun"');
             this.handleHook(this.beforeParams, callback);
-            this.loggerDebug.add('Ended beforeRun hook');
+            this.loggerDebug.add('Hook ended – "beforeRun"');
             this.log(compiler, this.beforeParams);
         });
         applyHook(cmplr, 'watchRun', 'watch-run', this.beforeParams, (compiler, callback) => {
-            this.loggerDebug.add('Started watchRun hook');
+            this.loggerDebug.add('Hook started – "watchRun"');
             this.handleHook(this.beforeParams, callback);
-            this.loggerDebug.add('Ended watchRun hook');
+            this.loggerDebug.add('Hook ended – "watchRun"');
             this.log(compiler, this.beforeParams);
         });
         applyHook(cmplr, 'afterEmit', 'after-emit', this.afterParams, (compilation, callback) => {
-            this.loggerDebug.add('Started afterEmit hook');
+            this.loggerDebug.add('Hook started – "afterEmit"');
             this.handleHook(this.afterParams, callback);
-            this.loggerDebug.add('Ended afterEmit hook');
+            this.loggerDebug.add('Hook ended – "afterEmit"');
             this.log(compilation, this.afterParams);
         });
     }
@@ -247,7 +247,7 @@ class Plugin {
             !Object.keys(items.directories).length &&
             !Object.keys(items.files).length
         ) {
-            const message = 'An items for removing not found.';
+            const message = 'An items for removing not found';
 
             this.loggerDebug.add(message);
             this.loggerWarning.add(message);
@@ -315,7 +315,7 @@ class Plugin {
         for (const item of params.include) {
             if (params.exclude.includes(item)) {
                 this.loggerDebug.add(
-                    `Skipped, because item is excluded – ${item}`
+                    `Skipped, because item is excluded – "${item}"`
                 );
 
                 continue;
@@ -325,7 +325,7 @@ class Plugin {
                 !params.allowRootAndOutside &&
                 !this.isSave(params.root, item)
             ) {
-                const message = `Skipped, because unsafe removing of ${item}`;
+                const message = `Skipped, because unsafe removing – "${item}"`;
 
                 this.loggerDebug.add(message);
                 this.loggerWarning.add(message);
@@ -338,22 +338,22 @@ class Plugin {
 
             if (!stat) {
                 this.loggerDebug.add(
-                    `Cannot get stat for ${item}`
+                    `Cannot get stat – "${item}"`
                 );
 
                 continue;
             } else if (stat.isFile()) {
                 group = 'files';
                 this.loggerDebug.add(
-                    `It is file – ${item}`
+                    `It is file – "${item}"`
                 );
             } else if (stat.isDirectory()) {
                 group = 'directories';
                 this.loggerDebug.add(
-                    `It is directory – ${item}`
+                    `It is directory – "${item}"`
                 );
             } else {
-                const message = `Skipped, because invalid stat for ${item}`;
+                const message = `Skipped, because invalid stat – "${item}"`;
 
                 this.loggerDebug.add(message);
                 this.loggerWarning.add(message);
@@ -420,7 +420,7 @@ class Plugin {
                 !params.allowRootAndOutside &&
                 !this.isSave(params.root, test.folder)
             ) {
-                const message = `Skipped, because unsafe removing of ${test.folder}`;
+                const message = `Skipped, because unsafe removing – "${test.folder}"`;
 
                 this.loggerDebug.add(message);
                 this.loggerWarning.add(message);
@@ -437,7 +437,7 @@ class Plugin {
 
                 continue;
             } else if (!itemStat.isDirectory()) {
-                const message = `Skipped, because test folder not a directory – ${test.folder}`;
+                const message = `Skipped, because test folder not a directory – "${test.folder}"`;
 
                 this.loggerDebug.add(message);
                 this.loggerWarning.add(message);
@@ -467,7 +467,7 @@ class Plugin {
 
                     if (!stat) {
                         this.loggerDebug.add(
-                            `Cannot get stat for ${file}`
+                            `Cannot get stat – "${file}"`
                         );
 
                         continue;
@@ -477,17 +477,17 @@ class Plugin {
                         if (passed) {
                             paths.push(file);
                             this.loggerDebug.add(
-                                `Test passed, added for removing – ${file}`
+                                `Test passed, added for removing – "${file}"`
                             );
                         } else {
                             this.loggerDebug.add(
-                                `Test not passed – ${file}`
+                                `Test not passed – "${file}"`
                             );
                         }
                     } else if (stat.isDirectory() && test.recursive) {
                         getFilesRecursiveSync(file);
                     } else if (!stat.isDirectory() && !stat.isFile()) {
-                        const message = `Skipped, because invalid stat for ${file}`;
+                        const message = `Skipped, because invalid stat – "${file}"`;
 
                         this.loggerDebug.add(message);
                         this.loggerWarning.add(message);
@@ -510,7 +510,7 @@ class Plugin {
     unlinkFolderSync(folderPath) {
         if (!fs.existsSync(folderPath)) {
             this.loggerDebug.add(
-                `Skipped, because folder doesn't exists – ${folderPath}`
+                `Skipped, because folder doesn't exists – "${folderPath}"`
             );
 
             return;
@@ -524,7 +524,7 @@ class Plugin {
 
             if (!stat) {
                 this.loggerDebug.add(
-                    `Cannot get stat for ${file}`
+                    `Cannot get stat – "${file}"`
                 );
 
                 continue;
@@ -532,7 +532,7 @@ class Plugin {
                 try {
                     fs.unlinkSync(file);
                     this.loggerDebug.add(
-                        `File removed – ${file}`
+                        `File removed – "${file}"`
                     );
                 } catch (error) {
                     this.loggerDebug.add(error.message || error);
@@ -541,7 +541,7 @@ class Plugin {
             } else if (stat.isDirectory()) {
                 this.unlinkFolderSync(file);
             } else {
-                const message = `Skipped, because invalid stat for ${file}`;
+                const message = `Skipped, because invalid stat – "${file}"`;
 
                 this.loggerDebug.add(message);
                 this.loggerWarning.add(message);
@@ -551,7 +551,7 @@ class Plugin {
         try {
             fs.rmdirSync(folderPath);
             this.loggerDebug.add(
-                `Folder removed – ${folderPath}`
+                `Folder removed – "${folderPath}"`
             );
         } catch (error) {
             this.loggerDebug.add(error.message || error);
@@ -601,7 +601,7 @@ class Plugin {
         if (!path.isAbsolute(pth)) {
             newPath = path.join(root, pth);
             this.loggerDebug.add(
-                `${pth} converted to ${newPath}`
+                `"${pth}" converted to "${newPath}"`
             );
         }
 
@@ -716,9 +716,9 @@ class Plugin {
         pth = pthFormat.string;
         const save = new RegExp(`(^${root})(.+)`, 'm').test(pth);
 
-        this.loggerDebug.add(`Root – ${root}`);
-        this.loggerDebug.add(`Path – ${pth}`);
-        this.loggerDebug.add(`Save – ${save}`);
+        this.loggerDebug.add(`Root – "${root}"`);
+        this.loggerDebug.add(`Path – "${pth}"`);
+        this.loggerDebug.add(`Save – "${save}"`);
 
         return save;
     }

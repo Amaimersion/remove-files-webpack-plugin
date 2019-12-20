@@ -665,22 +665,55 @@ class Plugin {
      * root = './dist'
      * pth = 'dist/scripts'
      * Returns – true
+     *
+     * root = '.'
+     * pth = './dist/scripts'
+     * Returns - true
      */
     isSave(root, pth) {
-        /**
-         * Normalize any path in order to match properly structure.
-         * e.g., `./dist` becomes `dist`.
-         * If there will be `./` at the start of a string,
-         * then regexp will not work properly.
-         */
-        root = path.join(root);
-        pth = path.join(pth);
+        const format = (string, escape, replaceDoubleSlash) => {
+            const result = {
+                string: string,
+                continue: false
+            };
 
-        /**
-         * Other formatting.
-         */
-        root = Utils.escape(root);
+            try {
+                string = path.resolve(string);
+            } catch (error) {
+                this.loggerError.add(error.message || error);
+                this.loggerDebug.add(error.message || error);
 
+                result.continue = false;
+
+                return result;
+            }
+
+            if (escape) {
+                string = Utils.escape(string);
+            }
+
+            if (replaceDoubleSlash) {
+                string = string.replace(/\\/g, '\\\\');
+            }
+
+            result.string = string;
+            result.continue = true;
+
+            return result;
+        };
+
+        const rootFormat = format(root, true, true);
+        const pthFormat = format(pth, false, true); // we shouldn't escape.
+
+        if (
+            !rootFormat.continue ||
+            !pthFormat.continue
+        ) {
+            return false;
+        }
+
+        root = rootFormat.string;
+        pth = pthFormat.string;
         const save = new RegExp(`(^${root})(.+)`, 'm').test(pth);
 
         this.loggerDebug.add(`Root – ${root}`);

@@ -42,6 +42,11 @@
  * A folders for testing.
  * Defaults to `[]`.
  *
+ * @property {boolean} trash
+ * Move folders or files to trash (recycle bin)
+ * instead of permanent deleting.
+ * Defaults to `true`.
+ *
  * @property {boolean} log
  * Logs messages of `info` level
  * (example: "Which folders or files have been removed").
@@ -101,6 +106,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const trash = require('trash');
 const Items = require('./items');
 const Utils = require('./utils');
 const Logger = require('./logger');
@@ -142,6 +148,7 @@ class Plugin {
             include: [],
             exclude: [],
             test: [],
+            trash: true,
             log: true,
             logWarning: true,
             logError: false,
@@ -247,7 +254,11 @@ class Plugin {
             !Object.keys(items.directories).length &&
             !Object.keys(items.files).length
         ) {
-            const message = 'An items for removing not found';
+            const message = (
+                'An items for ' +
+                `${params.trash ? 'removing in trash' : 'permanent removing'}` +
+                ' not found'
+            );
 
             this.loggerDebug.add(message);
             this.loggerWarning.add(message);
@@ -256,17 +267,20 @@ class Plugin {
         }
 
         if (params.emulate) {
-            this.loggerInfo.add(
-                'Following items will be removed in case of not emulation:',
-                items
+            const message = (
+                'Following items will be ' +
+                `${params.trash ? 'removed in trash' : 'permanently removed'}` +
+                ' in case of not emulation:'
             );
+
+            this.loggerInfo.add(message, items);
 
             return;
         }
 
         for (const dir of items.directories) {
             try {
-                this.unlinkFolderSync(dir);
+                this.unlinkFolderSync(dir, params.trash);
             } catch (error) {
                 this.loggerDebug.add(error.message || error);
                 this.loggerError.add(error.message || error);
@@ -275,7 +289,7 @@ class Plugin {
 
         for (const file of items.files) {
             try {
-                fs.unlinkSync(file);
+                this.unlinkFileSync(file, params.trash);
             } catch (error) {
                 this.loggerDebug.add(error.message || error);
                 this.loggerError.add(error.message || error);
@@ -287,10 +301,13 @@ class Plugin {
             items.trimRoot(params.root);
         }
 
-        this.loggerInfo.add(
-            'Following items have been removed:',
-            items
+        const message = (
+            'Following items have been ' +
+            `${params.trash ? 'removed in trash' : 'permanently removed'}` +
+            ':'
         );
+
+        this.loggerInfo.add(message, items);
     }
 
     /**
@@ -502,16 +519,63 @@ class Plugin {
     }
 
     /**
+     * Removes a file.
+     *
+     * @param {string} filePath
+     * An absolute path to the file.
+     *
+     * @param {boolean} inTrash
+     * Move item to trash.
+     */
+    unlinkFileSync(filePath, inTrash) {
+        if (!fs.existsSync(filePath)) {
+            this.loggerDebug.add(
+                `Skipped, because file doesn't exists – "${filePath}"`
+            );
+
+            return;
+        }
+
+        if (inTrash) {
+            trash(filePath).catch((error) => {
+                this.loggerError.add(error.message || error);
+                this.loggerDebug.add(error.message || error);
+            });
+
+            return;
+        }
+
+        try {
+            fs.unlinkSync(filePath);
+        } catch (error) {
+            this.loggerError.add(error.message || error);
+            this.loggerDebug.add(error.message || error);
+        }
+    }
+
+    /**
      * Removes a folder.
      *
      * @param {string} folderPath
      * An absolute path to the folder.
+     *
+     * @param {boolean} inTrash
+     * Move item to trash.
      */
-    unlinkFolderSync(folderPath) {
+    unlinkFolderSync(folderPath, inTrash) {
         if (!fs.existsSync(folderPath)) {
             this.loggerDebug.add(
                 `Skipped, because folder doesn't exists – "${folderPath}"`
             );
+
+            return;
+        }
+
+        if (inTrash) {
+            trash(folderPath).catch((error) => {
+                this.loggerError.add(error.message || error);
+                this.loggerDebug.add(error.message || error);
+            });
 
             return;
         }
@@ -530,7 +594,7 @@ class Plugin {
                 continue;
             } else if (stat.isFile()) {
                 try {
-                    fs.unlinkSync(file);
+                    this.unlinkFileSync(file, false);
                     this.loggerDebug.add(
                         `File removed – "${file}"`
                     );
@@ -539,7 +603,7 @@ class Plugin {
                     this.loggerError.add(error.message || error);
                 }
             } else if (stat.isDirectory()) {
-                this.unlinkFolderSync(file);
+                this.unlinkFolderSync(file, false);
             } else {
                 const message = `Skipped, because invalid stat – "${file}"`;
 

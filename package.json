@@ -21,6 +21,9 @@
         "url": "https://github.com/Amaimersion"
     },
     "license": "MIT",
+    "dependencies": {
+        "trash": "^6.1.1"
+    },
     "devDependencies": {
         "eslint": "6.7.2"
     },

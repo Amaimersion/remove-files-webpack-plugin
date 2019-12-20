@@ -157,7 +157,13 @@ class Items {
      * A root value that should be trimmed.
      */
     trimRoot(root) {
-        const method = (value) => value.replace(root, '');
+        const method = (value) => {
+            if (value.indexOf(root) === 0) {
+                value = value.replace(root, '');
+            }
+
+            return value;
+        };
 
         this.directories = this.directories.map(method);
         this.files = this.files.map(method);

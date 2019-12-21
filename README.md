@@ -61,22 +61,22 @@ module.exports = {
 
 ## Parameters
 
-|         Name         |              Type               | Default  |                                                                         Description                                                                          |
-| :------------------: | :-----------------------------: | :------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|         root         |            `string`             |   `.`    |              A root directory.  Not absolute paths will be appended to this.  Defaults to where `package.json` and `node_modules` are located.               |
-|       include        |           `string[]`            |   `[]`   |                                                               A folders or files for removing.                                                               |
-|       exclude        |           `string[]`            |   `[]`   |                                                                    A files for excluding.                                                                    |
-|         test         |         `TestObject[]`          |   `[]`   |                                                                    A folders for testing.                                                                    |
-|  TestObject.folder   |            `string`             | Required |                                                                    A path to the folder.                                                                     |
-|  TestObject.method   | `(filePath: string) => boolean` | Required |        A method that accepts a file path (`root` + directoryPath + filePath) and  returns value that indicates should be this file be removed or not.        |
-| TestObject.recursive |            `boolean`            | `false`  |                                                   Test in all subfolders, not just in `TestObject.folder`.                                                   |
-|        trash         |            `boolean`            |  `true`  |                                         Move folders or files to trash (recycle bin) instead of permanent deleting.                                          |
-|         log          |            `boolean`            |  `true`  |                                   Prints messages of "info" level  (example: "Which folders or files have been removed").                                    |
-|      logWarning      |            `boolean`            |  `true`  |                                      Prints messages of "warning" level  (example: "An items for removing not found").                                       |
-|       logError       |            `boolean`            | `false`  |                                          Prints messages of "error" level  (example: "No such file or directory").                                           |
-|       logDebug       |            `boolean`            | `false`  |                                            Prints messages of "debug" level  (used for developers of the plugin).                                            |
-|       emulate        |            `boolean`            | `false`  |                 Emulate remove process.  Print which folders or files will be removed without actually removing them.  Ignores `log` value.                  |
-| allowRootAndOutside  |            `boolean`            | `false`  | Allow remove of a `root` directory or outside the `root` directory.  It is kind of safe mode.  **Don't turn it on, if you don't know what you actually do!** |
+|         Name         |              Type               | Default  |                                                                       Description                                                                       |
+| :------------------: | :-----------------------------: | :------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------: |
+|         root         |            `string`             |   `.`    |            A root directory.  Not absolute paths will be appended to this.  Defaults to where `package.json` and `node_modules` are located.            |
+|       include        |           `string[]`            |   `[]`   |                                                            A folders or files for removing.                                                             |
+|       exclude        |           `string[]`            |   `[]`   |                                                                 A files for excluding.                                                                  |
+|         test         |         `TestObject[]`          |   `[]`   |                                                                 A folders for testing.                                                                  |
+|  TestObject.folder   |            `string`             | Required |                                                                  A path to the folder.                                                                  |
+|  TestObject.method   | `(filePath: string) => boolean` | Required |      A method that accepts file path (`root` + directoryPath + fileName) and  returns value that indicates should be this file be removed or not.       |
+| TestObject.recursive |            `boolean`            | `false`  |                                                Test in all subfolders, not just in `TestObject.folder`.                                                 |
+|        trash         |            `boolean`            |  `true`  |                                       Move folders or files to trash (recycle bin) instead of permanent removing.                                       |
+|         log          |            `boolean`            |  `true`  |                                 Prints messages of "info" level  (example: "Which folders or files have been removed").                                 |
+|      logWarning      |            `boolean`            |  `true`  |                                    Prints messages of "warning" level  (example: "An items for removing not found").                                    |
+|       logError       |            `boolean`            | `false`  |                                        Prints messages of "error" level  (example: "No such file or directory").                                        |
+|       logDebug       |            `boolean`            | `false`  |                                         Prints messages of "debug" level  (used for developers of the plugin).                                          |
+|       emulate        |            `boolean`            | `false`  |               Emulate remove process.  Print which folders or files will be removed without actually removing them.  Ignores `log` value.               |
+| allowRootAndOutside  |            `boolean`            | `false`  | Allow removing of `root` directory or outside `root` directory.  It is kind of safe mode.  **Don't turn it on if you don't know what you actually do!** |
 
 #### How to set
 

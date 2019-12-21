@@ -28,7 +28,7 @@
         "eslint": "6.7.2"
     },
     "peerDependencies": {
-        "webpack": "*"
+        "webpack": ">=2.2.0"
     },
     "keywords": [
         "webpack",

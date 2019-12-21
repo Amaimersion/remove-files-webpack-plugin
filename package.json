@@ -1,7 +1,7 @@
 {
     "name": "remove-files-webpack-plugin",
     "version": "1.1.4",
-    "description": "A plugin for webpack which removes files and folders before and after compilation.",
+    "description": "A plugin for webpack that removes files and folders before and after compilation.",
     "main": "./src/index.js",
     "scripts": {
         "eslint": "./node_modules/.bin/eslint **/*.js",

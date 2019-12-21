@@ -114,7 +114,7 @@ const Info = require('./info');
 
 
 /**
- * A plugin for webpack which removes files and
+ * A plugin for webpack that removes files and
  * folders before and after compilation.
  */
 class Plugin {

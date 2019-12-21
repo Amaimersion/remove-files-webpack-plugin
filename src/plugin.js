@@ -14,8 +14,8 @@
  * A path to the folder.
  *
  * @property {(filePath: string) => boolean} method
- * A method that accepts an absolute file path and returns
- * value that indicates should this file be removed or not.
+ * A method that accepts a file path (`root` + directoryPath + filePath) and
+ * returns value that indicates should be this file be removed or not.
  *
  * @property {boolean} recursive
  * Apply this method to files in subdirectories.
@@ -28,7 +28,7 @@
  * @property {string} root
  * A root directory.
  * Not absolute paths will be appended to this.
- * Defaults to `.` (from which directory is called).
+ * Defaults to `.` (where `package.json` and `node_modules` are located).
  *
  * @property {string[]} include
  * A folders or files for removing.
@@ -48,22 +48,22 @@
  * Defaults to `true`.
  *
  * @property {boolean} log
- * Logs messages of `info` level
+ * Prints messages of "info" level
  * (example: "Which folders or files have been removed").
  * Defaults to `true`.
  *
  * @property {boolean} logWarning
- * Logs messages of `warning` level
+ * Prints messages of "warning" level
  * (example: "An items for removing not found").
  * Defaults to `true`.
  *
  * @property {boolean} logError
- * Logs messages of `error` level
+ * Prints messages of "error" level
  * (example: "No such file or directory").
  * Defaults to `false`.
  *
  * @property {boolean} logDebug
- * Logs messages of `debug` level
+ * Prints messages of "debug" level
  * (used for developers of the plugin).
  * Defaults to `false`.
  *

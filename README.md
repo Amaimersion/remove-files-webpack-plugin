@@ -94,15 +94,19 @@ module.exports = {
     plugins: [
         new RemovePlugin({
             /**
-             * Before compilation removes entire `./dist` folder.
+             * Before compilation removes entire 
+             * `./dist` folder to trash.
              */
             before: {
-                include: ['dist']
+                include: [
+                    'dist'
+                ]
             },
 
             /**
              * After compilation removes all files in 
-             * `./dist/styles` folder that have `.map` extension.
+             * `./dist/styles` folder that have `.map` extension
+             * to trash.
              */
             after: {
                 test: [
@@ -125,15 +129,19 @@ module.exports = {
 ```javascript
 new RemovePlugin({
     /**
-     * Before compilation removes entire `./dist` folder.
-     */ 
+     * Before compilation removes entire 
+     * `./dist` folder to trash.
+     */
     before: {
-        include: ['dist']
+        include: [
+            'dist'
+        ]
     },
 
     /**
      * After compilation removes all css maps 
-     * in `./dist/styles` folder except `popup.css.map` file.
+     * in `./dist/styles` folder to trash except 
+     * `popup.css.map` file.
      */
     after: {
         exclude: [
@@ -155,7 +163,7 @@ new RemovePlugin({
 new RemovePlugin({
     /**
      * After compilation removes all css maps in 
-     * `./dist/styles` folder and all subfolders 
+     * `./dist/styles` folder to trash and all subfolders 
      * (e.g. `./dist/styles/header`).
      */
     after: {
@@ -176,7 +184,8 @@ new RemovePlugin({
 new RemovePlugin({
     /**
      * Before compilation removes both 
-     * `./dist/manifest.json` file and `./dist/js` folder.
+     * `./dist/manifest.json` file and `./dist/js` folder
+     * to trash.
      */
     before: {
         root: './dist',
@@ -192,8 +201,8 @@ new RemovePlugin({
 new RemovePlugin({
     /**
      * After compilation:
-     * - removes all css maps in `./dist/styles` folder.
-     * - removes all js maps in `./dist/scripts` folder and 
+     * - removes all css maps in `./dist/styles` folder to trash.
+     * - removes all js maps in `./dist/scripts` folder to trash and 
      * all subfolders (e.g. `./dist/scripts/header`).
      */
     after: {

@@ -1,3 +1,26 @@
+# 1.2.0
+
+## Improved
+
+- Stability and quality.
+- Documentation and description.
+
+## Added
+
+- New feature: `trash`. Now you can remove your items in a trash (recycle bin).
+- New features: `logWarning`, `logError` and `logDebug`. Now you can control logging of different levels. [#10](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/10)
+
+## Changed
+
+- Text of log messages.
+
+## Fixed
+
+- A bug when safety of removal was incorrectly determined. [#7](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/7)
+- A bug when the plugin not worked in `--watch` mode. [#9](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/9)
+- A bug when a path could be incorrectly changed for pretty printing.
+
+
 # 1.1.3 (May 10, 2019)
 
 ## Fixed

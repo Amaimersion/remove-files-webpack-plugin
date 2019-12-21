@@ -28,7 +28,7 @@
 npm install remove-files-webpack-plugin
 ```
 
-- With `Yarn`:
+- With `yarn`:
 ```javascript
 yarn add remove-files-webpack-plugin
 ```

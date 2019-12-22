@@ -104,7 +104,7 @@ rules:
   no-new-require: "error"
   no-path-concat: "error"
   no-process-exit: "error"
-  no-sync: "warn"
+  # no-sync: "warn" # because in webpack plugin sync operations should be used.
 
   # Stylistic Issues
   array-bracket-newline:

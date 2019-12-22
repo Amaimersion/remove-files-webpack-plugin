@@ -48,22 +48,22 @@
  * Defaults to `true`.
  *
  * @property {boolean} log
- * Prints messages of "info" level
+ * Print messages of "info" level
  * (example: "Which folders or files have been removed").
  * Defaults to `true`.
  *
  * @property {boolean} logWarning
- * Prints messages of "warning" level
+ * Print messages of "warning" level
  * (example: "An items for removing not found").
  * Defaults to `true`.
  *
  * @property {boolean} logError
- * Prints messages of "error" level
+ * Print messages of "error" level
  * (example: "No such file or directory").
  * Defaults to `false`.
  *
  * @property {boolean} logDebug
- * Prints messages of "debug" level
+ * Print messages of "debug" level
  * (used for developers of the plugin).
  * Defaults to `false`.
  *

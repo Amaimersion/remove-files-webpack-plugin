@@ -71,10 +71,10 @@ module.exports = {
 |  TestObject.method   | `(filePath: string) => boolean` | Required |      A method that accepts file path (`root` + directoryPath + fileName) and  returns value that indicates should be this file be removed or not.       |
 | TestObject.recursive |            `boolean`            | `false`  |                                                Test in all subfolders, not just in `TestObject.folder`.                                                 |
 |        trash         |            `boolean`            |  `true`  |                                       Move folders or files to trash (recycle bin) instead of permanent removing.                                       |
-|         log          |            `boolean`            |  `true`  |                                 Prints messages of "info" level  (example: "Which folders or files have been removed").                                 |
-|      logWarning      |            `boolean`            |  `true`  |                                    Prints messages of "warning" level  (example: "An items for removing not found").                                    |
-|       logError       |            `boolean`            | `false`  |                                        Prints messages of "error" level  (example: "No such file or directory").                                        |
-|       logDebug       |            `boolean`            | `false`  |                                         Prints messages of "debug" level  (used for developers of the plugin).                                          |
+|         log          |            `boolean`            |  `true`  |                                 Print messages of "info" level  (example: "Which folders or files have been removed").                                  |
+|      logWarning      |            `boolean`            |  `true`  |                                    Print messages of "warning" level  (example: "An items for removing not found").                                     |
+|       logError       |            `boolean`            | `false`  |                                        Print messages of "error" level  (example: "No such file or directory").                                         |
+|       logDebug       |            `boolean`            | `false`  |                                          Print messages of "debug" level  (used for developers of the plugin).                                          |
 |       emulate        |            `boolean`            | `false`  |               Emulate remove process.  Print which folders or files will be removed without actually removing them.  Ignores `log` value.               |
 | allowRootAndOutside  |            `boolean`            | `false`  | Allow removing of `root` directory or outside `root` directory.  It is kind of safe mode.  **Don't turn it on if you don't know what you actually do!** |
 

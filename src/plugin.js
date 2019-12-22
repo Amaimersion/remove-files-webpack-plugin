@@ -1,6 +1,3 @@
-/* eslint-disable no-sync */
-
-
 'use strict';
 
 

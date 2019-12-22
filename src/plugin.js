@@ -338,6 +338,15 @@ class Plugin {
                 continue;
             }
 
+            if (!fs.existsSync(item)) {
+                const message = `Skipped, because not exists – "${item}"`;
+
+                this.loggerDebug.add(message);
+                this.loggerWarning.add(message);
+
+                continue;
+            }
+
             if (
                 !params.allowRootAndOutside &&
                 !this.isSave(params.root, item)
@@ -432,6 +441,15 @@ class Plugin {
                 params.root,
                 test.folder
             );
+
+            if (!fs.existsSync(test.folder)) {
+                const message = `Skipped, because not exists – "${test.folder}"`;
+
+                this.loggerDebug.add(message);
+                this.loggerWarning.add(message);
+
+                continue;
+            }
 
             if (
                 !params.allowRootAndOutside &&
@@ -733,11 +751,16 @@ class Plugin {
      * root = '.'
      * pth = './dist/scripts'
      * Returns - true
+     *
+     * root = 'D:\\Desktop\\test'
+     * pth = 'D:\\Desktop\\test.txt'
+     * Returns - false
      */
     isSave(root, pth) {
         const format = (string, escape, replaceDoubleSlash) => {
             const result = {
                 string: string,
+                initiallyFile: false,
                 continue: false
             };
 
@@ -750,6 +773,23 @@ class Plugin {
                 result.continue = false;
 
                 return result;
+            }
+
+            const stat = this.getStatSync(string);
+
+            if (!stat) {
+                this.loggerDebug.add(
+                    `Cannot get stat – "${string}"`
+                );
+
+                result.continue = false;
+
+                return result;
+            }
+
+            if (stat.isFile()) {
+                result.initiallyFile = true;
+                string = path.dirname(string);
             }
 
             if (escape) {
@@ -773,13 +813,26 @@ class Plugin {
             !rootFormat.continue ||
             !pthFormat.continue
         ) {
+            this.loggerDebug.add('Cannot continue');
+
             return false;
         }
 
+        this.loggerDebug.add('Before formatting:');
+        this.loggerDebug.add(`Root – "${root}"`);
+        this.loggerDebug.add(`Path – "${pth}"`);
+
         root = rootFormat.string;
         pth = pthFormat.string;
-        const save = new RegExp(`(^${root})(.+)`, 'm').test(pth);
+        let save = false;
 
+        if (pthFormat.initiallyFile) {
+            save = new RegExp(`(^${root})`, 'm').test(pth);
+        } else {
+            save = new RegExp(`(^${root})(.+)`, 'm').test(pth);
+        }
+
+        this.loggerDebug.add('After formatting:');
         this.loggerDebug.add(`Root – "${root}"`);
         this.loggerDebug.add(`Path – "${pth}"`);
         this.loggerDebug.add(`Save – "${save}"`);

@@ -332,7 +332,7 @@ class Plugin {
         for (const item of params.include) {
             if (params.exclude.includes(item)) {
                 this.loggerDebug.add(
-                    `Skipped, because item is excluded – "${item}"`
+                    `Skipped, because item excluded – "${item}"`
                 );
 
                 continue;

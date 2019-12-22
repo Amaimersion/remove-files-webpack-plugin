@@ -278,18 +278,18 @@ class Plugin {
             return;
         }
 
-        for (const dir of items.directories) {
+        for (const file of items.files) {
             try {
-                this.unlinkFolderSync(dir, params.trash);
+                this.unlinkFileSync(file, params.trash);
             } catch (error) {
                 this.loggerDebug.add(error.message || error);
                 this.loggerError.add(error.message || error);
             }
         }
 
-        for (const file of items.files) {
+        for (const dir of items.directories) {
             try {
-                this.unlinkFileSync(file, params.trash);
+                this.unlinkFolderSync(dir, params.trash);
             } catch (error) {
                 this.loggerDebug.add(error.message || error);
                 this.loggerError.add(error.message || error);

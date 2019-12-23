@@ -19,6 +19,7 @@
 - A bug when safety of removal was incorrectly determined. [#7](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/7)
 - A bug when the plugin not worked in `--watch` mode. [#9](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/9)
 - A bug when a path could be incorrectly changed for pretty printing.
+- A bug when unnecessary items could be cropped incorrectly.
 
 
 # 1.1.3 (May 10, 2019)

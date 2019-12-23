@@ -1,6 +1,8 @@
 'use strict';
 
 
+const fs = require('fs');
+const path = require('path');
 const Utils = require('./utils');
 
 
@@ -74,12 +76,14 @@ class Items {
      *   directories: [
      *     'D:/dist/styles/css',
      *     'D:/dist/js/scripts',
-     *     'D:/dist/styles'
+     *     'D:/dist/styles',
+     *     'D:/test'
      *   ],
      *   files: [
      *     'D:/dist/styles/popup.css',
      *     'D:/dist/styles/popup.css.map',
-     *     'D:/dist/manifest.json'
+     *     'D:/dist/manifest.json',
+     *     'D:/test.txt'
      *   ]
      * };
      *
@@ -87,10 +91,12 @@ class Items {
      * this = {
      *   directories: [
      *     'D:/dist/js/scripts',
-     *     'D:/dist/styles'
+     *     'D:/dist/styles',
+     *     'D:/test'
      *   ],
      *   files: [
-     *     'D:/dist/manifest.json'
+     *     'D:/dist/manifest.json',
+     *     'D:/test.txt'
      *   ]
      * };
      *
@@ -105,18 +111,40 @@ class Items {
         const unnecessaryIndexes = new Set();
 
         /**
+         * - at the moment it is duplicates `isSave()` from `plugin.js`,
+         * which leads to big issues with performance and quality of code.
+         * So, we need to do refactoring of this.
+         *
          * @param {string[]} firstGroup
          * @param {string[]} secondGroup
          * @param {Set<string>} indexes
          */
         const addToUnnecessaryIndexes = (firstGroup, secondGroup, indexes) => {
             for (let itemFirst of firstGroup) {
-                itemFirst = Utils.escape(itemFirst);
-                const regexp = new RegExp(`(^${itemFirst})(.+)`, 'm');
+                itemFirst = Utils.escape(
+                    path.resolve(itemFirst)
+                );
 
+                const regexpForFile = new RegExp(`(^${itemFirst})`, 'm');
+                const regexpForFolder = new RegExp(`(^${itemFirst})(.+)`, 'm');
+
+                // eslint-disable-next-line guard-for-in
                 for (const itemSecond in secondGroup) {
-                    if (regexp.test(secondGroup[itemSecond])) {
-                        indexes.add(itemSecond);
+                    const item = path.resolve(
+                        secondGroup[itemSecond]
+                    );
+                    const stat = fs.statSync(item);
+
+                    if (stat.isFile()) {
+                        const newItem = path.dirname(item);
+
+                        if (regexpForFile.test(newItem)) {
+                            indexes.add(itemSecond);
+                        }
+                    } else {
+                        if (regexpForFolder.test(item)) {
+                            indexes.add(itemSecond);
+                        }
                     }
                 }
             }

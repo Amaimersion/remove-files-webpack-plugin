@@ -2,7 +2,7 @@
 
 
 /**
- * Information about the plugin.
+ * Information about plugin.
  */
 class Info {
     /**
@@ -16,7 +16,7 @@ class Info {
      * Version of plugin.
      */
     static get version() {
-        return '1.1.3';
+        return '1.2.0';
     }
 
     /**

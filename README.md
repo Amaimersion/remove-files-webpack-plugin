@@ -3,8 +3,22 @@
 </h1>
 
 <p align="center">
-    A plugin for webpack which removes files and folders before and after compilation.
+    A plugin for webpack that removes files and folders before and after compilation.
 </p>
+
+
+## Content
+
+- [Content](#content)
+- [Installation](#installation)
+- [Support](#support)
+- [Usage](#usage)
+- [Parameters](#parameters)
+    - [How to set](#how-to-set)
+    - [Example](#example)
+- [Examples](#examples)
+- [Contribution](#contribution)
+- [License](#license)
 
 
 ## Installation
@@ -14,10 +28,15 @@
 npm install remove-files-webpack-plugin
 ```
 
-- With `Yarn`:
+- With `yarn`:
 ```javascript
 yarn add remove-files-webpack-plugin
 ```
+
+
+## Support
+
+The plugin works on any OS and webpack >= 2.2.0.
 
 
 ## Usage
@@ -29,40 +48,44 @@ module.exports = {
     plugins: [
         new RemovePlugin({
             before: {
-                // parameters.
+                // parameters for "before compilation" stage.
             },
             after: {
-                // parameters.
+                // parameters for "after compilation" stage.
             }
         })
     ]
-}
+};
 ```
-
-**Be aware!** You cannot undo deletion of folders or files. Use the `emulate` option if you not sure about correctness of the parameters.
 
 
 ## Parameters
 
-|         Name         |              Type               | Default  | Description                                                                                                                                             |
-| :------------------: | :-----------------------------: | :------: | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
-|         root         |            `String`             |   `.`    | A root directory. Not absolute paths will be appended to this. Defaults to from which directory is called.                                              |
-|       include        |         `Array<String>`         |   `[]`   | A folders or files for removing.                                                                                                                        |
-|       exclude        |         `Array<String>`         |   `[]`   | A files for excluding.                                                                                                                                  |
-|         test         |       `Array<TestObject>`       |   `[]`   | A folders for custom testing.                                                                                                                           |
-|  TestObject.folder   |            `String`             | Required | A path to the folder.                                                                                                                                   |
-|  TestObject.method   | `(filePath: String) => Boolean` | Required | A method that accepts an absolute file path and must return boolean value that indicates should be removed that file or not.                            |
-| TestObject.recursive |            `Boolean`            | `false`  | Test in all subfolders, not just in `TestObject.folder`.                                                                                                |
-|         log          |            `Boolean`            |  `true`  | Print which folders or files has been removed.                                                                                                          |
-|       emulate        |            `Boolean`            | `false`  | Emulate remove process. Print which folders or files will be removed without actually removing them. Ignores `log` value.                               |
-| allowRootAndOutside  |            `Boolean`            | `false`  | Allow remove of a `root` directory or outside the `root` directory. It's kinda safe mode. **Don't turn it on, if you don't know what you actually do!** |
+|         Name         |              Type               | Default  |                                                                       Description                                                                       |
+| :------------------: | :-----------------------------: | :------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------: |
+|         root         |            `string`             |   `.`    |            A root directory.  Not absolute paths will be appended to this.  Defaults to where `package.json` and `node_modules` are located.            |
+|       include        |           `string[]`            |   `[]`   |                                                            A folders or files for removing.                                                             |
+|       exclude        |           `string[]`            |   `[]`   |                                                                 A files for excluding.                                                                  |
+|         test         |         `TestObject[]`          |   `[]`   |                                                                 A folders for testing.                                                                  |
+|  TestObject.folder   |            `string`             | Required |                                                                  A path to the folder.                                                                  |
+|  TestObject.method   | `(filePath: string) => boolean` | Required |      A method that accepts file path (`root` + directoryPath + fileName) and  returns value that indicates should be this file be removed or not.       |
+| TestObject.recursive |            `boolean`            | `false`  |                                                Test in all subfolders, not just in `TestObject.folder`.                                                 |
+|        trash         |            `boolean`            |  `true`  |                                       Move folders or files to trash (recycle bin) instead of permanent removing.                                       |
+|         log          |            `boolean`            |  `true`  |                                 Print messages of "info" level  (example: "Which folders or files have been removed").                                  |
+|      logWarning      |            `boolean`            |  `true`  |                                    Print messages of "warning" level  (example: "An items for removing not found").                                     |
+|       logError       |            `boolean`            | `false`  |                                        Print messages of "error" level  (example: "No such file or directory").                                         |
+|       logDebug       |            `boolean`            | `false`  |                                          Print messages of "debug" level  (used for developers of the plugin).                                          |
+|       emulate        |            `boolean`            | `false`  |               Emulate remove process.  Print which folders or files will be removed without actually removing them.  Ignores `log` value.               |
+| allowRootAndOutside  |            `boolean`            | `false`  | Allow removing of `root` directory or outside `root` directory.  It is kind of safe mode.  **Don't turn it on if you don't know what you actually do!** |
 
-#### Example how to set these options:
+#### How to set
 
-You can pass the options into both `before` and `after` keys. Each key is optional, but at least one should be specified. 
+You can pass these parameters into both `before` and `after` keys. Each key is optional, but at least one should be specified. 
 
 - `before` - executes before compilation; 
 - `after` - executes after compilation.
+
+#### Example
 
 ```javascript
 const RemovePlugin = require('remove-files-webpack-plugin');
@@ -71,15 +94,19 @@ module.exports = {
     plugins: [
         new RemovePlugin({
             /**
-             * Before compilation removes entire `dist` folder.
+             * Before compilation removes entire 
+             * `./dist` folder to trash.
              */
             before: {
-                include: ['dist']
+                include: [
+                    'dist'
+                ]
             },
 
             /**
-             * After compilation removes all files in `dist/styles` folder,
-             * that have `.map` type.
+             * After compilation removes all files in 
+             * `./dist/styles` folder that have `.map` extension
+             * to trash.
              */
             after: {
                 test: [
@@ -93,7 +120,7 @@ module.exports = {
             }
         })
     ]
-}
+};
 ```
 
 
@@ -102,18 +129,24 @@ module.exports = {
 ```javascript
 new RemovePlugin({
     /**
-     * Before compilation removes entire `dist` folder.
-     */ 
+     * Before compilation removes entire 
+     * `./dist` folder to trash.
+     */
     before: {
-        include: ['dist']
+        include: [
+            'dist'
+        ]
     },
 
     /**
      * After compilation removes all css maps 
-     * in `dist/styles` folder except `popup.css.map` file.
+     * in `./dist/styles` folder to trash except 
+     * `popup.css.map` file.
      */
     after: {
-        exclude: ['dist/styles/popup.css.map'],
+        exclude: [
+            'dist/styles/popup.css.map'
+        ],
         test: [
             {
                 folder: 'dist/styles',
@@ -130,8 +163,8 @@ new RemovePlugin({
 new RemovePlugin({
     /**
      * After compilation removes all css maps in 
-     * `dist/styles` folder and all subfolders 
-     * (e.g. `dist/styles/header`).
+     * `./dist/styles` folder to trash and all subfolders 
+     * (e.g. `./dist/styles/header`).
      */
     after: {
         test: [
@@ -150,12 +183,16 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * Before compilation removes `manifest.json` file and 
-     * removes `js` folder.
+     * Before compilation removes both 
+     * `./dist/manifest.json` file and `./dist/js` folder
+     * to trash.
      */
     before: {
         root: './dist',
-        include: ['manifest.json', 'js']
+        include: [
+            'manifest.json',
+            'js'
+        ]
     }
 })
 ```
@@ -164,9 +201,9 @@ new RemovePlugin({
 new RemovePlugin({
     /**
      * After compilation:
-     * - removes all css maps in `dist/styles` folder.
-     * - removes all js maps in `dist/scripts` folder and 
-     * all subfolders (e.g. `dist/scripts/header`).
+     * - removes all css maps in `./dist/styles` folder to trash.
+     * - removes all js maps in `./dist/scripts` folder to trash and 
+     * all subfolders (e.g. `./dist/scripts/header`).
      */
     after: {
         root: './dist',
@@ -189,7 +226,53 @@ new RemovePlugin({
 })
 ```
 
+```javascript
+new RemovePlugin({
+    /**
+     * Before compilation permanently removes both 
+     * `./dist/manifest.json` file and `./dist/js` folder.
+     * Log only works for warnings and errors.
+     */
+    before: {
+        root: './dist',
+        include: [
+            'manifest.json',
+            'js'
+        ],
+        trash: false,
+        log: false,
+        logWarning: true,
+        logError: true,
+        logDebug: false
+    }
+})
+```
 
-## Issues and requests
+```javascript
+new RemovePlugin({
+    /**
+     * Before compilation emulates remove process
+     * for a file that outside of the root directory.
+     * That file will be removed in trash.
+     */
+    before: {
+        root: '.', // "D:\\remove-files-webpack-plugin-master"
+        include: [
+            "C:\\Desktop\\test.txt"
+        ],
+        trash: true,
+        emulate: true,
+        allowRootAndOutside: true
+    }
+})
+```
+
+
+## Contribution
 
 Feel free to use [issues](https://github.com/Amaimersion/remove-files-webpack-plugin/issues). [Pull requests](https://github.com/Amaimersion/remove-files-webpack-plugin/pulls) are also always welcome!
+
+
+## License
+
+[MIT](https://github.com/Amaimersion/remove-files-webpack-plugin/blob/master/LICENSE).

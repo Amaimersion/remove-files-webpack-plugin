@@ -1,16 +1,14 @@
 {
     "name": "remove-files-webpack-plugin",
-    "version": "1.1.3",
-    "description": "A plugin for webpack which removes files and folders before and after compilation.",
+    "version": "1.2.0",
+    "description": "A plugin for webpack that removes files and folders before and after compilation.",
     "main": "./src/index.js",
-    "peerDependencies": {
-        "webpack": "*"
+    "scripts": {
+        "eslint": "./node_modules/.bin/eslint **/*.js",
+        "eslint-format-codeframe": "yarn eslint --format codeframe",
+        "eslint-fix": "yarn eslint --fix"
     },
     "homepage": "https://github.com/Amaimersion/remove-files-webpack-plugin/blob/master/README.md",
-    "author": {
-        "name": "Sergey Kuznetsov",
-        "url": "https://github.com/Amaimersion"
-    },
     "repository": {
         "type": "git",
         "url": "https://github.com/Amaimersion/remove-files-webpack-plugin.git"
@@ -18,11 +16,28 @@
     "bugs": {
         "url": "https://github.com/Amaimersion/remove-files-webpack-plugin/issues"
     },
+    "author": {
+        "name": "Sergey Kuznetsov",
+        "url": "https://github.com/Amaimersion"
+    },
     "license": "MIT",
+    "dependencies": {
+        "trash": "^6.1.1"
+    },
+    "devDependencies": {
+        "eslint": "^6.8.0"
+    },
+    "peerDependencies": {
+        "webpack": ">=2.2.0"
+    },
     "keywords": [
         "webpack",
         "webpack-plugin",
+        "webpack-compilation",
+        "webpack-files",
+        "compilation",
         "plugin",
+        "files",
         "build-automation",
         "clean",
         "cleanup",
@@ -41,6 +56,10 @@
         "delete-files-plugin",
         "delete-files-webpack-plugin",
         "вебпак",
+        "вебпак-автоматизация",
+        "вебпак-файлы",
+        "вебпак-компиляция",
+        "компиляция",
         "удалить",
         "удаление",
         "очистка"

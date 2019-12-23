@@ -13,6 +13,8 @@ proseWrap: "preserve"
 endOfLine: "crlf"
 
 overrides:
-    - files: ["*.md", "*.yaml"]
-      options:
-        tabWidth: 2
+    - files: 
+      - "*.md" 
+      - "*.yaml"
+      - options:
+        - tabWidth: 2

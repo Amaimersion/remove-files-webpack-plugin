@@ -1,55 +1,78 @@
 'use strict';
 
 
+//#region Types
+
 /**
  * @typedef {Object} TestObject
- * A folder for custom testing of files that should be removed.
- * 
- * @property {String} folder
+ * A folder for testing of files that should be removed.
+ *
+ * @property {string} folder
  * A path to the folder.
- * 
- * @property {(filePath: String) => Boolean} method
- * A method that accepts an absolute file path and must return 
- * boolean value that indicates should be removed that file or not.
- * 
- * @property {Boolean} recursive
- * Should the method be applied to files in subdirectories.
+ *
+ * @property {(filePath: string) => boolean} method
+ * A method that accepts a file path (`root` + directoryPath + filePath) and
+ * returns value that indicates should be this file be removed or not.
+ *
+ * @property {boolean} recursive
+ * Apply this method to files in subdirectories.
  */
 
 /**
- * @typedef {Object} RemoveParameters
- * A parameters for removing.
- * 
- * @property {String} root
+ * @typedef {Object} RemovingParameters
+ * A parameters of removing.
+ *
+ * @property {string} root
  * A root directory.
  * Not absolute paths will be appended to this.
- * Defaults to `.` (from which directory is called).
- * 
- * @property {Array<String>} include
+ * Defaults to `.` (where `package.json` and `node_modules` are located).
+ *
+ * @property {string[]} include
  * A folders or files for removing.
  * Defaults to `[]`.
- * 
- * @property {Array<String>} exclude
+ *
+ * @property {string[]} exclude
  * A files for excluding.
  * Defaults to `[]`.
- * 
- * @property {Array<TestObject>} test
- * A folders for custom testing.
+ *
+ * @property {TestObject[]} test
+ * A folders for testing.
  * Defaults to `[]`.
- * 
- * @property {Boolean} log
- * Print which folders or files has been removed.
+ *
+ * @property {boolean} trash
+ * Move folders or files to trash (recycle bin)
+ * instead of permanent deleting.
  * Defaults to `true`.
- * 
- * @property {Boolean} emulate
+ *
+ * @property {boolean} log
+ * Print messages of "info" level
+ * (example: "Which folders or files have been removed").
+ * Defaults to `true`.
+ *
+ * @property {boolean} logWarning
+ * Print messages of "warning" level
+ * (example: "An items for removing not found").
+ * Defaults to `true`.
+ *
+ * @property {boolean} logError
+ * Print messages of "error" level
+ * (example: "No such file or directory").
+ * Defaults to `false`.
+ *
+ * @property {boolean} logDebug
+ * Print messages of "debug" level
+ * (used for developers of the plugin).
+ * Defaults to `false`.
+ *
+ * @property {boolean} emulate
  * Emulate remove process.
  * Print which folders or files will be removed without actually removing them.
- * Ignores `params.log`.
+ * Ignores `log`.
  * Defaults to `false`.
- * 
- * @property {Boolean} allowRootAndOutside
- * Allow remove of a `root` directory or outside the `root` directory.
- * It's kinda safe mode.
+ *
+ * @property {boolean} allowRootAndOutside
+ * Allow removing of the `root` directory or outside the `root` directory.
+ * It's kind of safe mode.
  * Don't turn it on, if you don't know what you actually do!
  * Defaults to `false`.
  */
@@ -57,32 +80,46 @@
 /**
  * @typedef {Object} PluginParameters
  * A parameters for plugin.
- * 
- * @property {RemoveParameters} before
+ *
+ * @property {RemovingParameters} before
  * Removing before compilation.
- * 
- * @property {RemoveParameters} after
+ *
+ * @property {RemovingParameters} after
  * Removing after compilation.
  */
+
+/**
+ * @typedef {Object} Compiler
+ * Webpack environment.
+ */
+
+/**
+ * @typedef {Object} Compilation
+ * Webpack environment.
+ */
+
+//#endregion
 
 
 const fs = require('fs');
 const path = require('path');
+const trash = require('trash');
 const Items = require('./items');
 const Utils = require('./utils');
-const Terminal = require('./terminal');
+const Logger = require('./logger');
 const Info = require('./info');
 
 
 /**
- * A plugin for webpack which removes files and folders before and after compilation.
+ * A plugin for webpack that removes files and
+ * folders before and after compilation.
  */
 class Plugin {
     /**
      * Creates an instance of `Plugin`.
-     * 
+     *
      * @param {PluginParameters} params
-     * A parameters for plugin.
+     * A plugin parameters.
      * Contains two keys: `before` (compilation) and `after` (compilation).
      * At least one should be presented.
      * All properties are the same for these two keys.
@@ -92,31 +129,38 @@ class Plugin {
 
         if (!params.before && !params.after) {
             throw new Error(
-                `No "before" or "after" parameters specified. ` +
+                'No "before" or "after" parameters specified. ' +
                 'See https://github.com/Amaimersion/remove-files-webpack-plugin#parameters'
             );
         }
 
-        /** @type {RemoveParameters} */
+        this.loggerError = new Logger.ErrorLogger();
+        this.loggerWarning = new Logger.WarningLogger();
+        this.loggerInfo = new Logger.InfoLogger();
+        this.loggerDebug = new Logger.DebugLogger();
+
+        /** @type {RemovingParameters} */
         const defaultParams = {
             root: path.resolve('.'),
             include: [],
             exclude: [],
             test: [],
+            trash: true,
             log: true,
+            logWarning: true,
+            logError: false,
+            logDebug: false,
             emulate: false,
             allowRootAndOutside: false
         };
 
-        this.warnings = [];
-        this.errors = [];
-
-        /** @type {RemoveParameters} */
+        /** @type {RemovingParameters} */
         this.beforeParams = {
             ...defaultParams,
             ...params.before
         };
-        /** @type {RemoveParameters} */
+
+        /** @type {RemovingParameters} */
         this.afterParams = {
             ...defaultParams,
             ...params.after
@@ -124,16 +168,16 @@ class Plugin {
     }
 
     /**
-     * "This method is called once by the webpack 
+     * "This method is called once by the webpack
      * compiler while installing the plugin.".
      *
-     * @param {Object} compiler
+     * @param {Compiler} main
      * "Represents the fully configured webpack environment.".
      */
-    apply(compiler) {
+    apply(cmplr) {
         /**
          * webpack 4+ comes with a new plugin system.
-         * Check for hooks in order to support old plugin system.
+         * Checking for hooks in order to support old plugin system.
          */
         const applyHook = (compiler, v4Hook, v3Hook, params, method) => {
             if (!params || !Object.keys(params).length) {
@@ -142,52 +186,55 @@ class Plugin {
 
             if (compiler.hooks) {
                 compiler.hooks[v4Hook].tapAsync(Info.fullName, method);
+                this.loggerDebug.add(`v4 hook registered – "${v4Hook}"`);
             } else {
                 compiler.plugin(v3Hook, method);
+                this.loggerDebug.add(`v3 hook registered – "${v3Hook}"`);
             }
         };
 
-        applyHook(compiler, 'beforeRun', 'before-run', this.beforeParams, (compiler, callback) => {
-            this.handleHook(compiler, callback, this.beforeParams);
+        applyHook(cmplr, 'beforeRun', 'before-run', this.beforeParams, (compiler, callback) => {
+            this.loggerDebug.add('Hook started – "beforeRun"');
+            this.handleHook(this.beforeParams, callback);
+            this.loggerDebug.add('Hook ended – "beforeRun"');
+            this.log(compiler, this.beforeParams);
         });
-        applyHook(compiler, 'afterEmit', 'after-emit', this.afterParams, (compilation, callback) => {
-            this.handleHook(compilation, callback, this.afterParams);
+        applyHook(cmplr, 'watchRun', 'watch-run', this.beforeParams, (compiler, callback) => {
+            this.loggerDebug.add('Hook started – "watchRun"');
+            this.handleHook(this.beforeParams, callback);
+            this.loggerDebug.add('Hook ended – "watchRun"');
+            this.log(compiler, this.beforeParams);
+        });
+        applyHook(cmplr, 'afterEmit', 'after-emit', this.afterParams, (compilation, callback) => {
+            this.loggerDebug.add('Hook started – "afterEmit"');
+            this.handleHook(this.afterParams, callback);
+            this.loggerDebug.add('Hook ended – "afterEmit"');
+            this.log(compilation, this.afterParams);
         });
     }
 
     /**
      * Handles `beforeRun` and `afterEmit` hooks.
      *
-     * @param {Object} main
-     * Can be `compiler` or `compilation` object.
+     * @param {RemovingParameters} params
+     * A parameters of removing.
+     * Either `this.beforeParams` or `this.afterParams`.
      *
      * @param {Function} callback
      * "Some compilation plugin steps are asynchronous,
      * and pass a callback function that must be invoked
-     * when your plugin is finished running.".
-     *
-     * @param {RemoveParameters} params
-     * A parameters for remove.
-     * Either `this.beforeParams` or `this.afterParams`.
+     * when your plugin is finished running".
      */
-    handleHook(main, callback, params) {
+    handleHook(params, callback) {
         this.handleRemove(params);
-
-        Terminal.printMessages(main, this.warnings, 'warnings');
-        Terminal.printMessages(main, this.errors, 'errors');
-
-        // This function will executed later if specified both `before` and `after` params.
-        this.warnings = [];
-        this.errors = [];
-
         callback();
     }
 
     /**
      * Synchronously removes folders or files.
      *
-     * @param {RemoveParameters} params
-     * A parameters for removing.
+     * @param {RemovingParameters} params
+     * A parameters of removing.
      * Either `this.beforeParams` or `this.afterParams`.
      */
     handleRemove(params) {
@@ -201,27 +248,49 @@ class Plugin {
         const items = this.getItemsForRemoving(params);
 
         if (
-            !Object.keys(items.dicts).length &&
+            !Object.keys(items.directories).length &&
             !Object.keys(items.files).length
         ) {
-            this.warnings.push('An items for removing not found.');
+            const message = (
+                'An items for ' +
+                `${params.trash ? 'removing in trash' : 'permanent removing'}` +
+                ' not found'
+            );
+
+            this.loggerDebug.add(message);
+            this.loggerWarning.add(message);
+
             return;
         }
 
         if (params.emulate) {
-            Terminal.printMessage(
-                'Following items will be removed in case of not emulation: ',
-                items
+            const message = (
+                'Following items will be ' +
+                `${params.trash ? 'removed in trash' : 'permanently removed'}` +
+                ' in case of not emulation:'
             );
+
+            this.loggerInfo.add(message, items);
+
             return;
         }
 
-        for (let dict of items.dicts) {
-            this.unlinkFolderSync(dict);
+        for (const file of items.files) {
+            try {
+                this.unlinkFileSync(file, params.trash);
+            } catch (error) {
+                this.loggerDebug.add(error.message || error);
+                this.loggerError.add(error.message || error);
+            }
         }
 
-        for (let file of items.files) {
-            fs.unlinkSync(file);
+        for (const dir of items.directories) {
+            try {
+                this.unlinkFolderSync(dir, params.trash);
+            } catch (error) {
+                this.loggerDebug.add(error.message || error);
+                this.loggerError.add(error.message || error);
+            }
         }
 
         // trim root for pretty printing.
@@ -229,35 +298,49 @@ class Plugin {
             items.trimRoot(params.root);
         }
 
-        if (params.log) {
-            Terminal.printMessage(
-                'Following items have been removed: ',
-                items
-            );
-        }
+        const message = (
+            'Following items have been ' +
+            `${params.trash ? 'removed in trash' : 'permanently removed'}` +
+            ':'
+        );
+
+        this.loggerInfo.add(message, items);
     }
 
     /**
-     * Gets sorted folders and files for removing.
+     * Returns sorted folders and files for removing.
      *
-     * @param {RemoveParameters} params
-     * A parameters for remove.
+     * @param {RemovingParameters} params
+     * A parameters of removing.
      * Either `this.beforeParams` or `this.afterParams`.
      */
     getItemsForRemoving(params) {
-        let items = new Items();
+        const items = new Items();
 
         params.include = this.toAbsolutePaths(params.root, params.include);
         params.exclude = this.toAbsolutePaths(params.root, params.exclude);
 
-        // handle unexplicit files or folders and add it to explicit.
+        // handle unexplicit files or folders, and add it to explicit.
         params.include = params.include.concat(
             this.handleTest(params)
         );
 
         // handle explicit files or folders.
-        for (let item of params.include) {
+        for (const item of params.include) {
             if (params.exclude.includes(item)) {
+                this.loggerDebug.add(
+                    `Skipped, because item excluded – "${item}"`
+                );
+
+                continue;
+            }
+
+            if (!fs.existsSync(item)) {
+                const message = `Skipped, because not exists – "${item}"`;
+
+                this.loggerDebug.add(message);
+                this.loggerWarning.add(message);
+
                 continue;
             }
 
@@ -265,7 +348,11 @@ class Plugin {
                 !params.allowRootAndOutside &&
                 !this.isSave(params.root, item)
             ) {
-                this.warnings.push(`Unsafe removig of "${item}". Skipped.`);
+                const message = `Skipped, because unsafe removing – "${item}"`;
+
+                this.loggerDebug.add(message);
+                this.loggerWarning.add(message);
+
                 continue;
             }
 
@@ -273,13 +360,27 @@ class Plugin {
             let group = undefined;
 
             if (!stat) {
+                this.loggerDebug.add(
+                    `Cannot get stat – "${item}"`
+                );
+
                 continue;
             } else if (stat.isFile()) {
                 group = 'files';
+                this.loggerDebug.add(
+                    `It is file – "${item}"`
+                );
             } else if (stat.isDirectory()) {
-                group = 'dicts';
+                group = 'directories';
+                this.loggerDebug.add(
+                    `It is directory – "${item}"`
+                );
             } else {
-                this.warnings.push(`Invalid stat for "${item}". Skipped.`);
+                const message = `Skipped, because invalid stat – "${item}"`;
+
+                this.loggerDebug.add(message);
+                this.loggerWarning.add(message);
+
                 continue;
             }
 
@@ -290,7 +391,21 @@ class Plugin {
             items[group].push(item);
         }
 
+        this.loggerDebug.add(
+            `Directories before cropping – ${items.directories}`
+        );
+        this.loggerDebug.add(
+            `Files before cropping – ${items.files}`
+        );
+
         items.cropUnnecessaryItems();
+
+        this.loggerDebug.add(
+            `Directories after cropping – ${items.directories}`
+        );
+        this.loggerDebug.add(
+            `Files after cropping – ${items.files}`
+        );
 
         return items;
     }
@@ -298,58 +413,116 @@ class Plugin {
     /**
      * Performs a testing of files or folders for removing.
      *
-     * @param {RemoveParameters} params
-     * A parameters for remove.
+     * @param {RemovingParameters} params
+     * A parameters of removing.
      * Either `this.beforeParams` or `this.afterParams`.
-     * 
-     * @returns {Array<String>}
-     * An array of absolute paths of folders or files 
-     * that should be removed.
+     *
+     * @returns {string[]}
+     * An array of absolute paths of folders or
+     * files that should be removed.
      */
     handleTest(params) {
+        /** @type {string[]} */
         const paths = [];
 
         if (!params.test || !params.test.length) {
+            this.loggerDebug.add(
+                'Testing skipped, because params.test is empty'
+            );
+
             return paths;
         }
 
-        for (let test of params.test) {
-            if (!path.isAbsolute(test.folder)) {
-                test.folder = path.join(params.root, test.folder);
+        for (const test of params.test) {
+            test.folder = this.toAbsolutePath(
+                params.root,
+                test.folder
+            );
+
+            if (!fs.existsSync(test.folder)) {
+                const message = `Skipped, because not exists – "${test.folder}"`;
+
+                this.loggerDebug.add(message);
+                this.loggerWarning.add(message);
+
+                continue;
             }
 
             if (
                 !params.allowRootAndOutside &&
                 !this.isSave(params.root, test.folder)
             ) {
-                this.warnings.push(`Unsafe removig of "${test.folder}". Skipped.`);
+                const message = `Skipped, because unsafe removing – "${test.folder}"`;
+
+                this.loggerDebug.add(message);
+                this.loggerWarning.add(message);
+
                 continue;
             }
 
-            let itemStat = this.getStatSync(test.folder);
+            const itemStat = this.getStatSync(test.folder);
 
             if (!itemStat) {
+                this.loggerDebug.add(
+                    `Cannot get stat for ${test.folder}`
+                );
+
                 continue;
             } else if (!itemStat.isDirectory()) {
-                this.warnings.push(`Test folder is not a directory – "${test.folder}". Skipped.`);
+                const message = `Skipped, because test folder not a directory – "${test.folder}"`;
+
+                this.loggerDebug.add(message);
+                this.loggerWarning.add(message);
+
                 continue;
             }
 
-            const getFilesRecursiveSync = (dictPath) => {
-                const files = fs.readdirSync(dictPath);
+            /**
+             * @param {string} dirPath
+             */
+            const getFilesRecursiveSync = (dirPath) => {
+                /** @type {string[]} */
+                let files = [];
+
+                try {
+                    files = fs.readdirSync(dirPath);
+                } catch (error) {
+                    this.loggerDebug.add(error.message || error);
+                    this.loggerError.add(error.message || error);
+
+                    return;
+                }
 
                 for (let file of files) {
-                    file = path.join(dictPath, file);
+                    file = path.join(dirPath, file);
                     const stat = this.getStatSync(file);
 
                     if (!stat) {
+                        this.loggerDebug.add(
+                            `Cannot get stat – "${file}"`
+                        );
+
                         continue;
-                    } else if (stat.isFile() && test.method(file)) {
-                        paths.push(file);
+                    } else if (stat.isFile()) {
+                        const passed = test.method(file);
+
+                        if (passed) {
+                            paths.push(file);
+                            this.loggerDebug.add(
+                                `Test passed, added for removing – "${file}"`
+                            );
+                        } else {
+                            this.loggerDebug.add(
+                                `Test not passed – "${file}"`
+                            );
+                        }
                     } else if (stat.isDirectory() && test.recursive) {
                         getFilesRecursiveSync(file);
                     } else if (!stat.isDirectory() && !stat.isFile()) {
-                        this.warnings.push(`Invalid stat for "${file}". Skipped.`);
+                        const message = `Skipped, because invalid stat – "${file}"`;
+
+                        this.loggerDebug.add(message);
+                        this.loggerWarning.add(message);
                     }
                 }
             };
@@ -361,52 +534,114 @@ class Plugin {
     }
 
     /**
+     * Removes a file.
+     *
+     * @param {string} filePath
+     * An absolute path to the file.
+     *
+     * @param {boolean} inTrash
+     * Move item to trash.
+     */
+    unlinkFileSync(filePath, inTrash) {
+        if (!fs.existsSync(filePath)) {
+            this.loggerDebug.add(
+                `Skipped, because file doesn't exists – "${filePath}"`
+            );
+
+            return;
+        }
+
+        if (inTrash) {
+            trash(filePath).catch((error) => {
+                this.loggerError.add(error.message || error);
+                this.loggerDebug.add(error.message || error);
+            });
+
+            return;
+        }
+
+        try {
+            fs.unlinkSync(filePath);
+        } catch (error) {
+            this.loggerError.add(error.message || error);
+            this.loggerDebug.add(error.message || error);
+        }
+    }
+
+    /**
      * Removes a folder.
      *
-     * @param {String} folderPath
+     * @param {string} folderPath
      * An absolute path to the folder.
+     *
+     * @param {boolean} inTrash
+     * Move item to trash.
      */
-    unlinkFolderSync(folderPath) {
+    unlinkFolderSync(folderPath, inTrash) {
         if (!fs.existsSync(folderPath)) {
-            this.warnings.push(`Folder doesn't exists – "${folderPath}". Skipped.`);
+            this.loggerDebug.add(
+                `Skipped, because folder doesn't exists – "${folderPath}"`
+            );
+
+            return;
+        }
+
+        if (inTrash) {
+            trash(folderPath).catch((error) => {
+                this.loggerError.add(error.message || error);
+                this.loggerDebug.add(error.message || error);
+            });
+
             return;
         }
 
         let files = fs.readdirSync(folderPath);
         files = this.toAbsolutePaths(folderPath, files);
 
-        for (let file of files) {
+        for (const file of files) {
             const stat = this.getStatSync(file);
 
             if (!stat) {
+                this.loggerDebug.add(
+                    `Cannot get stat – "${file}"`
+                );
+
                 continue;
-            }
-            else if (stat.isFile()) {
+            } else if (stat.isFile()) {
                 try {
-                    fs.unlinkSync(file);
+                    this.unlinkFileSync(file, false);
+                    this.loggerDebug.add(
+                        `File removed – "${file}"`
+                    );
                 } catch (error) {
-                    this.errors.push(error.message || error);
+                    this.loggerDebug.add(error.message || error);
+                    this.loggerError.add(error.message || error);
                 }
-            }
-            else if (stat.isDirectory()) {
-                this.unlinkFolderSync(file);
-            }
-            else {
-                this.warnings.push(`Invalid stat for "${file}". Skipped.`);
+            } else if (stat.isDirectory()) {
+                this.unlinkFolderSync(file, false);
+            } else {
+                const message = `Skipped, because invalid stat – "${file}"`;
+
+                this.loggerDebug.add(message);
+                this.loggerWarning.add(message);
             }
         }
 
         try {
             fs.rmdirSync(folderPath);
+            this.loggerDebug.add(
+                `Folder removed – "${folderPath}"`
+            );
         } catch (error) {
-            this.errors.push(error.message || error);
+            this.loggerDebug.add(error.message || error);
+            this.loggerError.add(error.message || error);
         }
     }
 
     /**
      * Gets a stat for an item.
      *
-     * @param {String} path
+     * @param {string} pth
      * An absolute path to the folder or file.
      *
      * @returns {fs.Stats}
@@ -414,39 +649,64 @@ class Plugin {
      *
      * @see https://nodejs.org/api/fs.html#fs_fs_lstatsync_path_options
      */
-    getStatSync(path) {
+    getStatSync(pth) {
         let stat = undefined;
 
         try {
-            stat = fs.lstatSync(path);
+            stat = fs.lstatSync(pth);
         } catch (error) {
-            this.errors.push(error.message || error);
+            this.loggerDebug.add(error.message || error);
+            this.loggerError.add(error.message || error);
         }
 
         return stat;
     }
 
     /**
+     * Converts path to absolute path.
+     *
+     * @param {string} root
+     * A root that will be appended to non absolute path.
+     *
+     * @param {string} path
+     * A path for converting.
+     *
+     * @returns {string}
+     * An absolute path.
+     */
+    toAbsolutePath(root, pth) {
+        let newPath = pth;
+
+        if (!path.isAbsolute(pth)) {
+            newPath = path.join(root, pth);
+            this.loggerDebug.add(
+                `"${pth}" converted to "${newPath}"`
+            );
+        }
+
+        return newPath;
+    }
+
+    /**
      * Converts all paths to absolute paths.
      *
-     * @param {String} root
+     * @param {string} root
      * A root that will be appended to non absolute paths.
      *
-     * @param {Array<String>} paths
+     * @param {string[]} paths
      * A paths for converting.
      *
-     * @returns {Array<String>}
+     * @returns {string[]}
      * An absolute paths.
      */
     toAbsolutePaths(root, paths) {
         const newPaths = [];
 
-        for (let item of paths) {
-            if (!path.isAbsolute(item)) {
-                item = path.join(root, item);
-            }
-
-            newPaths.push(item);
+        for (const item of paths) {
+            newPaths.push(this.toAbsolutePath(
+                root,
+                item
+            ));
         }
 
         return newPaths;
@@ -455,35 +715,189 @@ class Plugin {
     /**
      * Checks a path for safety.
      *
-     * Checking for either exit beyond the root 
+     * Checking for either exit beyond the root
      * or similarity with the root.
-     * A paths before checking should be normalized!
      *
-     * @param {String} root
+     * @param {string} root
      * A root directory.
      *
-     * @param {String} pth
+     * @param {string} pth
      * A path for checking.
      *
-     * @returns {Boolean}
-     * `True` – save, 
-     * `False` – not save.
+     * @returns {boolean}
+     * `true` – save,
+     * `false` – not save.
      *
      * @example
-     * root – 'D:/dist'
-     * pth – 'D:/dist/chromium'
+     * root = 'D:/dist'
+     * pth = 'D:/dist/chromium'
      * Returns – true
      *
-     * root – 'D:/dist'
-     * pth – 'D:/dist'
+     * root = 'D:/dist'
+     * pth = 'D:/dist'
      * Returns – false
      *
-     * root – 'D:/dist'
-     * pth – 'D:/'
+     * root = 'D:/dist'
+     * pth = 'D:/'
      * Returns – false
+     *
+     * root = './dist'
+     * pth = 'dist/scripts'
+     * Returns – true
+     *
+     * root = '.'
+     * pth = './dist/scripts'
+     * Returns - true
+     *
+     * root = 'D:\\Desktop\\test'
+     * pth = 'D:\\Desktop\\test.txt'
+     * Returns - false
      */
     isSave(root, pth) {
-        return new RegExp(`(^${Utils.escape(root)})(.+)`, 'm').test(pth);
+        const format = (string, escape, replaceDoubleSlash) => {
+            const result = {
+                string: string,
+                initiallyFile: false,
+                continue: false
+            };
+
+            try {
+                string = path.resolve(string);
+            } catch (error) {
+                this.loggerError.add(error.message || error);
+                this.loggerDebug.add(error.message || error);
+
+                result.continue = false;
+
+                return result;
+            }
+
+            const stat = this.getStatSync(string);
+
+            if (!stat) {
+                this.loggerDebug.add(
+                    `Cannot get stat – "${string}"`
+                );
+
+                result.continue = false;
+
+                return result;
+            }
+
+            if (stat.isFile()) {
+                result.initiallyFile = true;
+                string = path.dirname(string);
+            }
+
+            if (escape) {
+                string = Utils.escape(string);
+            }
+
+            if (replaceDoubleSlash) {
+                string = string.replace(/\\/g, '\\\\');
+            }
+
+            result.string = string;
+            result.continue = true;
+
+            return result;
+        };
+
+        const rootFormat = format(root, true, true);
+        const pthFormat = format(pth, false, true); // we shouldn't escape.
+
+        if (
+            !rootFormat.continue ||
+            !pthFormat.continue
+        ) {
+            this.loggerDebug.add('Cannot continue');
+
+            return false;
+        }
+
+        this.loggerDebug.add('Before formatting:');
+        this.loggerDebug.add(`Root – "${root}"`);
+        this.loggerDebug.add(`Path – "${pth}"`);
+
+        root = rootFormat.string;
+        pth = pthFormat.string;
+        let save = false;
+
+        if (pthFormat.initiallyFile) {
+            save = new RegExp(`(^${root})`, 'm').test(pth);
+        } else {
+            save = new RegExp(`(^${root})(.+)`, 'm').test(pth);
+        }
+
+        this.loggerDebug.add('After formatting:');
+        this.loggerDebug.add(`Root – "${root}"`);
+        this.loggerDebug.add(`Path – "${pth}"`);
+        this.loggerDebug.add(`Save – "${save}"`);
+
+        return save;
+    }
+
+    /**
+     * Logs logger messages in console.
+     *
+     * - after logging logger data will be cleared.
+     *
+     * @param {Compiler | Compilation} main
+     * Current process.
+     *
+     * @param {RemovingParameters} params
+     * A parameters of removing.
+     * Either `this.beforeParams` or `this.afterParams`.
+     */
+    log(main, params) {
+        /**
+         * @param {boolean} enabled
+         * @param {Logger.Logger} logger
+         * @returns {boolean}
+         */
+        const willBePrinted = (enabled, logger) => (enabled && !logger.isEmpty());
+        const wllBPrntd = {
+            error: willBePrinted(params.logError, this.loggerError),
+            warning: willBePrinted(params.logWarning, this.loggerWarning),
+            info: willBePrinted(params.log, this.loggerInfo)
+        };
+
+        if (params.logError) {
+            this.loggerError.log(
+                main,
+                true
+            );
+        }
+
+        if (params.logWarning) {
+            this.loggerWarning.log(
+                main,
+                !(wllBPrntd.error)
+            );
+        }
+
+        if (params.log) {
+            this.loggerInfo.log(
+                main,
+                !(wllBPrntd.error || wllBPrntd.warning)
+            );
+        }
+
+        if (params.logDebug) {
+            this.loggerDebug.log(
+                main,
+                !(wllBPrntd.error || wllBPrntd.warning || wllBPrntd.info)
+            );
+        }
+
+        // this function will be executed later if
+        // specified both `before` and `after` params.
+        // so, we need to remove old data in order to
+        // avoid duplicate messages.
+        this.loggerError.clear();
+        this.loggerWarning.clear();
+        this.loggerInfo.clear();
+        this.loggerDebug.clear();
     }
 }
 

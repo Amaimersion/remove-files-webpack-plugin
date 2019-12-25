@@ -22,6 +22,7 @@
     },
     "license": "MIT",
     "dependencies": {
+        "@types/webpack": "^4.41.0",
         "trash": "^6.1.1"
     },
     "devDependencies": {

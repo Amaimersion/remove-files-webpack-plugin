@@ -1,3 +1,10 @@
+# 1.2.1 (December 25, 2019)
+
+## Added
+
+- Type definitions. [#13](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/13)
+
+
 # 1.2.0 (December 23, 2019)
 
 ## Improved

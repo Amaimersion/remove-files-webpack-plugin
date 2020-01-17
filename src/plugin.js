@@ -173,6 +173,9 @@ class Plugin {
      *
      * @param {Compiler} main
      * "Represents the fully configured webpack environment.".
+     *
+     * @throws
+     * Throws an error if webpack is not able to register the plugin.
      */
     apply(cmplr) {
         /**
@@ -181,15 +184,19 @@ class Plugin {
          */
         const applyHook = (compiler, v4Hook, v3Hook, params, method) => {
             if (!params || !Object.keys(params).length) {
+                this.loggerDebug.add('Skipped registering because "params" is empty');
+
                 return;
             }
 
             if (compiler.hooks) {
                 compiler.hooks[v4Hook].tapAsync(Info.fullName, method);
                 this.loggerDebug.add(`v4 hook registered – "${v4Hook}"`);
-            } else {
+            } else if (compiler.plugin) {
                 compiler.plugin(v3Hook, method);
                 this.loggerDebug.add(`v3 hook registered – "${v3Hook}"`);
+            } else {
+                throw new Error('webpack is not able to register the plugin');
             }
         };
 

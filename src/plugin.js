@@ -101,6 +101,7 @@
 //#endregion
 
 
+const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const trash = require('trash');
@@ -178,6 +179,13 @@ class Plugin {
      * Throws an error if webpack is not able to register the plugin.
      */
     apply(cmplr) {
+        this.loggerDebug.add('"apply" method is called');
+        this.loggerDebug.add(`platform – "${os.platform()}"`);
+        this.loggerDebug.add(`type – "${os.type()}"`);
+        this.loggerDebug.add(`release – "${os.release()}"`);
+        this.loggerDebug.add(`node – "${process.version}"`);
+        this.loggerDebug.add(`cwd – "${process.cwd()}"`);
+
         /**
          * webpack 4+ comes with a new plugin system.
          * Checking for hooks in order to support old plugin system.

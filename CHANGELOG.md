@@ -1,3 +1,10 @@
+# 1.2.2 (January 19, 2020)
+
+## Fixed
+
+- A bug when root path was escaped incorrectly. [#16](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/16)
+
+
 # 1.2.1 (December 25, 2019)
 
 ## Added

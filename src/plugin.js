@@ -670,16 +670,16 @@ class Plugin {
     }
 
     /**
-     * Converts path to absolute path.
+     * Converts path to absolute path (based on provided root).
      *
      * @param {string} root
      * A root that will be appended to non absolute path.
      *
-     * @param {string} path
+     * @param {string} pth
      * A path for converting.
      *
      * @returns {string}
-     * An absolute path.
+     * An absolute `pth`.
      */
     toAbsolutePath(root, pth) {
         let newPath = pth;
@@ -696,6 +696,8 @@ class Plugin {
 
     /**
      * Converts all paths to absolute paths.
+     *
+     * - see `toAbsolutePath` documentation.
      *
      * @param {string} root
      * A root that will be appended to non absolute paths.

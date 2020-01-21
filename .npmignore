@@ -1,7 +1,9 @@
 node_modules
 .vscode
+.github
 .prettierrc.yaml
 .eslintrc.yaml
 .gitignore
 yarn.lock
 *.log
+TODO

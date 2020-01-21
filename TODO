@@ -2,3 +2,4 @@ convert all paths to unique separator
 user methods to call before and after removing
 warning about file path for windows and posix users
 Suggestion: It would be helpful if the warning message hinted that this might be the thing blocking the action.
+github actions

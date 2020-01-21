@@ -2,8 +2,7 @@
     "editor.formatOnSave": true,
     "files.insertFinalNewline": true,
     "files.exclude": {
-        "**/node_modules": true,
-        "**/.vscode": true
+        "**/node_modules": true
     },
     "search.exclude": {
         "**/node_modules": true

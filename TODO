@@ -3,3 +3,4 @@ user methods to call before and after removing
 warning about file path for windows and posix users
 issues template
 merge fix from 1.2.2
+Suggestion: It would be helpful if the warning message hinted that this might be the thing blocking the action.

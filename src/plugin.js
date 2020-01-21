@@ -769,6 +769,10 @@ class Plugin {
      * root = 'D:\\Desktop\\test'
      * pth = 'D:\\Desktop\\test.txt'
      * Returns - false
+     *
+     * root = 'D:/te)st-tes(t and te[s]t {df} df+g.df^g&t'
+     * pth = 'D:/te)st-tes(t and te[s]t {df} df+g.df^g&t/chromium'
+     * Returns – true
      */
     isSave(root, pth) {
         const format = (string, escape, replaceDoubleSlash) => {
@@ -806,12 +810,16 @@ class Plugin {
                 string = path.dirname(string);
             }
 
-            if (escape) {
-                string = Utils.escape(string);
-            }
-
+            // in order to keep `\\` as string in a path.
+            // this should go before actual escaping.
             if (replaceDoubleSlash) {
                 string = string.replace(/\\/g, '\\\\');
+            }
+
+            // we need to escape special regexp characters
+            // in order to treat them as string.
+            if (escape) {
+                string = Utils.escape(string);
             }
 
             result.string = string;
@@ -820,8 +828,12 @@ class Plugin {
             return result;
         };
 
+        /**
+         * We should escape root because this will be pasted in RegExp.
+         * We shouldn't escape pth because this will be compared as a plain string.
+         */
         const rootFormat = format(root, true, true);
-        const pthFormat = format(pth, false, true); // we shouldn't escape.
+        const pthFormat = format(pth, false, true);
 
         if (
             !rootFormat.continue ||

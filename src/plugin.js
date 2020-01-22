@@ -229,7 +229,7 @@ class Plugin {
     }
 
     /**
-     * Handles `beforeRun` and `afterEmit` hooks.
+     * Handles webpack hooks.
      *
      * @param {RemovingParameters} params
      * A parameters of removing.

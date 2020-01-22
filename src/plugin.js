@@ -680,6 +680,8 @@ class Plugin {
     /**
      * Converts path to absolute path (based on provided root).
      *
+     - single `\` (Windows) not supported, because JS uses it for escaping.
+     *
      * @param {string} root
      * A root that will be appended to non absolute path.
      *

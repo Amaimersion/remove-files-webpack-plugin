@@ -12,7 +12,7 @@
  *
  * @property {(filePath: string) => boolean} method
  * A method that accepts a file path (`root` + directoryPath + filePath) and
- * returns value that indicates should be this file be removed or not.
+ * returns value that indicates should this file be removed or not.
  *
  * @property {boolean} recursive
  * Apply this method to files in subdirectories.
@@ -61,19 +61,19 @@
  *
  * @property {boolean} logDebug
  * Print messages of "debug" level
- * (used for developers of the plugin).
+ * (used for debugging).
  * Defaults to `false`.
  *
  * @property {boolean} emulate
  * Emulate remove process.
  * Print which folders or files will be removed without actually removing them.
- * Ignores `log`.
+ * Ignores `log` parameter.
  * Defaults to `false`.
  *
  * @property {boolean} allowRootAndOutside
  * Allow removing of the `root` directory or outside the `root` directory.
  * It's kind of safe mode.
- * Don't turn it on, if you don't know what you actually do!
+ * Don't turn it on if you don't know what you actually do!
  * Defaults to `false`.
  */
 

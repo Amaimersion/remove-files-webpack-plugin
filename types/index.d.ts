@@ -98,7 +98,7 @@ interface RemoveParameters {
 
     /**
      * Print messages of "debug" level
-     * (used for developers of the plugin).
+     * (used for debugging).
      *
      * Defaults to `false`.
      */
@@ -108,7 +108,7 @@ interface RemoveParameters {
      * Emulate remove process.
      * Print which folders or files will be removed
      * without actually removing them.
-     * Ignores `log` value.
+     * Ignores `log` parameter.
      *
      * Defaults to `false`.
      */
@@ -136,7 +136,7 @@ interface TestObject {
     /**
      * A method that accepts file path
      * (root + directoryPath + fileName) and
-     * returns value that indicates should be
+     * returns value that indicates should
      * this file be removed or not.
      */
     method: (filePath: string) => boolean;

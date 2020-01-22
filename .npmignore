@@ -1,10 +1,10 @@
+.github
+.vscode
 node_modules
 test
-.vscode
-.github
-.prettierrc.yaml
 .eslintrc.yaml
 .gitignore
+.prettierrc.yaml
+TODO
 yarn.lock
 *.log
-TODO

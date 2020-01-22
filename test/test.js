@@ -136,36 +136,43 @@ describe('file system', () => {
 
         describe('converting to absolute path', () => {
             it('double backslash', () => {
-                const correct = 'C:\\test\\test-test\\tE sT\\big file.name.txt';
-                const result = instance.toAbsolutePath('C:\\test\\test-test', 'tE sT\\big file.name.txt');
+                const correct = 'C:\\test\\test-test\\tE sT\\big + file.name.txt';
+                const result = instance.toAbsolutePath('C:\\test\\test-test', 'tE sT\\big + file.name.txt');
 
                 expect(result).to.equal(correct);
             });
 
             it('single slash', () => {
-                const correct = 'C:\\test\\test-test\\tE sT\\big file.name.txt';
-                const result = instance.toAbsolutePath('C:/test/test-test', 'tE sT/big file.name.txt');
+                const correct = 'C:\\test\\test-test\\tE sT\\big + file.name.txt';
+                const result = instance.toAbsolutePath('C:/test/test-test', 'tE sT/big + file.name.txt');
 
                 expect(result).to.equal(correct);
             });
 
-            it('mixed double backslash, single slash and dot', () => {
-                const correct = 'C:\\test\\test-test\\tE sT\\big file.name.txt';
-                const result = instance.toAbsolutePath('C:\\test/test-test\\', './tE sT\\big file.name.txt');
+            it('double backslash, single slash and relative dot', () => {
+                const correct = 'C:\\test\\test-test\\tE sT\\big + file.name.txt';
+                const result = instance.toAbsolutePath('C:\\test/test-test\\', './tE sT\\big + file.name.txt');
+
+                expect(result).to.equal(correct);
+            });
+
+            it('double backslash, single slash and relative dots', () => {
+                const correct = 'C:\\test\\test-test\\big + file.name.txt';
+                const result = instance.toAbsolutePath('C:\\test/test-test\\', './tE sT/..\\big + file.name.txt');
 
                 expect(result).to.equal(correct);
             });
 
             it('already absolute with double backslash', () => {
-                const correct = '\\tE sT\\big file.name.txt';
-                const result = instance.toAbsolutePath('C:\\test\\test-test', '\\tE sT\\big file.name.txt');
+                const correct = '\\tE sT\\big + file.name.txt';
+                const result = instance.toAbsolutePath('C:\\test\\test-test', '\\tE sT\\big + file.name.txt');
 
                 expect(result).to.equal(correct);
             });
 
             it('already absolute with single slash', () => {
-                const correct = '/tE sT/big file.name.txt';
-                const result = instance.toAbsolutePath('C:\\test\\test-test', '/tE sT/big file.name.txt');
+                const correct = '/tE sT/big + file.name.txt';
+                const result = instance.toAbsolutePath('C:\\test\\test-test', '/tE sT/big + file.name.txt');
 
                 expect(result).to.equal(correct);
             });

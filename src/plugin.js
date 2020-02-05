@@ -734,8 +734,8 @@ class Plugin {
     /**
      * Checks a path for safety.
      *
-     * Checking for either exit beyond the root
-     * or similarity with the root.
+     * - checks for either exit beyond the root
+     * or identicality with the root.
      *
      * @param {string} root
      * A root directory.
@@ -773,96 +773,56 @@ class Plugin {
      * Returns - false
      *
      * root = 'D:/te)st-tes(t and te[s]t {df} df+g.df^g&t'
-     * pth = 'D:/te)st-tes(t and te[s]t {df} df+g.df^g&t/chromium'
+     * pth = 'D:\\te)st-tes(t and te[s]t {df} df+g.df^g&t/chromium'
+     * Returns – true
+     *
+     * root = 'D:/test/../chromium'
+     * pth = 'D:\\chromium/file.txt'
      * Returns – true
      */
     isSave(root, pth) {
-        const format = (string, escape, replaceDoubleSlash) => {
-            const result = {
-                string: string,
-                initiallyFile: false,
-                continue: false
-            };
+        let rootDir, pthDir;
 
-            try {
-                string = path.resolve(string);
-            } catch (error) {
-                this.loggerError.add(error.message || error);
-                this.loggerDebug.add(error.message || error);
-
-                result.continue = false;
-
-                return result;
-            }
-
-            const stat = this.getStatSync(string);
-
-            if (!stat) {
-                this.loggerDebug.add(
-                    `Cannot get stat – "${string}"`
-                );
-
-                result.continue = false;
-
-                return result;
-            }
-
-            if (stat.isFile()) {
-                result.initiallyFile = true;
-                string = path.dirname(string);
-            }
-
-            // in order to keep `\\` as string in a path.
-            // this should go before actual escaping.
-            if (replaceDoubleSlash) {
-                string = string.replace(/\\/g, '\\\\');
-            }
-
-            // we need to escape special regexp characters
-            // in order to treat them as string.
-            if (escape) {
-                string = Utils.escape(string);
-            }
-
-            result.string = string;
-            result.continue = true;
-
-            return result;
-        };
-
-        /**
-         * We should escape root because this will be pasted in RegExp.
-         * We shouldn't escape pth because this will be compared as a plain string.
-         */
-        const rootFormat = format(root, true, true);
-        const pthFormat = format(pth, false, true);
-
-        if (
-            !rootFormat.continue ||
-            !pthFormat.continue
-        ) {
-            this.loggerDebug.add('Cannot continue');
+        try {
+            /**
+             * - we should escape root because
+             * this will be pasted in RegExp.
+             * - we shouldn't escape pth because
+             * this will be compared as a plain string.
+             */
+            rootDir = Utils.getDirName({
+                pth: root,
+                escapeForRegExp: true,
+                replaceDoubleSlash: true,
+                resolve: true
+            });
+            pthDir = Utils.getDirName({
+                pth: pth,
+                escapeForRegExp: false,
+                replaceDoubleSlash: true,
+                resolve: true
+            });
+        } catch (error) {
+            this.loggerDebug.add(error.message || error);
+            this.loggerError.add(error.message || error);
 
             return false;
         }
+
+        let save = false;
 
         this.loggerDebug.add('Before formatting:');
         this.loggerDebug.add(`Root – "${root}"`);
         this.loggerDebug.add(`Path – "${pth}"`);
 
-        root = rootFormat.string;
-        pth = pthFormat.string;
-        let save = false;
-
-        if (pthFormat.initiallyFile) {
-            save = new RegExp(`(^${root})`, 'm').test(pth);
-        } else {
-            save = new RegExp(`(^${root})(.+)`, 'm').test(pth);
-        }
+        save = new RegExp(
+            `(^${rootDir.dirName})${pthDir.initiallyIsFile ? '' : '(.+)'}`,
+            'm'
+        ).test(pthDir.dirName);
 
         this.loggerDebug.add('After formatting:');
-        this.loggerDebug.add(`Root – "${root}"`);
-        this.loggerDebug.add(`Path – "${pth}"`);
+        this.loggerDebug.add(`Root – "${rootDir.dirName}"`);
+        this.loggerDebug.add(`Path – "${pthDir.dirName}"`);
         this.loggerDebug.add(`Save – "${save}"`);
 
         return save;

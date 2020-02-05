@@ -121,7 +121,7 @@ class Items {
          */
         const addToUnnecessaryIndexes = (firstGroup, secondGroup, indexes) => {
             for (let itemFirst of firstGroup) {
-                itemFirst = Utils.escape(
+                itemFirst = Utils.escapeForRegExp(
                     path.resolve(itemFirst)
                 );
 

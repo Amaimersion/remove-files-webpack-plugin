@@ -270,7 +270,7 @@ new RemovePlugin({
 
 ## Contribution
 
-Feel free to use [issues](https://github.com/Amaimersion/remove-files-webpack-plugin/issues). [Pull requests](https://github.com/Amaimersion/remove-files-webpack-plugin/pulls) are also always welcome!
+Feel free to use [issues](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/new/choose). [Pull requests](https://github.com/Amaimersion/remove-files-webpack-plugin/compare) are also always welcome!
 
 
 ## License

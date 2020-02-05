@@ -154,6 +154,8 @@ rules:
     - "error"
     - 4
     - "SwitchCase": 1
+      "ignoredNodes":
+        - "ConditionalExpression"
   key-spacing:
     - "error"
     - "beforeColon": false

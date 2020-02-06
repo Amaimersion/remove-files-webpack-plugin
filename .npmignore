@@ -1,6 +1,8 @@
 .github
 .vscode
+.nyc_output
 node_modules
+coverage
 test
 .eslintrc.yaml
 .gitignore

@@ -5,9 +5,10 @@
     "main": "./src/index.js",
     "types": "./types/index.d.ts",
     "scripts": {
-        "test": "mocha",
+        "test": "mocha --reporter nyan --check-leaks",
+        "test-coverage": "nyc --reporter=html --reporter=text yarn test",
         "eslint": "./node_modules/.bin/eslint **/*.js",
-        "eslint-format-codeframe": "yarn eslint --format codeframe",
+        "eslint-codeframe": "yarn eslint --format codeframe",
         "eslint-fix": "yarn eslint --fix"
     },
     "homepage": "https://github.com/Amaimersion/remove-files-webpack-plugin/blob/master/README.md",
@@ -30,7 +31,8 @@
     "devDependencies": {
         "chai": "^4.2.0",
         "eslint": "^6.8.0",
-        "mocha": "^7.0.0"
+        "mocha": "^7.0.0",
+        "nyc": "^15.0.0"
     },
     "peerDependencies": {
         "webpack": ">=2.2.0"

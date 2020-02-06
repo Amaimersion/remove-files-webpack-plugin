@@ -8,6 +8,9 @@ env:
 parserOptions:
   ecmaVersion: 9
 
+ignorePatterns:
+  - "test/" 
+
 rules:
   # Possible Errors
   no-await-in-loop: "warn"

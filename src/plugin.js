@@ -75,6 +75,10 @@
  * It's kind of safe mode.
  * Don't turn it on if you don't know what you actually do!
  * Defaults to `false`.
+ *
+ * @property {PathType} _pathType
+ * Type of `path` module.
+ * Defaults to `''` (will be selected based on OS).
  */
 
 /**
@@ -103,10 +107,9 @@
 
 const os = require('os');
 const fs = require('fs');
-const path = require('path');
 const trash = require('trash');
+const Path = require('./path');
 const Items = require('./items');
-const Utils = require('./utils');
 const Logger = require('./logger');
 const Info = require('./info');
 
@@ -135,6 +138,7 @@ class Plugin {
             );
         }
 
+        this.path = new Path();
         this.loggerError = new Logger.ErrorLogger();
         this.loggerWarning = new Logger.WarningLogger();
         this.loggerInfo = new Logger.InfoLogger();
@@ -142,7 +146,7 @@ class Plugin {
 
         /** @type {RemovingParameters} */
         const defaultParams = {
-            root: path.resolve('.'),
+            root: this.path.path().resolve('.'),
             include: [],
             exclude: [],
             test: [],
@@ -152,7 +156,8 @@ class Plugin {
             logError: false,
             logDebug: false,
             emulate: false,
-            allowRootAndOutside: false
+            allowRootAndOutside: false,
+            _pathType: ''
         };
 
         /** @type {RemovingParameters} */
@@ -241,7 +246,11 @@ class Plugin {
      * when your plugin is finished running".
      */
     handleHook(params, callback) {
+        this.loggerDebug.add(`path - "${params._pathType || 'auto'}"`);
+
+        this.path.use(params._pathType);
         this.handleRemove(params);
+
         callback();
     }
 
@@ -332,8 +341,24 @@ class Plugin {
     getItemsForRemoving(params) {
         const items = new Items();
 
-        params.include = this.toAbsolutePaths(params.root, params.include);
-        params.exclude = this.toAbsolutePaths(params.root, params.exclude);
+        params.include = this.path.toAbsoluteS(
+            params.root,
+            params.include,
+            (oldPath, newPath) => {
+                this.loggerDebug.add(
+                    `include: "${oldPath}" converted to "${newPath}"`
+                );
+            }
+        );
+        params.exclude = this.path.toAbsoluteS(
+            params.root,
+            params.exclude,
+            (oldPath, newPath) => {
+                this.loggerDebug.add(
+                    `exclude: "${oldPath}" converted to "${newPath}"`
+                );
+            }
+        );
 
         // handle unexplicit files or folders, and add it to explicit.
         params.include = params.include.concat(
@@ -449,9 +474,14 @@ class Plugin {
         }
 
         for (const test of params.test) {
-            test.folder = this.toAbsolutePath(
+            test.folder = this.path.toAbsolute(
                 params.root,
-                test.folder
+                test.folder,
+                (oldPath, newPath) => {
+                    this.loggerDebug.add(
+                        `test: "${oldPath}" converted to "${newPath}"`
+                    );
+                }
             );
 
             if (!fs.existsSync(test.folder)) {
@@ -509,7 +539,7 @@ class Plugin {
                 }
 
                 for (let file of files) {
-                    file = path.join(dirPath, file);
+                    file = this.path.path().join(dirPath, file);
                     const stat = this.getStatSync(file);
 
                     if (!stat) {
@@ -611,7 +641,15 @@ class Plugin {
         }
 
         let files = fs.readdirSync(folderPath);
-        files = this.toAbsolutePaths(folderPath, files);
+        files = this.path.toAbsoluteS(
+            folderPath,
+            files,
+            (oldPath, newPath) => {
+                this.loggerDebug.add(
+                    `readdir: "${oldPath}" converted to "${newPath}"`
+                );
+            }
+        );
 
         for (const file of files) {
             const stat = this.getStatSync(file);
@@ -678,64 +716,11 @@ class Plugin {
     }
 
     /**
-     * Converts path to absolute path (based on provided root).
-     *
-     - single `\` (Windows) not supported, because JS uses it for escaping.
-     *
-     * @param {string} root
-     * A root that will be appended to non absolute path.
-     *
-     * @param {string} pth
-     * A path for converting.
-     *
-     * @returns {string}
-     * An absolute `pth`.
-     */
-    toAbsolutePath(root, pth) {
-        let newPath = pth;
-
-        if (!path.isAbsolute(pth)) {
-            newPath = path.join(root, pth);
-            this.loggerDebug.add(
-                `"${pth}" converted to "${newPath}"`
-            );
-        }
-
-        return newPath;
-    }
-
-    /**
-     * Converts all paths to absolute paths.
-     *
-     * - see `toAbsolutePath` documentation.
-     *
-     * @param {string} root
-     * A root that will be appended to non absolute paths.
-     *
-     * @param {string[]} paths
-     * A paths for converting.
-     *
-     * @returns {string[]}
-     * An absolute paths.
-     */
-    toAbsolutePaths(root, paths) {
-        const newPaths = [];
-
-        for (const item of paths) {
-            newPaths.push(this.toAbsolutePath(
-                root,
-                item
-            ));
-        }
-
-        return newPaths;
-    }
-
-    /**
      * Checks a path for safety.
      *
      * - checks for either exit beyond the root
      * or identicality with the root.
+     * - see `Path.isSave()` documentation for more.
      *
      * @param {string} root
      * A root directory.
@@ -746,83 +731,30 @@ class Plugin {
      * @returns {boolean}
      * `true` – save,
      * `false` – not save.
-     *
-     * @example
-     * root = 'D:/dist'
-     * pth = 'D:/dist/chromium'
-     * Returns – true
-     *
-     * root = 'D:/dist'
-     * pth = 'D:/dist'
-     * Returns – false
-     *
-     * root = 'D:/dist'
-     * pth = 'D:/'
-     * Returns – false
-     *
-     * root = './dist'
-     * pth = 'dist/scripts'
-     * Returns – true
-     *
-     * root = '.'
-     * pth = './dist/scripts'
-     * Returns - true
-     *
-     * root = 'D:\\Desktop\\test'
-     * pth = 'D:\\Desktop\\test.txt'
-     * Returns - false
-     *
-     * root = 'D:/te)st-tes(t and te[s]t {df} df+g.df^g&t'
-     * pth = 'D:\\te)st-tes(t and te[s]t {df} df+g.df^g&t/chromium'
-     * Returns – true
-     *
-     * root = 'D:/test/../chromium'
-     * pth = 'D:\\chromium/file.txt'
-     * Returns – true
-     */
+    */
     isSave(root, pth) {
-        let rootDir, pthDir;
+        this.loggerDebug.add('Started checking for safety');
+        this.loggerDebug.add(`Root – "${root}"`);
+        this.loggerDebug.add(`Path – "${pth}"`);
+
+        let save = false;
 
         try {
-            /**
-             * - we should escape root because
-             * this will be pasted in RegExp.
-             * - we shouldn't escape pth because
-             * this will be compared as a plain string.
-             */
-            rootDir = Utils.getDirName({
-                pth: root,
-                escapeForRegExp: true,
-                replaceDoubleSlash: true,
-                resolve: true
-            });
-            pthDir = Utils.getDirName({
-                pth: pth,
-                escapeForRegExp: false,
-                replaceDoubleSlash: true,
-                resolve: true
-            });
+            save = this.path.isSave(
+                root,
+                pth,
+                (comparedRoot, comparedPth) => {
+                    this.loggerDebug.add(`Compared root – "${comparedRoot}"`);
+                    this.loggerDebug.add(`Compared path – "${comparedPth}"`);
+                }
+            );
         } catch (error) {
             this.loggerDebug.add(error.message || error);
             this.loggerError.add(error.message || error);
 
-            return false;
+            return save;
         }
 
-        let save = false;
-
-        this.loggerDebug.add('Before formatting:');
-        this.loggerDebug.add(`Root – "${root}"`);
-        this.loggerDebug.add(`Path – "${pth}"`);
-
-        save = new RegExp(
-            `(^${rootDir.dirName})${pthDir.initiallyIsFile ? '' : '(.+)'}`,
-            'm'
-        ).test(pthDir.dirName);
-
-        this.loggerDebug.add('After formatting:');
-        this.loggerDebug.add(`Root – "${rootDir.dirName}"`);
-        this.loggerDebug.add(`Path – "${pthDir.dirName}"`);
         this.loggerDebug.add(`Save – "${save}"`);
 
         return save;

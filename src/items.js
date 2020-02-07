@@ -1,9 +1,7 @@
 'use strict';
 
 
-const fs = require('fs');
-const path = require('path');
-const Utils = require('./utils');
+const Path = require('./path');
 
 
 /**
@@ -109,42 +107,18 @@ class Items {
 
         const rightItems = new Items();
         const unnecessaryIndexes = new Set();
+        const path = new Path();
 
         /**
-         * - at the moment it is duplicates `isSave()` from `plugin.js`,
-         * which leads to big issues with performance and quality of code.
-         * So, we need to do refactoring of this.
-         *
          * @param {string[]} firstGroup
          * @param {string[]} secondGroup
          * @param {Set<string>} indexes
          */
         const addToUnnecessaryIndexes = (firstGroup, secondGroup, indexes) => {
-            for (let itemFirst of firstGroup) {
-                itemFirst = Utils.escapeForRegExp(
-                    path.resolve(itemFirst)
-                );
-
-                const regexpForFile = new RegExp(`(^${itemFirst})`, 'm');
-                const regexpForFolder = new RegExp(`(^${itemFirst})(.+)`, 'm');
-
-                // eslint-disable-next-line guard-for-in
+            for (const itemFirst of firstGroup) {
                 for (const itemSecond in secondGroup) {
-                    const item = path.resolve(
-                        secondGroup[itemSecond]
-                    );
-                    const stat = fs.statSync(item);
-
-                    if (stat.isFile()) {
-                        const newItem = path.dirname(item);
-
-                        if (regexpForFile.test(newItem)) {
-                            indexes.add(itemSecond);
-                        }
-                    } else {
-                        if (regexpForFolder.test(item)) {
-                            indexes.add(itemSecond);
-                        }
+                    if (path.isSave(itemFirst, itemSecond)) {
+                        indexes.add(itemSecond);
                     }
                 }
             }

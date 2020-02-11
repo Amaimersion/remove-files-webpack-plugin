@@ -146,7 +146,7 @@ class Plugin {
 
         /** @type {RemovingParameters} */
         const defaultParams = {
-            root: this.path.path().resolve('.'),
+            root: this.path.path.resolve('.'),
             include: [],
             exclude: [],
             test: [],
@@ -539,7 +539,7 @@ class Plugin {
                 }
 
                 for (let file of files) {
-                    file = this.path.path().join(dirPath, file);
+                    file = this.path.path.join(dirPath, file);
                     const stat = this.getStatSync(file);
 
                     if (!stat) {

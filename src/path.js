@@ -59,16 +59,6 @@ class Path {
     }
 
     /**
-     * Specifies type of `path` module.
-     *
-     * @param {PathType} type
-     * Type of `path` module.
-     */
-    use(type) {
-        this._type = type;
-    }
-
-    /**
      * Returns `path` module with
      * specified type.
      *
@@ -78,12 +68,22 @@ class Path {
      * @returns {path.PlatformPath}
      * `path` module.
      */
-    path() {
+    get path() {
         return (
             this._type ?
                 path[this._type] :
                 path
         );
+    }
+
+    /**
+     * Specifies type of `path` module.
+     *
+     * @param {PathType} type
+     * Type of `path` module.
+     */
+    use(type) {
+        this._type = type;
     }
 
     /**
@@ -112,8 +112,8 @@ class Path {
     toAbsolute(root, pth, onChange = undefined) {
         let newPath = pth;
 
-        if (!this.path().isAbsolute(pth)) {
-            newPath = this.path().join(root, pth);
+        if (!this.path.isAbsolute(pth)) {
+            newPath = this.path.join(root, pth);
 
             if (onChange) {
                 onChange(pth, newPath);
@@ -201,7 +201,7 @@ class Path {
 
         let pth = (
             params.resolve ?
-                this.path().resolve(params.pth) :
+                this.path.resolve(params.pth) :
                 params.pth
         );
         const stat = fs.lstatSync(pth);
@@ -212,7 +212,7 @@ class Path {
 
         if (stat.isFile()) {
             result.initiallyIsFile = true;
-            pth = this.path().dirname(pth);
+            pth = this.path.dirname(pth);
         }
 
         // this should go before actual escaping.

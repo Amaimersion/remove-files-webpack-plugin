@@ -5,3 +5,4 @@ Suggestion: It would be helpful if the warning message hinted that this might be
 github actions
 remove prettier?
 replaceDoubleSlash is unnecessary?
+disable trash by default, add warning about OS versions

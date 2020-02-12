@@ -106,8 +106,7 @@
 
 
 const os = require('os');
-const fs = require('fs');
-const trash = require('trash');
+const Fs = require('./fs');
 const Path = require('./path');
 const Items = require('./items');
 const Logger = require('./logger');
@@ -138,6 +137,7 @@ class Plugin {
             );
         }
 
+        this.fs = new Fs();
         this.path = new Path();
         this.loggerError = new Logger.ErrorLogger();
         this.loggerWarning = new Logger.WarningLogger();
@@ -375,7 +375,7 @@ class Plugin {
                 continue;
             }
 
-            if (!fs.existsSync(item)) {
+            if (!this.fs.fs.existsSync(item)) {
                 const message = `Skipped, because not exists – "${item}"`;
 
                 this.loggerDebug.add(message);
@@ -396,7 +396,7 @@ class Plugin {
                 continue;
             }
 
-            const stat = this.getStatSync(item);
+            const stat = this.fs.getStatSync(item);
             let group = undefined;
 
             if (!stat) {
@@ -463,7 +463,7 @@ class Plugin {
      */
     handleTest(params) {
         /** @type {string[]} */
-        const paths = [];
+        let paths = [];
 
         if (!params.test || !params.test.length) {
             this.loggerDebug.add(
@@ -484,7 +484,7 @@ class Plugin {
                 }
             );
 
-            if (!fs.existsSync(test.folder)) {
+            if (!this.fs.fs.existsSync(test.folder)) {
                 const message = `Skipped, because not exists – "${test.folder}"`;
 
                 this.loggerDebug.add(message);
@@ -505,7 +505,7 @@ class Plugin {
                 continue;
             }
 
-            const itemStat = this.getStatSync(test.folder);
+            const itemStat = this.fs.getStatSync(test.folder);
 
             if (!itemStat) {
                 this.loggerDebug.add(
@@ -522,57 +522,28 @@ class Plugin {
                 continue;
             }
 
-            /**
-             * @param {string} dirPath
-             */
-            const getFilesRecursiveSync = (dirPath) => {
-                /** @type {string[]} */
-                let files = [];
-
-                try {
-                    files = fs.readdirSync(dirPath);
-                } catch (error) {
-                    this.loggerDebug.add(error.message || error);
-                    this.loggerError.add(error.message || error);
-
-                    return;
-                }
-
-                for (let file of files) {
-                    file = this.path.path.join(dirPath, file);
-                    const stat = this.getStatSync(file);
-
-                    if (!stat) {
+            paths = paths.concat(
+                this.fs.getFilesSync({
+                    pth: test.folder,
+                    join: this.path.path.join,
+                    recursive: test.recursive,
+                    test: test.method,
+                    onTestSuccess: (file) => {
                         this.loggerDebug.add(
-                            `Cannot get stat – "${file}"`
+                            `Test passed, added for removing – "${file}"`
                         );
-
-                        continue;
-                    } else if (stat.isFile()) {
-                        const passed = test.method(file);
-
-                        if (passed) {
-                            paths.push(file);
-                            this.loggerDebug.add(
-                                `Test passed, added for removing – "${file}"`
-                            );
-                        } else {
-                            this.loggerDebug.add(
-                                `Test not passed – "${file}"`
-                            );
-                        }
-                    } else if (stat.isDirectory() && test.recursive) {
-                        getFilesRecursiveSync(file);
-                    } else if (!stat.isDirectory() && !stat.isFile()) {
-                        const message = `Skipped, because invalid stat – "${file}"`;
-
-                        this.loggerDebug.add(message);
-                        this.loggerWarning.add(message);
+                    },
+                    onTestFail: (file) => {
+                        this.loggerDebug.add(
+                            `Test not passed, skipped – "${file}"`
+                        );
+                    },
+                    onError: (errorMessage) => {
+                        this.loggerDebug.add(errorMessage);
+                        this.loggerError.add(errorMessage);
                     }
-                }
-            };
-
-            getFilesRecursiveSync(test.folder);
+                })
+            );
         }
 
         return paths;
@@ -584,33 +555,27 @@ class Plugin {
      * @param {string} filePath
      * An absolute path to the file.
      *
-     * @param {boolean} inTrash
+     * @param {boolean} toTrash
      * Move item to trash.
      */
-    unlinkFileSync(filePath, inTrash) {
-        if (!fs.existsSync(filePath)) {
-            this.loggerDebug.add(
-                `Skipped, because file doesn't exists – "${filePath}"`
-            );
-
-            return;
-        }
-
-        if (inTrash) {
-            trash(filePath).catch((error) => {
-                this.loggerError.add(error.message || error);
-                this.loggerDebug.add(error.message || error);
-            });
-
-            return;
-        }
-
-        try {
-            fs.unlinkSync(filePath);
-        } catch (error) {
-            this.loggerError.add(error.message || error);
-            this.loggerDebug.add(error.message || error);
-        }
+    unlinkFileSync(filePath, toTrash) {
+        this.fs.unlinkFileSync({
+            pth: filePath,
+            toTrash: toTrash,
+            onSuccess: (pth) => {
+                this.loggerDebug.add(
+                    'file: File' +
+                    `${toTrash ? '' : ' permanently'}` +
+                    ' removed' +
+                    `${toTrash ? ' to trash' : ''}` +
+                    ` – ${pth}`
+                );
+            },
+            onError: (errorMessage) => {
+                this.loggerError.add(errorMessage);
+                this.loggerDebug.add(errorMessage);
+            }
+        });
     }
 
     /**
@@ -619,100 +584,49 @@ class Plugin {
      * @param {string} folderPath
      * An absolute path to the folder.
      *
-     * @param {boolean} inTrash
+     * @param {boolean} toTrash
      * Move item to trash.
      */
-    unlinkFolderSync(folderPath, inTrash) {
-        if (!fs.existsSync(folderPath)) {
-            this.loggerDebug.add(
-                `Skipped, because folder doesn't exists – "${folderPath}"`
-            );
-
-            return;
-        }
-
-        if (inTrash) {
-            trash(folderPath).catch((error) => {
-                this.loggerError.add(error.message || error);
-                this.loggerDebug.add(error.message || error);
-            });
-
-            return;
-        }
-
-        let files = fs.readdirSync(folderPath);
-        files = this.path.toAbsoluteS(
-            folderPath,
-            files,
-            (oldPath, newPath) => {
-                this.loggerDebug.add(
-                    `readdir: "${oldPath}" converted to "${newPath}"`
-                );
-            }
-        );
-
-        for (const file of files) {
-            const stat = this.getStatSync(file);
-
-            if (!stat) {
-                this.loggerDebug.add(
-                    `Cannot get stat – "${file}"`
-                );
-
-                continue;
-            } else if (stat.isFile()) {
-                try {
-                    this.unlinkFileSync(file, false);
+    unlinkFolderSync(folderPath, toTrash) {
+        this.fs.unlinkFolderSync({
+            pth: folderPath,
+            toTrash: toTrash,
+            toAbsoluteS: (root, files) => this.path.toAbsoluteS(
+                root,
+                files,
+                (oldPath, newPath) => {
                     this.loggerDebug.add(
-                        `File removed – "${file}"`
+                        `folder: "${oldPath}" converted to "${newPath}"`
                     );
-                } catch (error) {
-                    this.loggerDebug.add(error.message || error);
-                    this.loggerError.add(error.message || error);
                 }
-            } else if (stat.isDirectory()) {
-                this.unlinkFolderSync(file, false);
-            } else {
-                const message = `Skipped, because invalid stat – "${file}"`;
-
-                this.loggerDebug.add(message);
-                this.loggerWarning.add(message);
+            ),
+            onFileSuccess: (pth) => {
+                this.loggerDebug.add(
+                    'folder: File' +
+                    `${toTrash ? '' : ' permanently'}` +
+                    ' removed' +
+                    `${toTrash ? ' to trash' : ''}` +
+                    ` – ${pth}`
+                );
+            },
+            onFileError: (errorMessage) => {
+                this.loggerError.add(errorMessage);
+                this.loggerDebug.add(errorMessage);
+            },
+            onFolderSuccess: (pth) => {
+                this.loggerDebug.add(
+                    'folder: Folder' +
+                    `${toTrash ? '' : ' permanently'}` +
+                    ' removed' +
+                    `${toTrash ? ' to trash' : ''}` +
+                    ` – ${pth}`
+                );
+            },
+            onFolderError: (errorMessage) => {
+                this.loggerError.add(errorMessage);
+                this.loggerDebug.add(errorMessage);
             }
-        }
-
-        try {
-            fs.rmdirSync(folderPath);
-            this.loggerDebug.add(
-                `Folder removed – "${folderPath}"`
-            );
-        } catch (error) {
-            this.loggerDebug.add(error.message || error);
-            this.loggerError.add(error.message || error);
-        }
-    }
-
-    /**
-     * Gets a stat for an item.
-     *
-     * @param {string} pth
-     * An absolute path to the folder or file.
-     *
-     * @returns {fs.Stats}
-     * An item stat or `undefined` if cannot get.
-     *
-     * @see https://nodejs.org/api/fs.html#fs_fs_lstatsync_path_options
-     */
-    getStatSync(pth) {
-        let stat = undefined;
-
-        try {
-            stat = fs.lstatSync(pth);
-        } catch (error) {
-            this.loggerDebug.add(error.message || error);
-            this.loggerError.add(error.message || error);
-        }
-
-        return stat;
+        });
     }
 
     /**

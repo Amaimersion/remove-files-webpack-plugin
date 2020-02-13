@@ -39,8 +39,8 @@
 //#endregion
 
 
-const fs = require('fs');
 const path = require('path');
+const Fs = require('./fs');
 const Utils = require('./utils');
 
 
@@ -56,6 +56,11 @@ class Path {
          * @type {PathType}
          * */
         this._type = '';
+
+        /**
+         * `fs` module.
+         */
+        this.fs = new Fs();
     }
 
     /**
@@ -204,7 +209,7 @@ class Path {
                 this.path.resolve(params.pth) :
                 params.pth
         );
-        const stat = fs.lstatSync(pth);
+        const stat = this.fs.getStatSync(pth);
 
         if (!stat) {
             throw new Error(`Cannot get stat – "${pth}"`);

@@ -1,5 +1,8 @@
 {
     "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
     "files.insertFinalNewline": true,
     "files.exclude": {
         "**/node_modules": true,

@@ -53,14 +53,14 @@ class Path {
      */
     constructor() {
         /**
-         * @type {PathType}
-         * */
-        this._type = '';
-
-        /**
          * `fs` module.
          */
         this.fs = new Fs();
+
+        /**
+         * @type {PathType}
+         * */
+        this._type = '';
     }
 
     /**

@@ -248,7 +248,7 @@ class Plugin {
     handleHook(params, callback) {
         this.loggerDebug.add(`path - "${params._pathType || 'auto'}"`);
 
-        this.path.use(params._pathType);
+        this.path.type = params._pathType;
         this.handleRemove(params);
 
         callback();

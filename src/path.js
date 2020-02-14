@@ -18,10 +18,6 @@
  * Escape special Regular Expression characters in returned
  * path in order to treat them as string in RegExp.
  *
- * @property {boolean} replaceDoubleSlash
- * Replace `\\` with `\\\\` in returned path
- * in order to keep `\\` as string in a path.
- *
  * @property {boolean} resolve
  * Resolve `pth` using `path.resolve()`.
  */
@@ -64,6 +60,26 @@ class Path {
     }
 
     /**
+     * Returns current `path` type.
+     *
+     * @returns {string}
+     * Current `path` type.
+     */
+    get type() {
+        return this._type;
+    }
+
+    /**
+     * Sets type of `path` module.
+     *
+     * @param {PathType} value
+     * Type of `path` module.
+     */
+    set type(value) {
+        this._type = value;
+    }
+
+    /**
      * Returns `path` module with
      * specified type.
      *
@@ -75,20 +91,10 @@ class Path {
      */
     get path() {
         return (
-            this._type ?
-                path[this._type] :
+            this.type ?
+                path[this.type] :
                 path
         );
-    }
-
-    /**
-     * Specifies type of `path` module.
-     *
-     * @param {PathType} type
-     * Type of `path` module.
-     */
-    use(type) {
-        this._type = type;
     }
 
     /**
@@ -97,6 +103,7 @@ class Path {
      *
      * - **single `\` (Windows) not supported,
      * because JS uses it for escaping.**
+     * - normalizes paths that has been converted.
      *
      * @param {string} root
      * A root that will be appended to non absolute path.
@@ -109,7 +116,7 @@ class Path {
      *  newPath: string
      * ) => any} onChange
      * If specified, will be called when
-     * old path will changed.
+     * provided path changes.
      *
      * @returns {string}
      * An absolute `pth`.
@@ -178,18 +185,18 @@ class Path {
      * params = {
      *  pth: 'D:\\dist\\chromium\\file.txt',
      *  escapeForRegExp: false,
-     *  replaceDoubleSlash: true
+     *  resolve: false
      * }
      * Returns
      * {
-     *  dirName: 'D:\\\\dist\\\\chromium',
+     *  dirName: 'D:\\dist\\chromium',
      *  initiallyIsFile: true
      * }
      *
      * params = {
      *  pth: 'D:/dist/chromium',
      *  escapeForRegExp: false,
-     *  replaceDoubleSlash: false
+     *  resolve: false
      * }
      * Returns
      * {
@@ -218,11 +225,6 @@ class Path {
         if (stat.isFile()) {
             result.initiallyIsFile = true;
             pth = this.path.dirname(pth);
-        }
-
-        // this should go before actual escaping.
-        if (params.replaceDoubleSlash) {
-            pth = pth.replace(/\\/g, '\\\\');
         }
 
         if (params.escapeForRegExp) {
@@ -304,13 +306,11 @@ class Path {
         const rootDir = this.getDirName({
             pth: root,
             escapeForRegExp: true,
-            replaceDoubleSlash: true,
             resolve: true
         });
         const pthDir = this.getDirName({
             pth: pth,
             escapeForRegExp: false,
-            replaceDoubleSlash: true,
             resolve: true
         });
 

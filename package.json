@@ -5,7 +5,7 @@
     "main": "./src/index.js",
     "types": "./types/index.d.ts",
     "scripts": {
-        "test": "mocha --reporter nyan --check-leaks",
+        "test": "mocha --recursive --reporter nyan --check-leaks",
         "test-coverage": "nyc --reporter=html --reporter=text yarn test",
         "eslint": "./node_modules/.bin/eslint **/*.js",
         "eslint-codeframe": "yarn eslint --format codeframe",

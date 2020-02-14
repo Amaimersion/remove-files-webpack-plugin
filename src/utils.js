@@ -10,6 +10,8 @@ class Utils {
      *
      * - means `\` will be in RegExp, like this
      * `/D:\/\(test/`.
+     * - you should insert result in RegExp like
+     * a string, not like expression.
      *
      * @param {string} string
      * A string for escaping.

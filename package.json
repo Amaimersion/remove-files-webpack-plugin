@@ -7,7 +7,7 @@
     "scripts": {
         "test": "mocha --recursive --reporter nyan --check-leaks",
         "test-coverage": "nyc --reporter=html --reporter=text yarn test",
-        "eslint": "./node_modules/.bin/eslint **/*.js",
+        "eslint": "./node_modules/.bin/eslint ./src/**/*.js",
         "eslint-codeframe": "yarn eslint --format codeframe",
         "eslint-fix": "yarn eslint --fix"
     },

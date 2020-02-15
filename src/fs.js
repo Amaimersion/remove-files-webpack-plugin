@@ -29,7 +29,7 @@
  * An absolute path to the folder.
  *
  * @property {(root: string, files: string[]) => string[]} toAbsoluteS
- * Converts path (array) to absolute path (array).
+ * Converts paths to absolute paths.
  *
  * @property {boolean} toTrash
  * Move item to trash.
@@ -66,8 +66,8 @@
  * Defaults to `false`.
  *
  * @property {(absoluteFilePath: string) => boolean} test
- * If provided, will be called, and file path will be added
- * in case of `true`, otherwise will be skipped.
+ * If provided, will be called, and file path will be added to
+ * result in case of `true`, otherwise file path will be skipped.
  * Defaults to `undefined`.
  *
  * @property {(error: string) => any} onError
@@ -134,6 +134,11 @@ class Fs {
     /**
      * Removes a file.
      *
+     * - don't throws an error if file not exists.
+     * - in case of removing in trash
+     * this becomes an async function and you
+     * should use callbacks.
+     *
      * @param {UnlinkFileParams} params
      * See `UnlinkFileParams` documentation.
      */
@@ -178,6 +183,12 @@ class Fs {
 
     /**
      * Removes a folder.
+     *
+     * - in case of removing in trash
+     * this becomes an async function and you
+     * should use callbacks.
+     * - in case of removing in trash
+     * don't throws an error if folder not exists.
      *
      * @param {UnlinkFolderParams} params
      * See `UnlinkFolderParams` documentation.

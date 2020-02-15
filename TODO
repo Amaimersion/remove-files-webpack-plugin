@@ -7,3 +7,4 @@ remove prettier?
 replaceDoubleSlash is unnecessary?
 disable trash by default, add warning about OS versions
 testing for folders too
+support for globs

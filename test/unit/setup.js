@@ -2,7 +2,7 @@
  * This script configures things so test scripts can work properly.
  * 
  * At the moment this script will work only on Windows with both C and D local disks.
- * You should change root directory to D in terminal.
+ * You should change root directory to D:/remove-files-webpack-plugin in terminal.
  */
 
 

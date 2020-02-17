@@ -197,12 +197,42 @@ describe('unit', function () {
                     expect(result).to.equal(correct);
                 });
 
-                it('folder with space', function () {
+                it('folder with space character', function () {
                     const result = instance.isSave(
                         'D:\\path_test\\test',
                         'D:\\path_test\\test test'
                     );
                     const correct = false;
+
+                    expect(result).to.equal(correct);
+                });
+
+                it('folder with percent character', function () {
+                    const result = instance.isSave(
+                        'D:\\path_test\\test',
+                        'D:\\path_test\\test%'
+                    );
+                    const correct = false;
+
+                    expect(result).to.equal(correct);
+                });
+
+                it('folder with number character', function () {
+                    const result = instance.isSave(
+                        'D:\\path_test\\test',
+                        'D:\\path_test\\test1'
+                    );
+                    const correct = false;
+
+                    expect(result).to.equal(correct);
+                });
+
+                it('folder and clear root', function () {
+                    const result = instance.isSave(
+                        'D:\\',
+                        'D:\\path_test'
+                    );
+                    const correct = true;
 
                     expect(result).to.equal(correct);
                 });
@@ -510,12 +540,42 @@ describe('unit', function () {
                     expect(result).to.equal(correct);
                 });
 
-                it('folder with space', function () {
+                it('folder with space character', function () {
                     const result = instance.isSave(
                         '/path_test/test',
                         '/path_test/test test'
                     );
                     const correct = false;
+
+                    expect(result).to.equal(correct);
+                });
+
+                it('folder with percent character', function () {
+                    const result = instance.isSave(
+                        '/path_test/test',
+                        '/path_test/test%'
+                    );
+                    const correct = false;
+
+                    expect(result).to.equal(correct);
+                });
+
+                it('folder with number character', function () {
+                    const result = instance.isSave(
+                        '/path_test/test',
+                        '/path_test/test1'
+                    );
+                    const correct = false;
+
+                    expect(result).to.equal(correct);
+                });
+
+                it('folder and clear root', function () {
+                    const result = instance.isSave(
+                        '/',
+                        '/path_test'
+                    );
+                    const correct = true;
 
                     expect(result).to.equal(correct);
                 });

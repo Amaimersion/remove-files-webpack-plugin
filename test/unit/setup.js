@@ -20,6 +20,8 @@ const fs = require('fs');
 const FOLDERS = [
     'D:/path_test',
     'D:/path_test/test',
+    'D:/path_test/test%',
+    'D:/path_test/test1',
     'D:/path_test/test test',
     'D:/path_test/path-test/PaTh TeSt',
     'D:/path_test/pa)t-h (t [e]s {t} +/Pa.^&th',

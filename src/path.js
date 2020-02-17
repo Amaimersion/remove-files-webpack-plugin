@@ -322,7 +322,7 @@ class Path {
         }
 
         return new RegExp(
-            `(^${rootDir.dirName})${pthDir.initiallyIsFile ? '' : '(.+)'}`,
+            `(^${rootDir.dirName})${pthDir.initiallyIsFile ? '' : '([^ ]+)'}`,
             'm'
         ).test(pthDir.dirName);
     }

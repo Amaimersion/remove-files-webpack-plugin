@@ -18,7 +18,7 @@
 
 /**
  * @typedef {Object} GenerateProperties
- * A properties for formatting of a message what will be generated.
+ * A properties for formatting of message that will be generated.
  *
  * @property {boolean} endDot
  * Dot character will be appended to the end of message, if not already presented.
@@ -35,7 +35,7 @@
  *
  * @property {boolean} pluginName
  * Plugin name will be appended to the start of message.
- * Plugin name will be in `cyan` color.
+ * It will be in `cyan` color.
  * Defaults to `true`.
 
  * @property {boolean} newLineStart
@@ -190,38 +190,41 @@ class Terminal {
          * @param {string[]} itms
          * @param {string} name
          */
-        const gnrtItmsMssg = (itms, name) => {
+        const generate = (itms, name) => {
             if (!itms.length) {
                 return;
             }
 
             /** @type {GenerateProperties} */
             const commonParams = {
-                pluginName: false,
                 endDot: false
             };
 
-            messages.push(this.generateMessage(
-                `${tab}${name}:`,
-                {
-                    ...commonParams,
-                    color: 'yellow'
-                }
-            ));
-
-            for (const item of itms) {
-                messages.push(this.generateMessage(
-                    `${tab}${tab}${item}`,
+            messages.push(
+                this.generateMessage(
+                    `${tab}${name}:`,
                     {
                         ...commonParams,
-                        color: 'green'
+                        color: 'yellow'
                     }
-                ));
+                )
+            );
+
+            for (const item of itms) {
+                messages.push(
+                    this.generateMessage(
+                        `${tab}${tab}${item}`,
+                        {
+                            ...commonParams,
+                            color: 'green'
+                        }
+                    )
+                );
             }
         };
 
-        gnrtItmsMssg(items.directories, 'folders');
-        gnrtItmsMssg(items.files, 'files');
+        generate(items.directories, 'folders');
+        generate(items.files, 'files');
 
         return messages;
     }
@@ -246,6 +249,7 @@ class Terminal {
             return;
         }
 
+        /** @type {PrintProperties} */
         params = {
             ...{
                 pluginName: true,

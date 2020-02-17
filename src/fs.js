@@ -9,15 +9,15 @@
  * @property {string} pth
  * An absolute path to the file.
  *
- * @property {boolean} toTrash
+ * @property {boolean} [toTrash]
  * Move item to trash.
  * Defaults to `true`.
  *
- * @property {(pth: string) => any} onSuccess
+ * @property {(pth: string) => any} [onSuccess]
  * Will be called if file successfully removed.
  * Defaults to `undefined`.
  *
- * @property {(error: string) => any} onError
+ * @property {(error: string) => any} [onError]
  * Will be called if error occurs.
  * Defaults to `undefined`.
  */
@@ -31,23 +31,23 @@
  * @property {(root: string, files: string[]) => string[]} toAbsoluteS
  * Converts paths to absolute paths.
  *
- * @property {boolean} toTrash
+ * @property {boolean} [toTrash]
  * Move item to trash.
  * Defaults to `true`.
  *
- * @property {(filePath: string) => any} onFileSuccess
+ * @property {(filePath: string) => any} [onFileSuccess]
  * Will be called if file successfully removed.
  * Defaults to `undefined`.
  *
- * @property {(error: string) => any} onFileError
+ * @property {(error: string) => any} [onFileError]
  * Will be called if error occurred during file removing.
  * Defaults to `undefined`.
  *
- * @property {(folderPath: string) => any} onFolderSuccess
+ * @property {(folderPath: string) => any} [onFolderSuccess]
  * Will be called if folder successfully removed.
  * Defaults to `undefined`.
  *
- * @property {(error: string) => any} onFolderError
+ * @property {(error: string) => any} [onFolderError]
  * Will be called if error occurred during folder removing.
  * Defaults to `undefined`.
  */
@@ -61,24 +61,24 @@
  * @property {(root: string, pth: string) => string[]} join
  * Joins provided root and path together.
  *
- * @property {boolean} recursive
+ * @property {boolean} [recursive]
  * Looks through all nested folders.
  * Defaults to `false`.
  *
- * @property {(absoluteFilePath: string) => boolean} test
+ * @property {(absoluteFilePath: string) => boolean} [test]
  * If provided, will be called, and file path will be added to
  * result in case of `true`, otherwise file path will be skipped.
  * Defaults to `undefined`.
  *
- * @property {(error: string) => any} onError
+ * @property {(error: string) => any} [onError]
  * Will be called if error occurs.
  * Defaults to `undefined`.
  *
- * @property {(absoluteFilePath: string) => any} onTestSuccess
+ * @property {(absoluteFilePath: string) => any} [onTestSuccess]
  * Will be called if test passed.
  * Defaults to `undefined`.
  *
- * @property {(absoluteFilePath: string) => any} onTestFail
+ * @property {(absoluteFilePath: string) => any} [onTestFail]
  * Will be called if test failed.
  * Defaults to `undefined`.
  */

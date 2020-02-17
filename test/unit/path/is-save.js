@@ -197,6 +197,16 @@ describe('unit', function () {
                     expect(result).to.equal(correct);
                 });
 
+                it('folder with space', function () {
+                    const result = instance.isSave(
+                        'D:\\path_test\\test',
+                        'D:\\path_test\\test test'
+                    );
+                    const correct = false;
+
+                    expect(result).to.equal(correct);
+                });
+
                 it('outside of root', function () {
                     const result = instance.isSave(
                         'D:/path_test',
@@ -496,6 +506,16 @@ describe('unit', function () {
                         '/path-test/big + file.name.txt'
                     );
                     const correct = true;
+
+                    expect(result).to.equal(correct);
+                });
+
+                it('folder with space', function () {
+                    const result = instance.isSave(
+                        '/path_test/test',
+                        '/path_test/test test'
+                    );
+                    const correct = false;
 
                     expect(result).to.equal(correct);
                 });

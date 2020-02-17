@@ -317,9 +317,9 @@ class Plugin {
             }
         }
 
-        // trim root for pretty printing.
+        // pretty printing.
         if (!params.allowRootAndOutside) {
-            items.trimRoot(params.root);
+            items.removeRoot(params.root);
         }
 
         const message = (
@@ -438,7 +438,7 @@ class Plugin {
             `Files before cropping – ${items.files}`
         );
 
-        items.cropUnnecessaryItems();
+        items.removeUnnecessary();
 
         this.loggerDebug.add(
             `Directories after cropping – ${items.directories}`

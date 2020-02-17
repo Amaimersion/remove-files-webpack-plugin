@@ -63,51 +63,61 @@ class Items {
     }
 
     /**
-     * Crops unecessary folders and files.
+     * Removes unnecessary folders and files.
      *
-     * - it's clears childrens directories or files,
+     * - it removes children directories or files
      * whose parents will be removed;
      * - changes `this.directories` and `this.files`.
      *
      * @example
-     * this = {
-     *   directories: [
-     *     'D:/dist/styles/css',
-     *     'D:/dist/js/scripts',
-     *     'D:/dist/styles',
-     *     'D:/test'
-     *   ],
-     *   files: [
-     *     'D:/dist/styles/popup.css',
-     *     'D:/dist/styles/popup.css.map',
-     *     'D:/dist/manifest.json',
-     *     'D:/test.txt'
-     *   ]
-     * };
+     * Input:
+     * directories: [
+     *   'D:/dist/styles/css',
+     *   'D:/dist/js/scripts',
+     *   'D:/dist/styles',
+     *   'D:/test',
+     *   'C:/test/test_1'
+     * ]
+     * files: [
+     *   'D:/dist/styles/popup.css',
+     *   'D:/dist/styles/popup.css.map',
+     *   'D:/dist/manifest.json',
+     *   'D:/test.txt',
+     *   'D:/dist/js/scripts/test.js'
+     * ]
      *
-     * After cropUnnecessaryItems() will be:
-     * this = {
-     *   directories: [
-     *     'D:/dist/js/scripts',
-     *     'D:/dist/styles',
-     *     'D:/test'
-     *   ],
-     *   files: [
-     *     'D:/dist/manifest.json',
-     *     'D:/test.txt'
-     *   ]
-     * };
-     *
-     * because entire styles folder will be removed.
+     * Output:
+     * // there is no point in 'D:/dist/styles/css'
+     * // because entire 'D:/dist/styles' will be removed.
+     * directories: [
+     *   'D:/dist/js/scripts',
+     *   'D:/dist/styles',
+     *   'D:/test',
+     *   'C:/test/test_1'
+     * ]
+     * // there is no point in 'D:/dist/styles/popup.css' and
+     * // 'D:/dist/styles/popup.css.map' because entire 'D:/dist/styles'
+     * // will be removed.
+     * // there is no point in 'D:/dist/js/scripts/test.js' because entire
+     * // 'D:/dist/js/scripts' will be removed.
+     * files: [
+     *   'D:/dist/manifest.json',
+     *   'D:/test.txt'
+     * ]
      */
-    cropUnnecessaryItems() {
+    removeUnnecessary() {
         if (!this.directories.length) {
             return;
         }
 
-        const rightItems = new Items();
+        /** @type {Set<string>} */
         const unnecessaryIndexes = new Set();
-        const path = new Path();
+
+        /** @type {string[]} */
+        const rightDirectories = [];
+
+        /** @type {string[]} */
+        const rightFiles = [];
 
         /**
          * @param {string[]} firstGroup
@@ -115,50 +125,67 @@ class Items {
          * @param {Set<string>} indexes
          */
         const addToUnnecessaryIndexes = (firstGroup, secondGroup, indexes) => {
+            const path = new Path();
+
             for (const itemFirst of firstGroup) {
-                for (const itemSecond in secondGroup) {
-                    if (path.isSave(itemFirst, itemSecond)) {
-                        indexes.add(itemSecond);
+                for (const indexSecond in secondGroup) {
+                    if (path.isSave(itemFirst, secondGroup[indexSecond])) {
+                        indexes.add(indexSecond);
                     }
                 }
             }
         };
 
         /**
-         * @param {string[]} firstGroup
-         * @param {string[]} secondGroup
+         * @param {string[]} rightGroup
+         * @param {string[]} itemsGroup
          * @param {Set<string>} indexes
          */
         const addToRightGroup = (rightGroup, itemsGroup, indexes) => {
-            for (const index in itemsGroup) {
-                if (!indexes.has(index)) {
-                    rightGroup.push(itemsGroup[index]);
+            for (const itemIndex in itemsGroup) {
+                if (!indexes.has(itemIndex)) {
+                    rightGroup.push(itemsGroup[itemIndex]);
                 }
             }
         };
 
-        addToUnnecessaryIndexes(this.directories, this.directories, unnecessaryIndexes);
-        addToRightGroup(rightItems.directories, this.directories, unnecessaryIndexes);
+        addToUnnecessaryIndexes(
+            this.directories,
+            this.directories,
+            unnecessaryIndexes
+        );
+        addToRightGroup(
+            rightDirectories,
+            this.directories,
+            unnecessaryIndexes
+        );
 
         unnecessaryIndexes.clear();
 
-        addToUnnecessaryIndexes(rightItems.directories, this.files, unnecessaryIndexes);
-        addToRightGroup(rightItems.files, this.files, unnecessaryIndexes);
+        addToUnnecessaryIndexes(
+            rightDirectories,
+            this.files,
+            unnecessaryIndexes
+        );
+        addToRightGroup(
+            rightFiles,
+            this.files,
+            unnecessaryIndexes
+        );
 
-        this.directories = rightItems.directories.slice();
-        this.files = rightItems.files.slice();
+        this.directories = rightDirectories.slice();
+        this.files = rightFiles.slice();
     }
 
     /**
      * Trims a root.
      *
-     * - should be used only for pretty printing;
      * - changes `this.directories` and `this.files`.
      *
      * @param {string} root
-     * A root value that should be trimmed.
+     * A root value that should be removed.
      */
-    trimRoot(root) {
+    removeRoot(root) {
         const method = (value) => {
             if (value.indexOf(root) === 0) {
                 value = value.replace(root, '');

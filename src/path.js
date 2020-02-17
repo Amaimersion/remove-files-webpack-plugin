@@ -8,30 +8,6 @@
  * Type of `path` module.
  */
 
-/**
- * @typedef {Object} GetDirNameParams
- *
- * @property {string} pth
- * A path for handling.
- *
- * @property {boolean} escapeForRegExp
- * Escape special Regular Expression characters in returned
- * path in order to treat them as string in RegExp.
- *
- * @property {boolean} resolve
- * Resolve `pth` using `path.resolve()`.
- */
-
-/**
- * @typedef {Object} GetDirNameReturn
- *
- * @property {string} dirName
- * Directory name of handled path.
- *
- * @property {boolean} initiallyIsFile
- * `pth` initially was a file.
- */
-
 //#endregion
 
 
@@ -163,77 +139,6 @@ class Path {
         }
 
         return newPaths;
-    }
-
-    /**
-     * Extracts directory name.
-     *
-     * - if it is file, then handled directory
-     * will be returned, else handled
-     * provided path will be returned.
-     *
-     * @param {GetDirNameParams} params
-     * See `GetDirNameParams` documentation.
-     *
-     * @returns {GetDirNameReturn}
-     * See `GetDirNameReturn` documentation.
-     *
-     * @throws
-     * Throws an error if provided path not exists.
-     *
-     * @example
-     * params = {
-     *  pth: 'D:\\dist\\chromium\\file.txt',
-     *  escapeForRegExp: false,
-     *  resolve: false
-     * }
-     * Returns
-     * {
-     *  dirName: 'D:\\dist\\chromium',
-     *  initiallyIsFile: true
-     * }
-     *
-     * params = {
-     *  pth: 'D:/dist/chromium',
-     *  escapeForRegExp: false,
-     *  resolve: false
-     * }
-     * Returns
-     * {
-     *  dirName: 'D:/dist/chromium',
-     *  initiallyIsFile: false
-     * }
-     */
-    getDirName(params) {
-        /** @type {GetDirNameReturn} */
-        const result = {
-            dirName: params.pth,
-            initiallyIsFile: false
-        };
-
-        let pth = (
-            params.resolve ?
-                this.path.resolve(params.pth) :
-                params.pth
-        );
-        const stat = this.fs.getStatSync(pth);
-
-        if (!stat) {
-            throw new Error(`Cannot get stat – "${pth}"`);
-        }
-
-        if (stat.isFile()) {
-            result.initiallyIsFile = true;
-            pth = this.path.dirname(pth);
-        }
-
-        if (params.escapeForRegExp) {
-            pth = Utils.escapeForRegExp(pth);
-        }
-
-        result.dirName = pth;
-
-        return result;
     }
 
     /**

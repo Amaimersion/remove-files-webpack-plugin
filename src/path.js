@@ -297,34 +297,48 @@ class Path {
      * Returns – true
      */
     isSave(root, pth, onCompare = undefined) {
-        /**
-         * - we should escape root because
-         * this will be pasted in RegExp.
-         * - we shouldn't escape pth because
-         * this will be compared as a plain string.
-         */
-        const rootDir = this.getDirName({
-            pth: root,
-            escapeForRegExp: true,
-            resolve: true
-        });
-        const pthDir = this.getDirName({
-            pth: pth,
-            escapeForRegExp: false,
-            resolve: true
-        });
+        root = this.path.resolve(root);
+        pth = this.path.resolve(pth);
+
+        if (!this.fs.fs.existsSync(root)) {
+            throw new Error(`Root not exists – ${root}`);
+        }
+
+        if (!this.fs.fs.existsSync(pth)) {
+            throw new Error(`Pth not exists – ${pth}`);
+        }
+
+        const parsedRoot = this.path.parse(root);
+        const parsedPth = this.path.parse(pth);
 
         if (onCompare) {
             onCompare(
-                rootDir.dirName,
-                pthDir.dirName
+                root,
+                pth
             );
         }
 
+        /**
+         * Cases which unable to handle with RegExp.
+         */
+        if (
+            /**
+             * 'D:/' and 'D:/test'
+             */
+            !parsedRoot.base &&
+            parsedRoot.root === parsedPth.root &&
+            parsedPth.base
+        ) {
+            return true;
+        }
+
+        const pthIsFile = !!parsedPth.ext;
+        root = Utils.escapeForRegExp(root);
+
         return new RegExp(
-            `(^${rootDir.dirName})${pthDir.initiallyIsFile ? '' : '([^ ]+)'}`,
+            `(^${root})${pthIsFile ? '([/\\\\]|$)' : '([/\\\\]+)'}`,
             'm'
-        ).test(pthDir.dirName);
+        ).test(pthIsFile ? this.path.dirname(pth) : pth);
     }
 }
 

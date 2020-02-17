@@ -23,7 +23,7 @@
  * @property {MessageGroup} group
  * A message group.
  *
- * @property {Items[]} [items]
+ * @property {Terminal.Items[]} [items]
  * An items for printing.
  * Optional.
  */
@@ -53,9 +53,9 @@ class Logger {
      * Message for printing.
      * **You shouldn't include new line symbols
      * in one message, because new line symbol
-     * is OS dependency. Use several `add` instead.**
+     * depend on the OS. Use several `add` instead.**
      *
-     * @param {Items} [items]
+     * @param {Terminal.Items} [items]
      * Optional.
      * An items for printing.
      */

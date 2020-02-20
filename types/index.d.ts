@@ -125,24 +125,22 @@ interface RemoveParameters {
 }
 
 /**
- * A folder for testing of files that should be removed.
+ * A folder for testing of items (folders and files) that should be removed.
  */
 interface TestObject {
     /**
-     * A path to the folder.
+     * A path to the folder (relative to `root`).
      */
     folder: string;
 
     /**
-     * A method that accepts file path
-     * (root + directoryPath + fileName) and
-     * returns value that indicates should
-     * this file be removed or not.
+     * A method that accepts an item path (`root` + folderPath + fileName) and
+     * returns value that indicates should this item be removed or not.
      */
-    method: (filePath: string) => boolean;
+    method: (absolutePath: string) => boolean;
 
     /**
-     * Test in all subfolders, not just in `folder`.
+     * Apply this method to all items in subdirectories.
      *
      * Defaults to `false`.
      */

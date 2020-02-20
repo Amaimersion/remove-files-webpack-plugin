@@ -5,17 +5,17 @@
 
 /**
  * @typedef {Object} TestObject
- * A folder for testing of files that should be removed.
+ * A folder for testing of folders and files that should be removed.
  *
  * @property {string} folder
- * A path to the folder.
+ * A path to the folder (relative to `root`).
  *
- * @property {(filePath: string) => boolean} method
- * A method that accepts a file path (`root` + directoryPath + filePath) and
- * returns value that indicates should this file be removed or not.
+ * @property {(absolutePath: string) => boolean} method
+ * A method that accepts an item path (`root` + folderPath + fileName) and
+ * returns value that indicates should this item be removed or not.
  *
  * @property {boolean} recursive
- * Apply this method to files in subdirectories.
+ * Apply this method to all items in subdirectories.
  */
 
 /**

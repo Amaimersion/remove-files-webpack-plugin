@@ -53,7 +53,7 @@
  */
 
 /**
- * @typedef {Object} GetFilesParams
+ * @typedef {Object} GetItemsParams
  *
  * @property {string} pth
  * An absolute path to the folder.
@@ -65,20 +65,20 @@
  * Looks through all nested folders.
  * Defaults to `false`.
  *
- * @property {(absoluteFilePath: string) => boolean} [test]
- * If provided, will be called, and file path will be added to
- * result in case of `true`, otherwise file path will be skipped.
+ * @property {(absolutePath: string) => boolean} [test]
+ * If provided, will be called, and item path will be added to
+ * result in case of `true`, otherwise item path will be skipped.
  * Defaults to `undefined`.
  *
  * @property {(error: string) => any} [onError]
  * Will be called if error occurs.
  * Defaults to `undefined`.
  *
- * @property {(absoluteFilePath: string) => any} [onTestSuccess]
+ * @property {(absolutePath: string) => any} [onTestSuccess]
  * Will be called if test passed.
  * Defaults to `undefined`.
  *
- * @property {(absoluteFilePath: string) => any} [onTestFail]
+ * @property {(absolutePath: string) => any} [onTestFail]
  * Will be called if test failed.
  * Defaults to `undefined`.
  */
@@ -271,15 +271,18 @@ class Fs {
     }
 
     /**
-     * Gets list of absolute file paths.
+     * Gets list of absolute items paths.
      *
-     * @param {GetFilesParams} params
-     * See `GetFilesParams` documentation.
+     * - if item is unnecessary,
+     * it will not be returned.
+     *
+     * @param {GetItemsParams} params
+     * See `GetItemsParams` documentation.
      *
      * @returns {string[]}
-     * Absolute file paths.
+     * Absolute folders and files paths.
      */
-    getFilesSync(params) {
+    getItemsSync(params) {
         /** @type {UnlinkFileParams} */
         params = {
             pth: '',
@@ -324,16 +327,32 @@ class Fs {
                 if (passed) {
                     result.push(item);
                 }
-            } else if (stat.isDirectory() && params.recursive) {
-                result = result.concat(
-                    this.getFilesSync({
-                        ...params,
-                        ...{
-                            pth: item
-                        }
-                    })
-                );
-            } else if (!stat.isDirectory() && !stat.isFile()) {
+            } else if (stat.isDirectory()) {
+                let passed = false;
+
+                if (params.test) {
+                    passed = params.test(item);
+
+                    if (passed && params.onTestSuccess) {
+                        params.onTestSuccess(item);
+                    } else if (!passed && params.onTestFail) {
+                        params.onTestFail(item);
+                    }
+                }
+
+                if (passed) {
+                    result.push(item);
+                } else if (params.recursive) {
+                    result = result.concat(
+                        this.getItemsSync({
+                            ...params,
+                            ...{
+                                pth: item
+                            }
+                        })
+                    );
+                }
+            } else {
                 if (params.onFileError) {
                     params.onFileError(`Skipped, because invalid stat – "${item}"`);
                 }

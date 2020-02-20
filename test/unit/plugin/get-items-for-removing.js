@@ -244,7 +244,7 @@ describe('unit', function () {
                 ]);
             });
 
-            it('should handle the test № 1 with folders, files and exclude', function () {
+            it('should handle test № 1 with folders, files and exclude', function () {
                 const instance = new Plugin({
                     before: {
                         root: 'plugin_test',
@@ -280,7 +280,7 @@ describe('unit', function () {
                 ]);
             });
 
-            it('should handle the test № 2 with folders, files and exclude', function () {
+            it('should handle test № 2 with folders, files and exclude', function () {
                 const instance = new Plugin({
                     before: {
                         root: 'plugin_test',

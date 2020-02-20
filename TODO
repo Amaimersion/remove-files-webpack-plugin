@@ -6,3 +6,4 @@ remove prettier?
 replaceDoubleSlash is unnecessary?
 disable trash by default, add warning about OS versions
 support for globs
+new color for debug?

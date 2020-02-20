@@ -126,7 +126,8 @@ describe('unit', function () {
                 const correct = [
                     'D:\\fs_test\\fs-test',
                     'D:\\fs_test\\fs test',
-                    'D:\\fs_test\\fs_test'
+                    'D:\\fs_test\\fs_test',
+                    'D:\\fs_test\\fs_test\\fs_test'
                 ];
 
                 expect(result).to.have.members(correct);
@@ -146,7 +147,12 @@ describe('unit', function () {
                 const correct = [
                     'D:\\fs_test\\fs-test',
                     'D:\\fs_test\\fs_test',
-                    'D:\\fs_test\\test_1.txt'
+                    'D:\\fs_test\\fs_test\\fs_test',
+                    'D:\\fs_test\\test_1.txt',
+                    'D:\\fs_test\\fs-test\\test_1.txt',
+                    'D:\\fs_test\\fs-test\\test-2.bin',
+                    'D:\\fs_test\\fs_test\\fs_test\\test_1.txt',
+                    'D:\\fs_test\\fs_test\\fs_test\\test_2.test'
                 ];
 
                 expect(result).to.have.members(correct);

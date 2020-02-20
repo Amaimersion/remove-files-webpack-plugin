@@ -274,7 +274,7 @@ class Fs {
      * Gets list of absolute items paths.
      *
      * - if item is unnecessary,
-     * it will not be returned.
+     * it still will be returned.
      *
      * @param {GetItemsParams} params
      * See `GetItemsParams` documentation.
@@ -342,7 +342,9 @@ class Fs {
 
                 if (passed) {
                     result.push(item);
-                } else if (params.recursive) {
+                }
+
+                if (params.recursive) {
                     result = result.concat(
                         this.getItemsSync({
                             ...params,

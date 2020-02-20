@@ -86,7 +86,16 @@ const FOLDERS = [
     path.resolve('.') + '/items_test/test/test_1',
     path.resolve('.') + '/items_test/js/maps',
     path.resolve('.') + '/items_test/js/scripts',
-    path.resolve('.') + '/items_test/test_1/test'
+    path.resolve('.') + '/items_test/test_1/test',
+    'D:/plugin_test',
+    'D:/plugin_test/test',
+    path.resolve('.') + '/plugin_test',
+    path.resolve('.') + '/plugin_test/test',
+    path.resolve('.') + '/plugin_test/test/test',
+    path.resolve('.') + '/plugin_test_remove',
+    path.resolve('.') + '/plugin_test_remove/test1',
+    path.resolve('.') + '/plugin_test_remove/test2',
+    path.resolve('.') + '/plugin_test_remove/test3'
 ];
 
 /**
@@ -162,7 +171,17 @@ const FILES = [
     path.resolve('.') + '/items_test/test/test_1/test.txt',
     path.resolve('.') + '/items_test/test_1/test/test.txt',
     path.resolve('.') + '/items_test/test/styles/style.css',
-    path.resolve('.') + '/items_test/test/styles/test.txt'
+    path.resolve('.') + '/items_test/test/styles/test.txt',
+    'D:/plugin_test/test.txt',
+    path.resolve('.') + '/plugin_test/test.txt',
+    path.resolve('.') + '/plugin_test/test test.txt',
+    path.resolve('.') + '/plugin_test/test.jpg',
+    path.resolve('.') + '/plugin_test/test/test.txt',
+    path.resolve('.') + '/plugin_test/test/test.png',
+    path.resolve('.') + '/plugin_test/test/test/test.bin',
+    path.resolve('.') + '/plugin_test_remove/test1.txt',
+    path.resolve('.') + '/plugin_test_remove/test2.txt',
+    path.resolve('.') + '/plugin_test_remove/test3.txt'
 ];
 
 

@@ -39,6 +39,27 @@
  * A folders for testing.
  * Defaults to `[]`.
  *
+ * @property {(
+ *  absoluteFoldersPaths: string[],
+ *  absoluteFilesPaths: string[]
+ * ) => boolean} beforeRemove
+ * If specified, will be called before removing.
+ * Absolute paths of folders and files that will be removed
+ * will be passed into this function.
+ * If returned value is `true`, then
+ * remove process will be canceled.
+ * Will be not called if `emulate` is on.
+ * Defaults to `undefined`.
+ *
+ * @property {(
+ *  absoluteFoldersPaths: string[],
+ *  absoluteFilesPaths: string[]
+ * ) => void} afterRemove
+ * If specified, will be called after removing.
+ * Absolute paths of folders and files that have been removed
+ * will be passed into this function.
+ * Defaults to `undefined`.
+ *
  * @property {boolean} trash
  * Move folders and files to trash (recycle bin)
  * instead of permanent deleting.
@@ -152,6 +173,8 @@ class Plugin {
             exclude: [],
             test: [],
             trash: false,
+            beforeRemove: undefined,
+            afterRemove: undefined,
             log: true,
             logWarning: true,
             logError: false,
@@ -318,7 +341,6 @@ class Plugin {
             return;
         }
 
-        const debugName = 'handle-remove: ';
         const items = this.getItemsForRemoving(params);
 
         if (
@@ -349,6 +371,30 @@ class Plugin {
             return;
         }
 
+        if (params.beforeRemove) {
+            this.loggerDebug.add(
+                `${debugName}\
+                user beforeRemove is called`
+            );
+
+            const shouldStop = params.beforeRemove(
+                items.directories,
+                items.files
+            );
+
+            if (shouldStop) {
+                const message = 'Stopped by user';
+
+                this.loggerDebug.add(
+                    `${debugName}\
+                    ${message}`
+                );
+                this.loggerInfo.add(message);
+
+                return;
+            }
+        }
+
         for (const file of items.files) {
             try {
                 this.unlinkFileSync(file, params.trash);
@@ -369,6 +415,18 @@ class Plugin {
                 this.loggerDebug.add(`${debugName}${message}`);
                 this.loggerError.add(message);
             }
+        }
+
+        if (params.afterRemove) {
+            this.loggerDebug.add(
+                `${debugName}\
+                user afterRemove is called`
+            );
+
+            params.afterRemove(
+                items.directories,
+                items.files
+            );
         }
 
         // pretty printing.

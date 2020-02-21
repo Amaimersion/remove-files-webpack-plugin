@@ -133,6 +133,75 @@ describe('unit', function () {
                     }
                 }, 2000);
             });
+
+            it('should call beforeRemove and afterRemove', function () {
+                let beforeRemoveIsCalled = false;
+                let afterRemoveIsCalled = false;
+                const instance = new Plugin({
+                    before: {
+                        root: './plugin_test_remove',
+                        trash: false,
+                        include: [
+                            'test4.txt',
+                            'test5.txt',
+                            'test4'
+                        ],
+                        beforeRemove: (folders, files) => {
+                            expect(folders).to.have.lengthOf(1);
+                            expect(files).to.have.lengthOf(2);
+
+                            beforeRemoveIsCalled = true;
+                        },
+                        afterRemove: (folders, files) => {
+                            expect(folders).to.have.lengthOf(1);
+                            expect(files).to.have.lengthOf(2);
+
+                            afterRemoveIsCalled = true;
+                        }
+                    }
+                });
+
+                instance.handleRemove(instance.beforeParams);
+
+                const folderExists = fs.existsSync('./plugin_test_remove/test4');
+                const filesExists = (
+                    fs.existsSync('./plugin_test_remove/test4.txt') &&
+                    fs.existsSync('./plugin_test_remove/test5.txt')
+                );
+
+                expect(beforeRemoveIsCalled).to.equal(true);
+                expect(afterRemoveIsCalled).to.equal(true);
+                expect(folderExists).to.equal(false);
+                expect(filesExists).to.equal(false);
+            });
+
+            it('should call beforeRemove and cancel removing', function () {
+                let beforeRemoveIsCalled = false;
+                const instance = new Plugin({
+                    after: {
+                        root: './plugin_test_remove',
+                        trash: false,
+                        include: [
+                            'test6.txt'
+                        ],
+                        beforeRemove: (folders, files) => {
+                            expect(folders).to.have.lengthOf(0);
+                            expect(files).to.have.lengthOf(1);
+
+                            beforeRemoveIsCalled = true;
+
+                            return true;
+                        }
+                    }
+                });
+
+                instance.handleRemove(instance.afterParams);
+
+                const fileExists = fs.existsSync('./plugin_test_remove/test6.txt');
+
+                expect(beforeRemoveIsCalled).to.equal(true);
+                expect(fileExists).to.equal(true);
+            });
         });
     });
 });

@@ -65,6 +65,31 @@ interface RemoveParameters {
     test?: ReadonlyArray<TestObject>;
 
     /**
+     * If specified, will be called before removing.
+     * Absolute paths of folders and files that will be removed
+     * will be passed into this function.
+     * If returned value is `true`, then
+     * remove process will be canceled.
+     * Will be not called if `emulate` is on.
+     * Defaults to `undefined`.
+     */
+    beforeRemove?: (
+        absoluteFoldersPaths: string[],
+        absoluteFilesPaths: string[]
+    ) => boolean;
+
+    /**
+     * If specified, will be called after removing.
+     * Absolute paths of folders and files that have been removed
+     * will be passed into this function.
+     * Defaults to `undefined`.
+     */
+    afterRemove?: (
+        absoluteFoldersPaths: string[],
+        absoluteFilesPaths: string[]
+    ) => void;
+
+    /**
      * Move folders and files to trash (recycle bin)
      * instead of permanent removing.
      *

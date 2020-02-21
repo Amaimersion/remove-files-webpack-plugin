@@ -95,7 +95,9 @@ const FOLDERS = [
     path.resolve('.') + '/plugin_test_remove',
     path.resolve('.') + '/plugin_test_remove/test1',
     path.resolve('.') + '/plugin_test_remove/test2',
-    path.resolve('.') + '/plugin_test_remove/test3'
+    path.resolve('.') + '/plugin_test_remove/test3',
+    path.resolve('.') + '/plugin_test_remove/test4',
+    path.resolve('.') + '/plugin_test_remove/test5'
 ];
 
 /**
@@ -181,7 +183,10 @@ const FILES = [
     path.resolve('.') + '/plugin_test/test/test/test.bin',
     path.resolve('.') + '/plugin_test_remove/test1.txt',
     path.resolve('.') + '/plugin_test_remove/test2.txt',
-    path.resolve('.') + '/plugin_test_remove/test3.txt'
+    path.resolve('.') + '/plugin_test_remove/test3.txt',
+    path.resolve('.') + '/plugin_test_remove/test4.txt',
+    path.resolve('.') + '/plugin_test_remove/test5.txt',
+    path.resolve('.') + '/plugin_test_remove/test6.txt'
 ];
 
 

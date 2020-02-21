@@ -11,7 +11,7 @@
  *
  * @property {boolean} [toTrash]
  * Move item to trash.
- * Defaults to `true`.
+ * Defaults to `false`.
  *
  * @property {(pth: string) => any} [onSuccess]
  * Will be called if file successfully removed.
@@ -146,7 +146,7 @@ class Fs {
         /** @type {UnlinkFileParams} */
         params = {
             pth: '',
-            toTrash: true,
+            toTrash: false,
             onSuccess: undefined,
             onError: undefined,
             ...params

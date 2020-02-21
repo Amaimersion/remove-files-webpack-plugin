@@ -68,7 +68,7 @@ interface RemoveParameters {
      * Move folders or files to trash (recycle bin)
      * instead of permanent removing.
      *
-     * Defaults to `true`.
+     * Defaults to `false`.
      */
     trash?: boolean;
 

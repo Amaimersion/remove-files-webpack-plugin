@@ -42,7 +42,7 @@
  * @property {boolean} trash
  * Move folders or files to trash (recycle bin)
  * instead of permanent deleting.
- * Defaults to `true`.
+ * Defaults to `false`.
  *
  * @property {boolean} log
  * Print messages of "info" level
@@ -151,7 +151,7 @@ class Plugin {
             include: [],
             exclude: [],
             test: [],
-            trash: true,
+            trash: false,
             log: true,
             logWarning: true,
             logError: false,

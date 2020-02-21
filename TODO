@@ -1,4 +1,3 @@
 user methods to call before and after removing
 warning about file path for windows and posix users
-remove prettier?
 support for globs

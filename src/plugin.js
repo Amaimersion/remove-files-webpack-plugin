@@ -299,10 +299,22 @@ class Plugin {
      * Either `this.beforeParams` or `this.afterParams`.
      */
     handleRemove(params) {
+        const debugName = 'handle-remove: ';
+
         if (
             !params.include.length &&
             !params.test.length
         ) {
+            /**
+             * I think we shouldn't add warning message in warning
+             * logger, because this can be intended behavior.
+             */
+
+            this.loggerDebug.add(
+                `${debugName}\
+                include and test is empty`
+            );
+
             return;
         }
 

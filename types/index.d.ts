@@ -44,14 +44,14 @@ interface RemoveParameters {
     root?: string;
 
     /**
-     * A folders or files for removing.
+     * A folders and files for removing.
      *
      * Defaults to `[]`.
      */
     include?: ReadonlyArray<string>;
 
     /**
-     * A files for excluding.
+     * A folders and files for excluding.
      *
      * Defaults to `[]`.
      */
@@ -65,7 +65,7 @@ interface RemoveParameters {
     test?: ReadonlyArray<TestObject>;
 
     /**
-     * Move folders or files to trash (recycle bin)
+     * Move folders and files to trash (recycle bin)
      * instead of permanent removing.
      *
      * Defaults to `false`.
@@ -106,7 +106,7 @@ interface RemoveParameters {
 
     /**
      * Emulate remove process.
-     * Print which folders or files will be removed
+     * Print which folders and files will be removed
      * without actually removing them.
      * Ignores `log` parameter.
      *

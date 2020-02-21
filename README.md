@@ -13,6 +13,9 @@
 - [Installation](#installation)
 - [Support](#support)
 - [Usage](#usage)
+- [Notes for Windows users](#notes-for-windows-users)
+  - [Don't use single backward slash](#dont-use-single-backward-slash)
+  - [Per-drive working directory](#per-drive-working-directory)
 - [Parameters](#parameters)
     - [How to set](#how-to-set)
     - [Example](#example)
@@ -59,24 +62,36 @@ module.exports = {
 ```
 
 
+## Notes for Windows users
+
+### Don't use single backward slash
+
+JavaScript uses it for escaping. If you want to use backward slash, then use double backward slash. Example: `C:\\Windows\\System32\\cmd.exe`. By the way, single forward slashes are also supported.
+
+### Per-drive working directory
+
+From [Node.js documentation](https://nodejs.org/api/path.html#path_windows_vs_posix):
+> On Windows Node.js follows the concept of per-drive working directory. This behavior can be observed when using a drive path without a backslash. For example, `path.resolve('c:\\')` can potentially return a different result than `path.resolve('c:')`. For more information, see [this MSDN page](https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file#fully-qualified-vs-relative-paths).
+
+
 ## Parameters
 
-|         Name         |                Type                 | Default  |                                                                         Description                                                                         |
-| :------------------: | :---------------------------------: | :------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|         root         |              `string`               |   `.`    |            A root directory.<br>Not absolute paths will be appended to this.<br>Defaults to where `package.json` and `node_modules` are located.            |
-|       include        |             `string[]`              |   `[]`   |                                                              A folders and files for removing.                                                              |
-|       exclude        |             `string[]`              |   `[]`   |                                                             A folders and files for excluding.                                                              |
-|         test         |           `TestObject[]`            |   `[]`   |                                                                   A folders for testing.                                                                    |
-|  TestObject.folder   |              `string`               | Required |                                                         A path to the folder (relative to `root`).                                                          |
-|  TestObject.method   | `(absolutePath: string) => boolean` | Required |         A method that accepts an item path (`root` + folderPath + fileName) and<br>returns value that indicates should this item be removed or not.         |
-| TestObject.recursive |              `boolean`              | `false`  |                                                      Apply this method to all items in subdirectories.                                                      |
-|        trash         |              `boolean`              | `false`  |                 Move folders and files to trash (recycle bin) instead of permanent removing.<br>Requires Windows 8+, macOS 10.12+ or Linux.                 |
-|         log          |              `boolean`              |  `true`  |                                  Print messages of "info" level<br>(example: "Which folders or files have been removed").                                   |
-|      logWarning      |              `boolean`              |  `true`  |                                     Print messages of "warning" level<br>(example: "An items for removing not found").                                      |
-|       logError       |              `boolean`              | `false`  |                                         Print messages of "error" level<br>(example: "No such file or directory").                                          |
-|       logDebug       |              `boolean`              | `false`  |                                                  Print messages of "debug" level<br>(used for debugging).                                                   |
-|       emulate        |              `boolean`              | `false`  |            Emulate remove process.<br>Print which folders and files will be removed without actually removing them.<br>Ignores `log` parameter.             |
-| allowRootAndOutside  |              `boolean`              | `false`  | Allow removing of `root` directory or outside `root` directory.<br>It is kind of safe mode.<br>**Don't turn it on if you don't know what you actually do!** |
+|         Name         |                Type                 | Default  |                                                                                                                  Description                                                                                                                   |
+| :------------------: | :---------------------------------: | :------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|         root         |              `string`               |   `.`    |                                                     A root directory.<br>Not absolute paths will be appended to this.<br>Defaults to where `package.json` and `node_modules` are located.                                                      |
+|       include        |             `string[]`              |   `[]`   |                                                                                                       A folders and files for removing.                                                                                                        |
+|       exclude        |             `string[]`              |   `[]`   |                                                                                                       A folders and files for excluding.                                                                                                       |
+|         test         |           `TestObject[]`            |   `[]`   |                                                                                                             A folders for testing.                                                                                                             |
+|  TestObject.folder   |              `string`               | Required |                                                                                                   A path to the folder (relative to `root`).                                                                                                   |
+|  TestObject.method   | `(absolutePath: string) => boolean` | Required | A method that accepts an item path (`root` + folderPath + fileName) and<br>returns value that indicates should this item be removed or not.<br>Segment separators (slashes) in path is platform-specific:<br>`\\` on Windows and `/` on POSIX. |
+| TestObject.recursive |              `boolean`              | `false`  |                                                                                               Apply this method to all items in subdirectories.                                                                                                |
+|        trash         |              `boolean`              | `false`  |                                                          Move folders and files to trash (recycle bin) instead of permanent removing.<br>Requires Windows 8+, macOS 10.12+ or Linux.                                                           |
+|         log          |              `boolean`              |  `true`  |                                                                            Print messages of "info" level<br>(example: "Which folders or files have been removed").                                                                            |
+|      logWarning      |              `boolean`              |  `true`  |                                                                               Print messages of "warning" level<br>(example: "An items for removing not found").                                                                               |
+|       logError       |              `boolean`              | `false`  |                                                                                   Print messages of "error" level<br>(example: "No such file or directory").                                                                                   |
+|       logDebug       |              `boolean`              | `false`  |                                                                                            Print messages of "debug" level<br>(used for debugging).                                                                                            |
+|       emulate        |              `boolean`              | `false`  |                                                      Emulate remove process.<br>Print which folders and files will be removed without actually removing them.<br>Ignores `log` parameter.                                                      |
+| allowRootAndOutside  |              `boolean`              | `false`  |                                          Allow removing of `root` directory or outside `root` directory.<br>It is kind of safe mode.<br>**Don't turn it on if you don't know what you actually do!**                                           |
 
 #### How to set
 

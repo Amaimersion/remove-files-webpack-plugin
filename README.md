@@ -150,8 +150,8 @@ new RemovePlugin({
         test: [
             {
                 folder: 'dist/styles',
-                method: (filePath) => {
-                    return new RegExp(/\.map$/, 'm').test(filePath);
+                method: (absoluteItemPath) => {
+                    return new RegExp(/\.map$/, 'm').test(absoluteItemPath);
                 }
             }
         ]
@@ -170,8 +170,8 @@ new RemovePlugin({
         test: [
             {
                 folder: 'dist/styles',
-                method: (filePath) => {
-                    return new RegExp(/\.map$/, 'm').test(filePath);
+                method: (absoluteItemPath) => {
+                    return new RegExp(/\.map$/, 'm').test(absoluteItemPath);
                 },
                 recursive: true
             }
@@ -210,14 +210,14 @@ new RemovePlugin({
         test: [
             {
                 folder: './styles',
-                method: (filePath) => {
-                    return new RegExp(/\.map$/, 'm').test(filePath);
+                method: (absoluteItemPath) => {
+                    return new RegExp(/\.map$/, 'm').test(absoluteItemPath);
                 }
             },
             {
                 folder: './scripts',
-                method: (filePath) => {
-                    return new RegExp(/\.js.map$/, 'm').test(filePath);
+                method: (absoluteItemPath) => {
+                    return new RegExp(/\.js.map$/, 'm').test(absoluteItemPath);
                 },
                 recursive: true
             }

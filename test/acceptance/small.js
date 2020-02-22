@@ -7,14 +7,14 @@ const RemovePlugin = require('../..');
 
 describe('acceptance', function () {
     describe('small', function () {
-        it('should run beforeRun hook without trash', function () {
-            const logs = {
-                log: false,
-                logWarning: true,
-                logError: true,
-                logDebug: false
-            };
+        const logs = {
+            log: false,
+            logWarning: true,
+            logError: true,
+            logDebug: false
+        };
 
+        it('should run beforeRun hook without trash', function () {
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({
                 before: {

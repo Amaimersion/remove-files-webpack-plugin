@@ -1,45 +1,19 @@
 const expect = require('chai').expect;
+const Webpack = require('../../webpack');
 const Plugin = require('../../../src/plugin');
 
 
 describe('unit', function () {
     describe('plugin', function () {
         describe('.apply()', function () {
-            const emulatedWebpackCompiler = {
-                v4: {
-                    hooks: {
-                        beforeRun: {
-                            tapAsync: () => { }
-                        },
-                        watchRun: {
-                            tapAsync: () => { }
-                        },
-                        afterEmit: {
-                            tapAsync: () => { }
-                        }
-                    }
-                },
-                v3: {
-                    plugin: (hookName) => {
-                        if (!([
-                            'before-run',
-                            'watch-run',
-                            'after-emit'
-                        ].includes(hookName))) {
-                            throw new Error(`Invalid hook name - "${hookName}"`);
-                        }
-                    }
-                },
-                invalid: {}
-            };
-
             it('should work with webpack v4', function () {
                 const test = () => {
+                    const webpackV4 = new Webpack.EmulatedWebpackCompiler.v4();
                     const instance = new Plugin({
                         before: {}
                     });
 
-                    instance.apply(emulatedWebpackCompiler.v4);
+                    instance.apply(webpackV4);
                 };
 
                 expect(test).not.to.throw();
@@ -47,11 +21,12 @@ describe('unit', function () {
 
             it('should work with webpack v3', function () {
                 const test = () => {
+                    const webpackV3 = new Webpack.EmulatedWebpackCompiler.v3();
                     const plugin = new Plugin({
                         before: {}
                     });
 
-                    plugin.apply(emulatedWebpackCompiler.v3);
+                    plugin.apply(webpackV3);
                 };
 
                 expect(test).not.to.throw();
@@ -59,11 +34,12 @@ describe('unit', function () {
 
             it('should not work with invalid webpack', function () {
                 const test = () => {
+                    const webpackInvalid = {};
                     const plugin = new Plugin({
                         before: {}
                     });
 
-                    plugin.apply(emulatedWebpackCompiler.invalid);
+                    plugin.apply(webpackInvalid);
                 };
 
                 expect(test).to.throw();

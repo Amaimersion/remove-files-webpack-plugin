@@ -339,7 +339,7 @@ new RemovePlugin({
                 }
             }
         },
-        afterRemove: (absoluteFoldersPaths, absoluteFilesPaths) {
+        afterRemove: (absoluteFoldersPaths, absoluteFilesPaths) => {
             // replacing plugin logger with custom logger.
             console.log('Successfully removed:');
             console.log(`Folders – [${absoluteFoldersPaths}]`);

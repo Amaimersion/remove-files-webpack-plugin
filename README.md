@@ -19,7 +19,6 @@
   - [Per-drive working directory](#per-drive-working-directory)
 - [Parameters](#parameters)
     - [How to set](#how-to-set)
-    - [Example](#example)
 - [Examples](#examples)
 - [Contribution](#contribution)
 - [License](#license)
@@ -106,43 +105,6 @@ You can pass these parameters into both `before` and `after` keys. Each key is o
 
 - `before` - executes before compilation; 
 - `after` - executes after compilation.
-
-#### Example
-
-```javascript
-const RemovePlugin = require('remove-files-webpack-plugin');
-
-module.exports = {
-    plugins: [
-        new RemovePlugin({
-            /**
-             * Before compilation permanently
-             * removes entire `./dist` folder.
-             */
-            before: {
-                include: [
-                    'dist'
-                ]
-            },
-
-            /**
-             * After compilation permanently removes all files in 
-             * `./dist/styles` folder that have `.map` extension.
-             */
-            after: {
-                test: [
-                    {
-                        folder: 'dist/styles',
-                        method: (filePath) => {
-                            return new RegExp(/\.map$/, 'm').test(filePath);
-                        }
-                    } 
-                ]
-            }
-        })
-    ]
-};
-```
 
 
 ## Examples

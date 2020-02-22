@@ -2,29 +2,73 @@ class EmulatedWebpackCompilerV4 {
     constructor() {
         this.hooks = {
             beforeRun: {
-                tapAsync: this._tapAsync
+                tapAsync: (_pluginName, method) => {
+                    this._register('beforeRun', method);
+                },
+                run: undefined
             },
             watchRun: {
-                tapAsync: this._tapAsync
+                tapAsync: (_pluginName, method) => {
+                    this._register('watchRun', method);
+                },
+                run: undefined
             },
             afterEmit: {
-                tapAsync: this._tapAsync
+                tapAsync: (_pluginName, method) => {
+                    this._register('afterEmit', method);
+                },
+                run: undefined
             }
         };
     }
 
-    _tapAsync(_pluginName, method) {
-        method({}, () => { });
+    _register(hookName, method) {
+        this.hooks[hookName].run = () => {
+            method({}, () => { });
+        };
+    }
+
+    _run(hookName) {
+        this.hooks[hookName].run();
+    }
+
+    runBeforeRun() {
+        this._run('beforeRun');
+    }
+
+    runWatchRun() {
+        this._run('watchRun');
+    }
+
+    runAfterEmit() {
+        this._run('afterEmit');
+    }
+
+    runAllHooks() {
+        this.runBeforeRun();
+        this.runWatchRun();
+        this.runAfterEmit();
     }
 }
 
 
 class EmulatedWebpackCompilerV3 {
     constructor() {
-        this.plugin = this._plugin;
+        this.plugin = this._register;
+        this._hooks = {
+            'before-run': {
+                run: undefined
+            },
+            'watch-run': {
+                run: undefined
+            },
+            'after-emit': {
+                run: undefined
+            }
+        };
     }
 
-    _plugin(hookName, method) {
+    _register(hookName, method) {
         if (!([
             'before-run',
             'watch-run',
@@ -33,7 +77,31 @@ class EmulatedWebpackCompilerV3 {
             throw new Error(`Invalid hook name - "${hookName}"`);
         }
 
-        method({}, () => { });
+        this._hooks[hookName].run = () => {
+            method({}, () => { });
+        };
+    }
+
+    _run(hookName) {
+        this._hooks[hookName].run();
+    }
+
+    runBeforeRun() {
+        this._run('before-run');
+    }
+
+    runWatchRun() {
+        this._run('watch-run');
+    }
+
+    runAfterEmit() {
+        this._run('after-emit');
+    }
+
+    runAllHooks() {
+        this.runBeforeRun();
+        this.runWatchRun();
+        this.runAfterEmit();
     }
 }
 

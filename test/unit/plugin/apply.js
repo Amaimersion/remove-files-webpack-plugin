@@ -14,6 +14,7 @@ describe('unit', function () {
                     });
 
                     instance.apply(webpackV4);
+                    webpackV4.runAllHooks();
                 };
 
                 expect(test).not.to.throw();
@@ -27,6 +28,7 @@ describe('unit', function () {
                     });
 
                     plugin.apply(webpackV3);
+                    webpackV3.runAllHooks();
                 };
 
                 expect(test).not.to.throw();

@@ -116,7 +116,11 @@ const FOLDERS = [
     path.resolve('.', 'acceptance_test_remove/dist6/maps/test'),
     path.resolve('.', 'acceptance_test_remove/dist6/styles/test'),
     path.resolve('.', 'acceptance_test_remove/dist8/test/test'),
-    path.resolve('.', 'acceptance_test_remove/dist8/test test')
+    path.resolve('.', 'acceptance_test_remove/dist8/test test'),
+    path.resolve('.', 'acceptance_test_remove/large_test/Pa.^&th/test'),
+    path.resolve('.', 'acceptance_test_remove/large_test/pa)t-h (t [e]s {t} +'),
+    path.resolve('.', 'acceptance_test_remove/large_test/maps/test'),
+    path.resolve('.', 'acceptance_test_remove/large_test/test')
 ];
 
 /**
@@ -255,6 +259,19 @@ const FILES = [
     path.resolve('.', 'acceptance_test_remove/dist8/test/test1.txt'),
     path.resolve('.', 'acceptance_test_remove/dist8/test/test2.txt'),
     path.resolve('.', 'acceptance_test_remove/dist8/test/test/test3.txt'),
+    path.resolve('.', 'acceptance_test_remove/large_test/pa)t-h (t [e]s {t} + file.name.txt'),
+    path.resolve('.', 'acceptance_test_remove/large_test/test.txt'),
+    path.resolve('.', 'acceptance_test_remove/large_test/Pa.^&th/test.txt'),
+    path.resolve('.', 'acceptance_test_remove/large_test/Pa.^&th/another.txt'),
+    path.resolve('.', 'acceptance_test_remove/large_test/Pa.^&th/test/test.txt'),
+    path.resolve('.', 'acceptance_test_remove/large_test/Pa.^&th/test/another.txt'),
+    path.resolve('.', 'acceptance_test_remove/large_test/maps/test.txt'),
+    path.resolve('.', 'acceptance_test_remove/large_test/maps/test.map'),
+    path.resolve('.', 'acceptance_test_remove/large_test/maps/1.map'),
+    path.resolve('.', 'acceptance_test_remove/large_test/maps/test/1.map'),
+    path.resolve('.', 'acceptance_test_remove/large_test/maps/test/file.map'),
+    path.resolve('.', 'acceptance_test_remove/large_test/pa)t-h (t [e]s {t} +/test.txt'),
+    path.resolve('.', 'acceptance_test_remove/large_test/pa)t-h (t [e]s {t} +/1.map')
 ];
 
 

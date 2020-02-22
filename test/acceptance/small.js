@@ -8,6 +8,13 @@ const RemovePlugin = require('../..');
 describe('acceptance', function () {
     describe('small', function () {
         it('should run beforeRun hook without trash', function () {
+            const logs = {
+                log: false,
+                logWarning: true,
+                logError: true,
+                logDebug: false
+            };
+
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({
                 before: {
@@ -16,10 +23,7 @@ describe('acceptance', function () {
                         './acceptance_test_remove/test1'
                     ],
                     trash: false,
-                    log: false,
-                    logWarning: true,
-                    logError: true,
-                    logDebug: false
+                    ...logs
                 }
             });
 
@@ -56,10 +60,7 @@ describe('acceptance', function () {
                         './acceptance_test_remove/test2'
                     ],
                     trash: true,
-                    log: false,
-                    logWarning: true,
-                    logError: true,
-                    logDebug: false
+                    ...logs
                 }
             });
 
@@ -101,10 +102,7 @@ describe('acceptance', function () {
                         './acceptance_test_remove/test3'
                     ],
                     trash: false,
-                    log: false,
-                    logWarning: true,
-                    logError: true,
-                    logDebug: false
+                    ...logs
                 }
             });
 
@@ -141,10 +139,7 @@ describe('acceptance', function () {
                         './acceptance_test_remove/test4'
                     ],
                     trash: true,
-                    log: false,
-                    logWarning: true,
-                    logError: true,
-                    logDebug: false
+                    ...logs
                 }
             });
 
@@ -186,10 +181,7 @@ describe('acceptance', function () {
                         './acceptance_test_remove/test5'
                     ],
                     trash: false,
-                    log: false,
-                    logWarning: true,
-                    logError: true,
-                    logDebug: false
+                    ...logs
                 },
                 after: {
                     include: [
@@ -197,10 +189,7 @@ describe('acceptance', function () {
                         './acceptance_test_remove/test6'
                     ],
                     trash: false,
-                    log: false,
-                    logWarning: true,
-                    logError: true,
-                    logDebug: false
+                    ...logs
                 }
             });
 
@@ -254,10 +243,7 @@ describe('acceptance', function () {
                         'D:/acceptance_test_remove/test1.txt'
                     ],
                     allowRootAndOutside: true,
-                    log: false,
-                    logWarning: true,
-                    logError: true,
-                    logDebug: false
+                    ...logs
                 }
             });
 
@@ -280,10 +266,8 @@ describe('acceptance', function () {
                         'D:/acceptance_test_remove/test2.txt'
                     ],
                     allowRootAndOutside: false,
-                    log: false,
-                    logWarning: false,
-                    logError: true,
-                    logDebug: false
+                    ...logs,
+                    logWarning: false
                 }
             });
 

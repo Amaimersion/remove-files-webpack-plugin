@@ -126,37 +126,37 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * Before compilation permanently removes
-     * all files from `./dist/maps` except
-     * `./dist/maps/main.map.js` file.
-     */
-    before: {
-        root: './dist'
-        include: [
-            './maps'
-        ],
-        exclude: [
-            './maps/main.map.js'
-        ]
-    },
-
-    /**
-     * After compilation permanently removes 
-     * all css maps in `./dist/styles` folder 
-     * except `popup.css.map` file.
+     * After compilation removes both 
+     * `./dist/manifest.json` file and 
+     * `./dist/maps` folder to trash.
      */
     after: {
-        exclude: [
-            'dist/styles/popup.css.map'
+        root: './dist',
+        include: [
+            'manifest.json',
+            'maps'
         ],
-        test: [
-            {
-                folder: 'dist/styles',
-                method: (absoluteItemPath) => {
-                    return new RegExp(/\.map$/, 'm').test(absoluteItemPath);
-                }
-            }
-        ]
+        trash: true
+    }
+})
+```
+
+```javascript
+new RemovePlugin({
+    /**
+     * Before compilation permanently removes both 
+     * `./dist/manifest.json` file and `./dist/maps` folder.
+     * Log only works for warnings and errors.
+     */
+    before: {
+        include: [
+            'dist/manifest.json',
+            './dist/maps'
+        ],
+        log: false,
+        logWarning: true,
+        logError: true,
+        logDebug: false
     }
 })
 ```
@@ -178,24 +178,6 @@ new RemovePlugin({
                 recursive: true
             }
         ]
-    }
-})
-```
-
-```javascript
-new RemovePlugin({
-    /**
-     * Before compilation removes both 
-     * `./dist/manifest.json` file and 
-     * `./dist/js` folder to trash.
-     */
-    before: {
-        root: './dist',
-        include: [
-            'manifest.json',
-            'js'
-        ],
-        trash: true
     }
 })
 ```
@@ -232,20 +214,45 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * Before compilation permanently removes both 
-     * `./dist/manifest.json` file and `./dist/js` folder.
-     * Log only works for warnings and errors.
+     * Before compilation permanently removes all
+     * folders, subfolders and files from `./dist/maps`
+     * except `./dist/maps/main.map.js` file.
      */
     before: {
-        root: './dist',
-        include: [
-            'manifest.json',
-            'js'
+        root: './dist'
+        /**
+         * You should do like this
+         * instead of `include: ['./maps']`.
+         */
+        test: [
+            {
+                folder: './maps',
+                method: () => true,
+                recursive: true
+            }
         ],
-        log: false,
-        logWarning: true,
-        logError: true,
-        logDebug: false
+        exclude: [
+            './maps/main.map.js'
+        ]
+    },
+
+    /**
+     * After compilation permanently removes 
+     * all css maps in `./dist/styles` folder 
+     * except `popup.css.map` file.
+     */
+    after: {
+        test: [
+            {
+                folder: 'dist/styles',
+                method: (absoluteItemPath) => {
+                    return new RegExp(/\.map$/, 'm').test(absoluteItemPath);
+                }
+            }
+        ],
+        exclude: [
+            'dist/styles/popup.css.map'
+        ]
     }
 })
 ```

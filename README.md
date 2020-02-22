@@ -165,7 +165,7 @@ new RemovePlugin({
 new RemovePlugin({
     /**
      * After compilation permanently removes 
-     * all css maps in `./dist/styles` folder and 
+     * all maps files in `./dist/styles` folder and 
      * all subfolders (e.g. `./dist/styles/header`).
      */
     after: {
@@ -196,13 +196,13 @@ new RemovePlugin({
             {
                 folder: './styles',
                 method: (absoluteItemPath) => {
-                    return new RegExp(/\.map$/, 'm').test(absoluteItemPath);
+                    return new RegExp(/\.css\.map$/, 'm').test(absoluteItemPath);
                 }
             },
             {
                 folder: './scripts',
                 method: (absoluteItemPath) => {
-                    return new RegExp(/\.js.map$/, 'm').test(absoluteItemPath);
+                    return new RegExp(/\.js\.map$/, 'm').test(absoluteItemPath);
                 },
                 recursive: true
             }
@@ -246,7 +246,7 @@ new RemovePlugin({
             {
                 folder: 'dist/styles',
                 method: (absoluteItemPath) => {
-                    return new RegExp(/\.map$/, 'm').test(absoluteItemPath);
+                    return new RegExp(/\.css\.map$/, 'm').test(absoluteItemPath);
                 }
             }
         ],

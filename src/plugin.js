@@ -584,7 +584,7 @@ class Plugin {
                     const message = `Skipped, because unsafe removing – "${includeItem}"`;
 
                     this.loggerDebug.add(`${debugName}${message}`);
-                    this.loggerError.add(message);
+                    this.loggerWarning.add(message);
 
                     return false;
                 }

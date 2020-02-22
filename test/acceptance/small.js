@@ -281,6 +281,34 @@ describe('acceptance', function () {
             expect(fileExists).to.equal(true);
         });
 
+        it('should not remove root', function () {
+            const webpack = new Webpack.EmulatedWebpackCompiler.v4();
+            const instance = new RemovePlugin({
+                before: {
+                    root: '.',
+                    include: [
+                        '.'
+                    ],
+                    allowRootAndOutside: false,
+                    beforeRemove: (folders) => {
+                        if (folders.length || files.length) {
+                            throw new Error("Dangerous!");
+                        }
+                    },
+                    ...logs,
+                    logWarning: false
+                }
+            });
+
+            instance.apply(webpack);
+
+            const run = () => {
+                webpack.runBeforeRun();
+            };
+
+            expect(run).not.to.throw();
+        });
+
         it('should not conflict when both include and test are provided', function () {
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({

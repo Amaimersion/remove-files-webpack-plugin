@@ -50,7 +50,7 @@ describe('acceptance', function () {
         });
 
         it('should run watchRun hook with trash', function (done) {
-            this.timeout(4000);
+            this.timeout(1000);
 
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({
@@ -90,7 +90,7 @@ describe('acceptance', function () {
                 } else {
                     done();
                 }
-            }, 2000);
+            }, 800);
         });
 
         it('should run afterEmit hook without trash', function () {
@@ -129,7 +129,7 @@ describe('acceptance', function () {
         });
 
         it('should run afterEmit hook with trash', function (done) {
-            this.timeout(4000);
+            this.timeout(1000);
 
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({
@@ -169,7 +169,7 @@ describe('acceptance', function () {
                 } else {
                     done();
                 }
-            }, 2000);
+            }, 800);
         });
 
         it('should run both beforeRun and afterEmit hooks', function () {

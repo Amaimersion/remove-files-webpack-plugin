@@ -31,7 +31,7 @@ describe('unit', function () {
 
             it('should not remove when both emulate and trash parameters is on', function (done) {
                 // trash removing is async, not sync.
-                this.timeout(4000);
+                this.timeout(1000);
 
                 const instance = new Plugin({
                     after: {
@@ -61,7 +61,7 @@ describe('unit', function () {
                             done(new Error('File not exists'));
                         }
                     }
-                }, 2000);
+                }, 800);
             });
 
             it('should remove folders and files', function () {
@@ -95,7 +95,7 @@ describe('unit', function () {
 
             it('should remove folders and files to trash', function (done) {
                 // trash removing is async, not sync.
-                this.timeout(4000);
+                this.timeout(1000);
 
                 const instance = new Plugin({
                     after: {
@@ -131,7 +131,7 @@ describe('unit', function () {
                             done(new Error('File exists'));
                         }
                     }
-                }, 2000);
+                }, 800);
             });
 
             it('should call beforeRemove and afterRemove', function () {

@@ -50,7 +50,7 @@ describe('acceptance', function () {
         });
 
         it('should pass example № 2', function (done) {
-            this.timeout(4000);
+            this.timeout(1000);
 
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({
@@ -95,7 +95,7 @@ describe('acceptance', function () {
                 } else {
                     done(new Error("After is not success"));
                 }
-            }, 2000);
+            }, 800);
         });
 
         it('should pass example № 3', function () {

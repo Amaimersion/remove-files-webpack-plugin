@@ -116,8 +116,8 @@ module.exports = {
     plugins: [
         new RemovePlugin({
             /**
-             * Before compilation removes entire 
-             * `./dist` folder to trash.
+             * Before compilation permanently
+             * removes entire `./dist` folder.
              */
             before: {
                 include: [
@@ -126,9 +126,8 @@ module.exports = {
             },
 
             /**
-             * After compilation removes all files in 
-             * `./dist/styles` folder that have `.map` extension
-             * to trash.
+             * After compilation permanently removes all files in 
+             * `./dist/styles` folder that have `.map` extension.
              */
             after: {
                 test: [
@@ -151,19 +150,38 @@ module.exports = {
 ```javascript
 new RemovePlugin({
     /**
-     * Before compilation removes entire 
-     * `./dist` folder to trash.
+     * Before compilation permanently removes
+     * entire `./dist` folder.
      */
     before: {
         include: [
-            'dist'
+            './dist'
+        ]
+    }
+})
+```
+
+```javascript
+new RemovePlugin({
+    /**
+     * Before compilation permanently removes
+     * all files from `./dist/maps` except
+     * `./dist/maps/main.map.js` file.
+     */
+    before: {
+        root: './dist'
+        include: [
+            './maps'
+        ],
+        exclude: [
+            './maps/main.map.js'
         ]
     },
 
     /**
-     * After compilation removes all css maps 
-     * in `./dist/styles` folder to trash except 
-     * `popup.css.map` file.
+     * After compilation permanently removes 
+     * all css maps in `./dist/styles` folder 
+     * except `popup.css.map` file.
      */
     after: {
         exclude: [
@@ -184,9 +202,9 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * After compilation removes all css maps in 
-     * `./dist/styles` folder to trash and all subfolders 
-     * (e.g. `./dist/styles/header`).
+     * After compilation permanently removes 
+     * all css maps in `./dist/styles` folder and 
+     * all subfolders (e.g. `./dist/styles/header`).
      */
     after: {
         test: [
@@ -206,15 +224,16 @@ new RemovePlugin({
 new RemovePlugin({
     /**
      * Before compilation removes both 
-     * `./dist/manifest.json` file and `./dist/js` folder
-     * to trash.
+     * `./dist/manifest.json` file and 
+     * `./dist/js` folder to trash.
      */
     before: {
         root: './dist',
         include: [
             'manifest.json',
             'js'
-        ]
+        ],
+        trash: true
     }
 })
 ```
@@ -223,8 +242,8 @@ new RemovePlugin({
 new RemovePlugin({
     /**
      * After compilation:
-     * - removes all css maps in `./dist/styles` folder to trash.
-     * - removes all js maps in `./dist/scripts` folder to trash and 
+     * - permanently removes all css maps in `./dist/styles` folder.
+     * - permanently removes all js maps in `./dist/scripts` folder and 
      * all subfolders (e.g. `./dist/scripts/header`).
      */
     after: {
@@ -261,7 +280,6 @@ new RemovePlugin({
             'manifest.json',
             'js'
         ],
-        trash: false,
         log: false,
         logWarning: true,
         logError: true,
@@ -274,8 +292,9 @@ new RemovePlugin({
 new RemovePlugin({
     /**
      * Before compilation emulates remove process
-     * for a file that outside of the root directory.
-     * That file will be removed in trash.
+     * for a file that is outside of the root directory.
+     * That file will be removed in trash in case of
+     * not emulation.
      */
     before: {
         root: '.', // "D:\\remove-files-webpack-plugin-master"
@@ -285,6 +304,48 @@ new RemovePlugin({
         trash: true,
         emulate: true,
         allowRootAndOutside: true
+    }
+})
+```
+
+```javascript
+new RemovePlugin({
+    /**
+     * After compilation grabs all files from
+     * all subdirectories and decides should
+     * remove process be continued or not.
+     * If removed process is continued,
+     * then logs results with custom logger.
+     */
+    after: {
+        root: './dist',
+        test: [
+            {
+                folder: '.',
+                method: () => true,
+                recursive: true
+            }
+        ],
+        beforeRemove: (absoluteFoldersPaths, absoluteFilesPaths) => {
+            // cancel removing if there at least one folder.
+            if (absoluteFoldersPaths.length) {
+                return true;
+            }
+
+            // cancel removing if there at least one `.txt` file.
+            for (const item of absoluteFilesPaths) {
+                if (item.includes('.txt')) {
+                    return true;
+                }
+            }
+        },
+        afterRemove: (absoluteFoldersPaths, absoluteFilesPaths) {
+            // replacing plugin logger with custom logger.
+            console.log('Successfully removed:');
+            console.log(`Folders – [${absoluteFoldersPaths}]`);
+            console.log(`Files – [${absoluteFilesPaths}]`);
+        },
+        log: false
     }
 })
 ```

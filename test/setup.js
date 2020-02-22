@@ -106,6 +106,7 @@ const FOLDERS = [
     path.resolve('.', 'acceptance_test_remove/test4'),
     path.resolve('.', 'acceptance_test_remove/test5'),
     path.resolve('.', 'acceptance_test_remove/test6'),
+    path.resolve('.', 'acceptance_test_remove/test7/test'),
     path.resolve('.', 'acceptance_test_remove/dist1'),
     path.resolve('.', 'acceptance_test_remove/dist2/maps'),
     path.resolve('.', 'acceptance_test_remove/dist3/maps'),
@@ -214,6 +215,7 @@ const FILES = [
     path.resolve('.', 'acceptance_test_remove/test4.txt'),
     path.resolve('.', 'acceptance_test_remove/test5.txt'),
     path.resolve('.', 'acceptance_test_remove/test6.txt'),
+    path.resolve('.', 'acceptance_test_remove/test7/test.txt'),
     path.resolve('.', 'acceptance_test_remove/dist2/manifest.json'),
     path.resolve('.', 'acceptance_test_remove/dist2/test.txt'),
     path.resolve('.', 'acceptance_test_remove/dist2/maps/test.txt'),
@@ -252,7 +254,7 @@ const FILES = [
     path.resolve('.', 'acceptance_test_remove/dist8/test.txt'),
     path.resolve('.', 'acceptance_test_remove/dist8/test/test1.txt'),
     path.resolve('.', 'acceptance_test_remove/dist8/test/test2.txt'),
-    path.resolve('.', 'acceptance_test_remove/dist8/test/test/test3.txt')
+    path.resolve('.', 'acceptance_test_remove/dist8/test/test/test3.txt'),
 ];
 
 

@@ -280,5 +280,49 @@ describe('acceptance', function () {
 
             expect(fileExists).to.equal(true);
         });
+
+        it('should not conflict when both include and test are provided', function () {
+            const webpack = new Webpack.EmulatedWebpackCompiler.v4();
+            const instance = new RemovePlugin({
+                before: {
+                    root: './acceptance_test_remove/test7',
+                    include: [
+                        'test',
+                        'test.txt'
+                    ],
+                    test: [
+                        {
+                            folder: '.',
+                            method: () => true,
+                            recursive: true
+                        }
+                    ],
+                    ...logs
+                }
+            });
+
+            instance.apply(webpack);
+            webpack.runBeforeRun();
+
+            const fileExists = fs.existsSync(
+                path.resolve(
+                    '.',
+                    'acceptance_test_remove',
+                    'test7',
+                    'test.txt'
+                )
+            );
+            const folderExists = fs.existsSync(
+                path.resolve(
+                    '.',
+                    'acceptance_test_remove',
+                    'test7',
+                    'test'
+                )
+            );
+
+            expect(fileExists).to.equal(false);
+            expect(folderExists).to.equal(false);
+        });
     });
 });

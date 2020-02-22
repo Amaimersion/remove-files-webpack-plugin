@@ -244,5 +244,57 @@ describe('acceptance', function () {
             expect(filesExists).to.equal(false);
             expect(foldersExists).to.equal(false);
         });
+
+        it('should remove file that is outside the root', function () {
+            const webpack = new Webpack.EmulatedWebpackCompiler.v4();
+            const instance = new RemovePlugin({
+                before: {
+                    root: '.',
+                    include: [
+                        'D:/acceptance_test_remove/test1.txt'
+                    ],
+                    allowRootAndOutside: true,
+                    log: false,
+                    logWarning: true,
+                    logError: true,
+                    logDebug: false
+                }
+            });
+
+            instance.apply(webpack);
+            webpack.runBeforeRun();
+
+            const fileExists = fs.existsSync(
+                'D:/acceptance_test_remove/test1.txt'
+            );
+
+            expect(fileExists).to.equal(false);
+        });
+
+        it('should not remove file that is outside the root', function () {
+            const webpack = new Webpack.EmulatedWebpackCompiler.v4();
+            const instance = new RemovePlugin({
+                before: {
+                    root: '.',
+                    include: [
+                        'D:/acceptance_test_remove/test2.txt'
+                    ],
+                    allowRootAndOutside: false,
+                    log: false,
+                    logWarning: false,
+                    logError: true,
+                    logDebug: false
+                }
+            });
+
+            instance.apply(webpack);
+            webpack.runBeforeRun();
+
+            const fileExists = fs.existsSync(
+                'D:/acceptance_test_remove/test2.txt'
+            );
+
+            expect(fileExists).to.equal(true);
+        });
     });
 });

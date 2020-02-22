@@ -7,9 +7,7 @@ const Plugin = require('../../../src/plugin');
 describe('unit', function () {
     describe('plugin', function () {
         describe('.getItemsForRemoving()', function () {
-            const toAbsolute = (items) => {
-                return `${path.resolve('.')}${path.sep}${path.join(...items)}`;
-            };
+            const toAbsolute = (items) => path.resolve('.', ...items);
 
             it('should correctly handle include', function () {
                 const instance = new Plugin({

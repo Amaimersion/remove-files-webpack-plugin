@@ -32,7 +32,9 @@ describe('acceptance', function () {
                         'Pa.^&th/test/test.txt',
                         '.\\Pa.^&th/test.txt',
                         'test.txt',
-                        './maps/test.txt'
+                        './maps/test.txt',
+                        'styles',
+                        'styles/test'
                     ],
                     test: [
                         {
@@ -99,6 +101,12 @@ describe('acceptance', function () {
                     'maps',
                     'test',
                     'file.map'
+                ) &&
+                !exists(
+                    '.',
+                    'acceptance_test_remove',
+                    'large_test',
+                    'styles'
                 ) &&
                 !exists(
                     '.',

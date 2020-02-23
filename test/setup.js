@@ -120,7 +120,8 @@ const FOLDERS = [
     path.resolve('.', 'acceptance_test_remove/large_test/Pa.^&th/test'),
     path.resolve('.', 'acceptance_test_remove/large_test/pa)t-h (t [e]s {t} +'),
     path.resolve('.', 'acceptance_test_remove/large_test/maps/test'),
-    path.resolve('.', 'acceptance_test_remove/large_test/test')
+    path.resolve('.', 'acceptance_test_remove/large_test/test'),
+    path.resolve('.', 'acceptance_test_remove/large_test/styles/test')
 ];
 
 /**

@@ -13,6 +13,14 @@
  * Move item to trash.
  * Defaults to `false`.
  *
+ * @property {boolean} [rightTrashCallbacks]
+ * Callbacks not works as expected, because trash is async.
+ * We have to assume that trash working without errors,
+ * because there is no more way to call success callback.
+ * If `true`, then callbacks will be added in promise,
+ * otherwise will be called (only success callbacks) before finising.
+ * Defaults to `false`.
+ *
  * @property {(pth: string) => any} [onSuccess]
  * Will be called if file successfully removed.
  * Defaults to `undefined`.
@@ -33,7 +41,15 @@
  *
  * @property {boolean} [toTrash]
  * Move item to trash.
- * Defaults to `true`.
+ * Defaults to `false`.
+ *
+ * @property {boolean} [rightTrashCallbacks]
+ * Callbacks not works as expected, because trash is async.
+ * We have to assume that trash working without errors,
+ * because there is no more way to call success callback.
+ * If `true`, then callbacks will be added in promise,
+ * otherwise will be called (only success callbacks) before finising.
+ * Defaults to `false`.
  *
  * @property {(filePath: string) => any} [onFileSuccess]
  * Will be called if file successfully removed.
@@ -70,8 +86,8 @@
  * result in case of `true`, otherwise item path will be skipped.
  * Defaults to `undefined`.
  *
- * @property {(error: string) => any} [onError]
- * Will be called if error occurs.
+ * @property {(error: string) => any} [onItemError]
+ * Will be called if item error occurs.
  * Defaults to `undefined`.
  *
  * @property {(absolutePath: string) => any} [onTestSuccess]
@@ -135,9 +151,9 @@ class Fs {
      * Removes a file.
      *
      * - don't throws an error if file not exists.
-     * - in case of removing in trash
-     * this becomes an async function and you
-     * should use callbacks.
+     * - in case of removing in trash this becomes an
+     * async function and you should use callbacks
+     * (consider `rightTrashCallbacks` parameter).
      *
      * @param {UnlinkFileParams} params
      * See `UnlinkFileParams` documentation.
@@ -147,60 +163,52 @@ class Fs {
         params = {
             pth: '',
             toTrash: false,
+            rightTrashCallbacks: false,
             onSuccess: undefined,
             onError: undefined,
             ...params
         };
-
-        if (params.toTrash) {
-            /*
-            Callbacks not works as expected, because trash is async.
-            We have to assume that trash working without errors,
-            because there is no more way to call success callback.
-
-            trash(params.pth)
-                .then(() => {
-                    if (params.onSuccess) {
-                        params.onSuccess(params.pth);
-                    }
-                })
-                .catch((error) => {
-                    if (params.onError) {
-                        params.onError(error.message || error);
-                    }
-                });
-            */
-
+        const onSuccess = () => {
             if (params.onSuccess) {
                 params.onSuccess(params.pth);
             }
+        };
+        const onError = (message) => {
+            if (params.onError) {
+                params.onError(message);
+            }
+        };
 
-            trash(params.pth).catch((error) => {
-                throw error;
-            });
+        if (params.toTrash) {
+            if (params.rightTrashCallbacks) {
+                trash(params.pth)
+                    .then(() => onSuccess())
+                    .catch((error) => onError(error.message || error));
+            } else {
+                onSuccess();
+                trash(params.pth)
+                    .catch((error) => {
+                        throw error;
+                    });
+            }
 
             return;
         }
 
         try {
             this.fs.unlinkSync(params.pth);
-
-            if (params.onSuccess) {
-                params.onSuccess(params.pth);
-            }
+            onSuccess();
         } catch (error) {
-            if (params.onError) {
-                params.onError(error.message || error);
-            }
+            onError(error.message || error);
         }
     }
 
     /**
      * Removes a folder.
      *
-     * - in case of removing in trash
-     * this becomes an async function and you
-     * should use callbacks.
+     * - in case of removing in trash this becomes an
+     * async function and you should use callbacks
+     * (consider `rightTrashCallbacks` parameter).
      * - in case of removing in trash
      * don't throws an error if folder not exists.
      *
@@ -212,40 +220,42 @@ class Fs {
         params = {
             pth: '',
             toAbsoluteS: undefined,
-            toTrash: true,
+            toTrash: false,
+            rightTrashCallbacks: false,
             onFileSuccess: undefined,
             onFileError: undefined,
             onFolderSuccess: undefined,
             onFolderError: undefined,
             ...params
         };
-
-        if (params.toTrash) {
-            /*
-            Callbacks not works as expected, because trash is async.
-            We have to assume that trash working without errors,
-            because there is no more way to call success callback.
-
-            trash(params.pth)
-                .then(() => {
-                    if (params.onFolderSuccess) {
-                        params.onFolderSuccess(params.pth);
-                    }
-                })
-                .catch((error) => {
-                    if (params.onFolderError) {
-                        params.onFolderError(error.message || error);
-                    }
-                });
-            */
-
+        const onFileError = (message) => {
+            if (params.onFileError) {
+                params.onFileError(message);
+            }
+        };
+        const onFolderSuccess = () => {
             if (params.onFolderSuccess) {
                 params.onFolderSuccess(params.pth);
             }
+        };
+        const onFolderError = (message) => {
+            if (params.onFolderError) {
+                params.onFolderError(message);
+            }
+        };
 
-            trash(params.pth).catch((error) => {
-                throw error;
-            });
+        if (params.toTrash) {
+            if (params.rightTrashCallbacks) {
+                trash(params.pth)
+                    .then(() => onFolderSuccess())
+                    .catch((error) => onFolderError(error.message || error));
+            } else {
+                onFolderSuccess();
+
+                trash(params.pth).catch((error) => {
+                    throw error;
+                });
+            }
 
             return;
         }
@@ -257,15 +267,14 @@ class Fs {
             const stat = this.getStatSync(item);
 
             if (!stat) {
-                if (params.onFileError) {
-                    params.onFileError(`Skipped, because cannot get stat - "${item}"`);
-                }
+                onFileError(`Skipped, because cannot get stat - "${item}"`);
 
                 continue;
             } else if (stat.isFile()) {
                 this.unlinkFileSync({
                     pth: item,
                     toTrash: params.toTrash,
+                    rightTrashCallbacks: params.rightTrashCallbacks,
                     onSuccess: params.onFileSuccess,
                     onError: params.onFileError
                 });
@@ -277,9 +286,7 @@ class Fs {
                     }
                 });
             } else {
-                if (params.onFileError) {
-                    params.onFileError(`Skipped, because invalid stat – "${item}"`);
-                }
+                onFileError(`Skipped, because invalid stat – "${item}"`);
 
                 continue;
             }
@@ -287,14 +294,9 @@ class Fs {
 
         try {
             fs.rmdirSync(params.pth);
-
-            if (params.onFolderSuccess) {
-                params.onFolderSuccess(params.pth);
-            }
+            onFolderSuccess();
         } catch (error) {
-            if (params.onFolderError) {
-                params.onFolderError(error.message || error);
-            }
+            onFolderError(error.message || error);
         }
     }
 
@@ -311,16 +313,31 @@ class Fs {
      * Absolute folders and files paths.
      */
     getItemsSync(params) {
-        /** @type {UnlinkFileParams} */
+        /** @type {GetItemsParams} */
         params = {
             pth: '',
             join: undefined,
             recursive: false,
             test: undefined,
-            onError: undefined,
+            onItemError: undefined,
             onTestSuccess: undefined,
             onTestFail: undefined,
             ...params
+        };
+        const onItemError = (message) => {
+            if (params.onItemError) {
+                params.onItemError(message);
+            }
+        };
+        const onTestSuccess = (message) => {
+            if (params.onTestSuccess) {
+                params.onTestSuccess(message);
+            }
+        };
+        const onTestFail = (message) => {
+            if (params.onTestFail) {
+                params.onTestFail(message);
+            }
         };
 
         /** @type {string[]} */
@@ -334,9 +351,7 @@ class Fs {
             const stat = this.getStatSync(item);
 
             if (!stat) {
-                if (params.onFileError) {
-                    params.onFileError(`Skipped, because cannot get stat - "${item}"`);
-                }
+                onItemError(`Skipped, because cannot get stat - "${item}"`);
 
                 continue;
             } else if (stat.isFile()) {
@@ -345,10 +360,10 @@ class Fs {
                 if (params.test) {
                     passed = params.test(item);
 
-                    if (passed && params.onTestSuccess) {
-                        params.onTestSuccess(item);
-                    } else if (!passed && params.onTestFail) {
-                        params.onTestFail(item);
+                    if (passed) {
+                        onTestSuccess(item);
+                    } else {
+                        onTestFail(item);
                     }
                 }
 
@@ -361,10 +376,10 @@ class Fs {
                 if (params.test) {
                     passed = params.test(item);
 
-                    if (passed && params.onTestSuccess) {
-                        params.onTestSuccess(item);
-                    } else if (!passed && params.onTestFail) {
-                        params.onTestFail(item);
+                    if (passed) {
+                        onTestSuccess(item);
+                    } else {
+                        onTestFail(item);
                     }
                 }
 
@@ -383,9 +398,7 @@ class Fs {
                     );
                 }
             } else {
-                if (params.onFileError) {
-                    params.onFileError(`Skipped, because invalid stat – "${item}"`);
-                }
+                onItemError(`Skipped, because invalid stat – "${item}"`);
 
                 continue;
             }

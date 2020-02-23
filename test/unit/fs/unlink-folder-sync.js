@@ -76,6 +76,7 @@ describe('unit', function () {
                     pth: 'D:/fs_test_folder_remove_5',
                     toAbsoluteS: (...args) => customPath.toAbsoluteS(...args),
                     toTrash: true,
+                    rightTrashCallbacks: true,
                     onFolderSuccess: () => {
                         const result = fs.existsSync('D:/fs_test_folder_remove_5');
                         const correct = false;
@@ -94,6 +95,7 @@ describe('unit', function () {
                     pth: 'D:/fs_test_folder_remove_6',
                     toAbsoluteS: (...args) => customPath.toAbsoluteS(...args),
                     toTrash: true,
+                    rightTrashCallbacks: true,
                     onFolderSuccess: () => {
                         const result = fs.existsSync('D:/fs_test_folder_remove_6');
                         const correct = false;
@@ -112,6 +114,7 @@ describe('unit', function () {
                     pth: 'D:/fs_test_folder_remove_7',
                     toAbsoluteS: (...args) => customPath.toAbsoluteS(...args),
                     toTrash: true,
+                    rightTrashCallbacks: true,
                     onFolderSuccess: () => {
                         const result = fs.existsSync('D:/fs_test_folder_remove_7');
                         const correct = false;
@@ -130,6 +133,7 @@ describe('unit', function () {
                     pth: 'D:/fs_test_folder_remove_8',
                     toAbsoluteS: (...args) => customPath.toAbsoluteS(...args),
                     toTrash: true,
+                    rightTrashCallbacks: true,
                     onFolderSuccess: () => {
                         const result = fs.existsSync('D:/fs_test_folder_remove_8');
                         const correct = false;

@@ -45,6 +45,7 @@ describe('unit', function () {
                 instance.unlinkFileSync({
                     pth: 'D:/fs_test_file_remove/2 pa)t-h (t [e]s {t} + file.name.txt',
                     toTrash: true,
+                    rightTrashCallbacks: true,
                     onSuccess: () => {
                         const result = fs.existsSync('D:/fs_test_file_remove/2 pa)t-h (t [e]s {t} + file.name.txt');
                         const correct = false;

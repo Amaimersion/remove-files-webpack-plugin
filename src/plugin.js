@@ -764,7 +764,7 @@ class Plugin {
                             `test not passed, skipped – "${file}"`
                         );
                     },
-                    onError: (errorMessage) => {
+                    onItemError: (errorMessage) => {
                         this.loggerDebug.add(`${debugName}${errorMessage}`);
                         this.loggerError.add(errorMessage);
                     }
@@ -792,6 +792,7 @@ class Plugin {
         this.fs.unlinkFileSync({
             pth: absoluteFilePath,
             toTrash: toTrash,
+            rightTrashCallbacks: false,
             onSuccess: (pth) => {
                 this.loggerDebug.add(
                     debugName +
@@ -826,6 +827,7 @@ class Plugin {
         this.fs.unlinkFolderSync({
             pth: absoluteFolderPath,
             toTrash: toTrash,
+            rightTrashCallbacks: false,
             toAbsoluteS: (root, files) => this.path.toAbsoluteS(
                 root,
                 files,

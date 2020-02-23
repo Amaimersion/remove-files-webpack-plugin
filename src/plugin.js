@@ -501,7 +501,7 @@ class Plugin {
                 if (!exists) {
                     const message = `Skipped, because not exists – "${pth}"`;
 
-                    this.loggerError.add(message);
+                    this.loggerWarning.add(message);
                     this.loggerDebug.add(`${debugName}${message}`);
                 }
 
@@ -631,7 +631,7 @@ class Plugin {
                 const message = `Skipped, because invalid stat – "${item}"`;
 
                 this.loggerDebug.add(`${debugName}${message}`);
-                this.loggerError.add(message);
+                this.loggerWarning.add(message);
 
                 continue;
             }

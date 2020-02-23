@@ -153,6 +153,11 @@ class Fs {
         };
 
         if (params.toTrash) {
+            /*
+            Callbacks not works as expected, because trash is async.
+            We have to assume that trash working without errors,
+            because there is no more way to call success callback.
+
             trash(params.pth)
                 .then(() => {
                     if (params.onSuccess) {
@@ -164,6 +169,15 @@ class Fs {
                         params.onError(error.message || error);
                     }
                 });
+            */
+
+            if (params.onSuccess) {
+                params.onSuccess(params.pth);
+            }
+
+            trash(params.pth).catch((error) => {
+                throw error;
+            });
 
             return;
         }
@@ -207,6 +221,11 @@ class Fs {
         };
 
         if (params.toTrash) {
+            /*
+            Callbacks not works as expected, because trash is async.
+            We have to assume that trash working without errors,
+            because there is no more way to call success callback.
+
             trash(params.pth)
                 .then(() => {
                     if (params.onFolderSuccess) {
@@ -218,6 +237,15 @@ class Fs {
                         params.onFolderError(error.message || error);
                     }
                 });
+            */
+
+            if (params.onFolderSuccess) {
+                params.onFolderSuccess(params.pth);
+            }
+
+            trash(params.pth).catch((error) => {
+                throw error;
+            });
 
             return;
         }

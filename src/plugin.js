@@ -342,6 +342,11 @@ class Plugin {
         }
 
         const items = this.getItemsForRemoving(params);
+        const enablePrettyPrinting = (itms) => {
+            if (!params.allowRootAndOutside) {
+                itms.removeRoot(params.root);
+            }
+        };
 
         if (
             !Object.keys(items.directories).length &&
@@ -366,6 +371,7 @@ class Plugin {
                 ' in case of not emulation:'
             );
 
+            enablePrettyPrinting(items);
             this.loggerInfo.add(message, items);
 
             return;
@@ -426,10 +432,7 @@ class Plugin {
             );
         }
 
-        // pretty printing.
-        if (!params.allowRootAndOutside) {
-            items.removeRoot(params.root);
-        }
+        enablePrettyPrinting(items);
 
         const message = (
             'Following items have been ' +

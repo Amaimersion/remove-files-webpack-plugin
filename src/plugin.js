@@ -211,36 +211,36 @@ class Plugin {
         const debugName = 'apply: ';
 
         this.loggerDebug.add(
-            `${debugName}\
-            "apply" method is called`
+            debugName +
+            '"apply" method is called'
         );
         this.loggerDebug.add(
-            `${debugName}\
-            platform – "${os.platform()}"`
+            debugName +
+            `platform – "${os.platform()}"`
         );
         this.loggerDebug.add(
-            `${debugName}\
-            type – "${os.type()}"`
+            debugName +
+            `type – "${os.type()}"`
         );
         this.loggerDebug.add(
-            `${debugName}\
-            release – "${os.release()}"`
+            debugName +
+            `release – "${os.release()}"`
         );
         this.loggerDebug.add(
-            `${debugName}\
-            node – "${process.version}"`
+            debugName +
+            `node – "${process.version}"`
         );
         this.loggerDebug.add(
-            `${debugName}\
-            cwd – "${process.cwd()}"`
+            debugName +
+            `cwd – "${process.cwd()}"`
         );
         this.loggerDebug.add(
-            `${debugName}\
-            before parameters – "${JSON.stringify(this.beforeParams)}"`
+            debugName +
+            `before parameters – "${JSON.stringify(this.beforeParams)}"`
         );
         this.loggerDebug.add(
-            `${debugName}\
-            after parameters – "${JSON.stringify(this.afterParams)}"`
+            debugName +
+            `after parameters – "${JSON.stringify(this.afterParams)}"`
         );
 
         /**
@@ -250,8 +250,8 @@ class Plugin {
         const applyHook = (compiler, v4Hook, v3Hook, params) => {
             if (!params || !Object.keys(params).length) {
                 this.loggerDebug.add(
-                    `${debugName}\
-                    skipped registering, because "params" is empty`
+                    debugName +
+                    'skipped registering, because "params" is empty'
                 );
 
                 return;
@@ -267,14 +267,14 @@ class Plugin {
             if (compiler.hooks) {
                 compiler.hooks[v4Hook].tapAsync(Info.fullName, method);
                 this.loggerDebug.add(
-                    `${debugName}\
-                    v4 hook registered – "${v4Hook}"`
+                    debugName +
+                    `v4 hook registered – "${v4Hook}"`
                 );
             } else if (compiler.plugin) {
                 compiler.plugin(v3Hook, method);
                 this.loggerDebug.add(
-                    `${debugName}\
-                    v3 hook registered – "${v3Hook}"`
+                    debugName +
+                    `v3 hook registered – "${v3Hook}"`
                 );
             } else {
                 throw new Error('webpack is not able to register the plugin');
@@ -304,8 +304,8 @@ class Plugin {
         this.path.type = params._pathType;
 
         this.loggerDebug.add(
-            `${debugName}\
-            path – "${this.path.type || 'auto'}"`
+            debugName +
+            `path – "${this.path.type || 'auto'}"`
         );
         this.handleRemove(params);
 
@@ -334,8 +334,8 @@ class Plugin {
              */
 
             this.loggerDebug.add(
-                `${debugName}\
-                include and test is empty`
+                debugName +
+                'include and test is empty'
             );
 
             return;
@@ -373,8 +373,8 @@ class Plugin {
 
         if (params.beforeRemove) {
             this.loggerDebug.add(
-                `${debugName}\
-                user beforeRemove is called`
+                debugName +
+                'user beforeRemove is called'
             );
 
             const shouldStop = params.beforeRemove(
@@ -385,10 +385,7 @@ class Plugin {
             if (shouldStop) {
                 const message = 'Stopped by user';
 
-                this.loggerDebug.add(
-                    `${debugName}\
-                    ${message}`
-                );
+                this.loggerDebug.add(`${debugName}${message}`);
                 this.loggerInfo.add(message);
 
                 return;
@@ -419,8 +416,8 @@ class Plugin {
 
         if (params.afterRemove) {
             this.loggerDebug.add(
-                `${debugName}\
-                user afterRemove is called`
+                debugName +
+                'user afterRemove is called'
             );
 
             params.afterRemove(
@@ -457,23 +454,23 @@ class Plugin {
         const debugName = 'get-items-for-removing: ';
         const handleRoot = (root) => {
             this.loggerDebug.add(
-                `${debugName}\
-                root before handling – "${root}"`
+                debugName +
+                `root before handling – "${root}"`
             );
 
             root = this.path.path.resolve(root);
 
             this.loggerDebug.add(
-                `${debugName}\
-                root after handling – "${root}"`
+                debugName +
+                `root after handling – "${root}"`
             );
 
             return root;
         };
         const normalize = (items, name) => {
             this.loggerDebug.add(
-                `${debugName}\
-                ${name} before handling – [${items}]`
+                debugName +
+                `${name} before handling – [${items}]`
             );
 
             items = items.map((pth) => this.path.path.normalize(pth));
@@ -483,16 +480,16 @@ class Plugin {
             );
 
             this.loggerDebug.add(
-                `${debugName}\
-                ${name} after handling – [${items}]`
+                debugName +
+                `${name} after handling – [${items}]`
             );
 
             return items;
         };
         const checkExistence = (items, name) => {
             this.loggerDebug.add(
-                `${debugName}\
-                ${name} before existence check – [${items}]`
+                debugName +
+                `${name} before existence check – [${items}]`
             );
 
             items = items.filter((pth) => {
@@ -509,16 +506,16 @@ class Plugin {
             });
 
             this.loggerDebug.add(
-                `${debugName}\
-                ${name} after existence check – [${items}]`
+                debugName +
+                `${name} after existence check – [${items}]`
             );
 
             return items;
         };
         const handleTest = (items, name) => {
             this.loggerDebug.add(
-                `${debugName}\
-                ${name} before testing – [${items}]`
+                debugName +
+                `${name} before testing – [${items}]`
             );
 
             items = items.concat(
@@ -526,24 +523,24 @@ class Plugin {
             );
 
             this.loggerDebug.add(
-                `${debugName}\
-                ${name} after testing – [${items}]`
+                debugName +
+                `${name} after testing – [${items}]`
             );
 
             return items;
         };
         const filter = (include, exclude, name) => {
             this.loggerDebug.add(
-                `${debugName}\
-                ${name} before filtering – [${include}]`
+                debugName +
+                `${name} before filtering – [${include}]`
             );
 
             include = include.filter((includeItem, index) => {
                 // duplicates check.
                 if (include.indexOf(includeItem) !== index) {
                     this.loggerDebug.add(
-                        `${debugName}\
-                        duplicate – "${includeItem}"`
+                        debugName +
+                        `duplicate – "${includeItem}"`
                     );
 
                     return false;
@@ -551,8 +548,8 @@ class Plugin {
 
                 if (exclude.includes(includeItem)) {
                     this.loggerDebug.add(
-                        `${debugName}\
-                        explicitly excluded – "${includeItem}"`
+                        debugName +
+                        `explicitly excluded – "${includeItem}"`
                     );
 
                     return false;
@@ -565,8 +562,8 @@ class Plugin {
 
                     if (save) {
                         this.loggerDebug.add(
-                            `${debugName}\
-                            unexplicitly excluded – "${includeItem}" because of – "${excludeItem}"`
+                            debugName +
+                            `unexplicitly excluded – "${includeItem}" because of – "${excludeItem}"`
                         );
                     }
 
@@ -593,8 +590,8 @@ class Plugin {
             });
 
             this.loggerDebug.add(
-                `${debugName}\
-                ${name} after filtering – [${include}]`
+                debugName +
+                `${name} after filtering – [${include}]`
             );
 
             return include;
@@ -618,8 +615,8 @@ class Plugin {
 
             if (!stat) {
                 this.loggerDebug.add(
-                    `${debugName}\
-                    skipped, because cannot get stat – "${item}"`
+                    debugName +
+                    `skipped, because cannot get stat – "${item}"`
                 );
 
                 continue;
@@ -640,23 +637,23 @@ class Plugin {
         }
 
         this.loggerDebug.add(
-            `${debugName}\
-            directories before cropping – ${items.directories}`
+            debugName +
+            `directories before cropping – ${items.directories}`
         );
         this.loggerDebug.add(
-            `${debugName}\
-            files before cropping – ${items.files}`
+            debugName +
+            `files before cropping – ${items.files}`
         );
 
         items.removeUnnecessary();
 
         this.loggerDebug.add(
-            `${debugName}\
-            directories after cropping – ${items.directories}`
+            debugName +
+            `directories after cropping – ${items.directories}`
         );
         this.loggerDebug.add(
-            `${debugName}\
-            files after cropping – ${items.files}`
+            debugName +
+            `files after cropping – ${items.files}`
         );
 
         return items;
@@ -683,8 +680,8 @@ class Plugin {
             !params.test.length
         ) {
             this.loggerDebug.add(
-                `${debugName}\
-                testing skipped, because params.test is empty`
+                debugName +
+                'testing skipped, because params.test is empty'
             );
 
             return paths;
@@ -699,8 +696,8 @@ class Plugin {
                 test.folder,
                 (oldPath, newPath) => {
                     this.loggerDebug.add(
-                        `${debugName}\
-                        "${oldPath}" converted to "${newPath}"`
+                        debugName +
+                        `"${oldPath}" converted to "${newPath}"`
                     );
                 }
             );
@@ -718,8 +715,8 @@ class Plugin {
 
             if (!itemStat) {
                 this.loggerDebug.add(
-                    `${debugName}\
-                    skipped, because cannot get stat – "${test.folder}"`
+                    debugName +
+                    `skipped, because cannot get stat – "${test.folder}"`
                 );
 
                 continue;
@@ -754,14 +751,14 @@ class Plugin {
                     },
                     onTestSuccess: (file) => {
                         this.loggerDebug.add(
-                            `${debugName}\
-                            test passed, added for removing – "${file}"`
+                            debugName +
+                            `test passed, added for removing – "${file}"`
                         );
                     },
                     onTestFail: (file) => {
                         this.loggerDebug.add(
-                            `${debugName}\
-                            test not passed, skipped – "${file}"`
+                            debugName +
+                            `test not passed, skipped – "${file}"`
                         );
                     },
                     onError: (errorMessage) => {
@@ -794,7 +791,7 @@ class Plugin {
             toTrash: toTrash,
             onSuccess: (pth) => {
                 this.loggerDebug.add(
-                    `${debugName}` +
+                    debugName +
                     'File' +
                     `${toTrash ? '' : ' permanently'}` +
                     ' removed' +
@@ -831,14 +828,14 @@ class Plugin {
                 files,
                 (oldPath, newPath) => {
                     this.loggerDebug.add(
-                        `${debugName}\
-                        "${oldPath}" converted to "${newPath}"`
+                        debugName +
+                        `"${oldPath}" converted to "${newPath}"`
                     );
                 }
             ),
             onFileSuccess: (pth) => {
                 this.loggerDebug.add(
-                    `${debugName}` +
+                    debugName +
                     'File' +
                     `${toTrash ? '' : ' permanently'}` +
                     ' removed' +
@@ -852,7 +849,7 @@ class Plugin {
             },
             onFolderSuccess: (pth) => {
                 this.loggerDebug.add(
-                    `${debugName}` +
+                    debugName +
                     'Folder' +
                     `${toTrash ? '' : ' permanently'}` +
                     ' removed' +
@@ -888,12 +885,12 @@ class Plugin {
         const debugName = 'is-save: ';
 
         this.loggerDebug.add(
-            `${debugName}\
-            root – "${root}"`
+            debugName +
+            `root – "${root}"`
         );
         this.loggerDebug.add(
-            `${debugName}\
-            path – "${pth}"`
+            debugName +
+            `path – "${pth}"`
         );
 
         let save = false;
@@ -904,12 +901,12 @@ class Plugin {
                 pth,
                 (comparedRoot, comparedPth) => {
                     this.loggerDebug.add(
-                        `${debugName}\
-                        compared root – "${comparedRoot}"`
+                        debugName +
+                        `compared root – "${comparedRoot}"`
                     );
                     this.loggerDebug.add(
-                        `${debugName}\
-                        compared path – "${comparedPth}"`
+                        debugName +
+                        `compared path – "${comparedPth}"`
                     );
                 }
             );
@@ -923,8 +920,8 @@ class Plugin {
         }
 
         this.loggerDebug.add(
-            `${debugName}\
-            save – "${save}"`
+            debugName +
+            `save – "${save}"`
         );
 
         return save;

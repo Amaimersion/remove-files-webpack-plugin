@@ -197,6 +197,16 @@ class Items {
         this.directories = this.directories.map(method);
         this.files = this.files.map(method);
     }
+
+    /**
+     * Sorts items in ascending, ASCII character order.
+     *
+     * - changes `this.directories` and `this.files`.
+     */
+    sort() {
+        this.directories = this.directories.sort();
+        this.files = this.files.sort();
+    }
 }
 
 

@@ -341,11 +341,27 @@ class Plugin {
             return;
         }
 
+        /**
+         * After that call values of `params` properties will be changed.
+         * It is bad pattern, but intended behavior.
+         */
         const items = this.getItemsForRemoving(params);
-        const enablePrettyPrinting = (itms) => {
-            if (!params.allowRootAndOutside) {
-                itms.removeRoot(params.root);
+        const enablePrettyPrinting = () => {
+            items.sort();
+
+            if (params.allowRootAndOutside) {
+                return;
             }
+
+            let root = params.root;
+
+            // we removed only relative items, so,
+            // we don't want print absolute paths.
+            if (!root.endsWith(this.path.path.sep)) {
+                root += this.path.path.sep;
+            }
+
+            items.removeRoot(root);
         };
 
         if (
@@ -371,7 +387,7 @@ class Plugin {
                 ' in case of not emulation:'
             );
 
-            enablePrettyPrinting(items);
+            enablePrettyPrinting();
             this.loggerInfo.add(message, items);
 
             return;
@@ -432,7 +448,7 @@ class Plugin {
             );
         }
 
-        enablePrettyPrinting(items);
+        enablePrettyPrinting();
 
         const message = (
             'Following items have been ' +

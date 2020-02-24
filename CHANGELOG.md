@@ -1,3 +1,27 @@
+# 1.3.0 (February 24, 2020)
+
+## Improved
+
+- Stability, performance and quality.
+- Documentation and description.
+- Pretty printing of folders and files that have been removed.
+
+## Added
+
+- New features: `beforeRemove` and `afterRemove` parameters. See [readme](https://github.com/Amaimersion/remove-files-webpack-plugin#parameters) for documentation.
+
+## Changed
+
+- `trash` parameter is `false` by default.
+- `TestObject.method` supports testing for folders. **Ensure that behavior of your current tests remain unchanged.**
+
+## Fixed
+
+- A bug when safety of removal could have been incorrectly determined in specific cases.
+- A bug when "unnecessary" folders and files could have been incorrectly excluded in specific cases.
+- A bug when `exclude` could not work as expected in specific cases.
+
+
 # 1.2.2 (January 19, 2020)
 
 ## Fixed

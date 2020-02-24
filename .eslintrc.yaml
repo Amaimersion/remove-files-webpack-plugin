@@ -8,6 +8,9 @@ env:
 parserOptions:
   ecmaVersion: 9
 
+ignorePatterns:
+  - "test/" 
+
 rules:
   # Possible Errors
   no-await-in-loop: "warn"
@@ -154,6 +157,8 @@ rules:
     - "error"
     - 4
     - "SwitchCase": 1
+      "ignoredNodes":
+        - "ConditionalExpression"
   key-spacing:
     - "error"
     - "beforeColon": false
@@ -289,7 +294,7 @@ rules:
   prefer-arrow-callback: "error"
   prefer-const: "error"
   prefer-spread: "error"
-  prefer-template: "error"
+  prefer-template: "off" # disabled because i have to use it in some places.
   template-curly-spacing: 
     - "error"
     - "never"

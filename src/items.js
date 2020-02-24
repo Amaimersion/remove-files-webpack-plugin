@@ -1,9 +1,7 @@
 'use strict';
 
 
-const fs = require('fs');
-const path = require('path');
-const Utils = require('./utils');
+const Path = require('./path');
 
 
 /**
@@ -65,126 +63,129 @@ class Items {
     }
 
     /**
-     * Crops unecessary folders and files.
+     * Removes unnecessary folders and files.
      *
-     * - it's clears childrens directories or files,
+     * - it removes children directories or files
      * whose parents will be removed;
      * - changes `this.directories` and `this.files`.
      *
      * @example
-     * this = {
-     *   directories: [
-     *     'D:/dist/styles/css',
-     *     'D:/dist/js/scripts',
-     *     'D:/dist/styles',
-     *     'D:/test'
-     *   ],
-     *   files: [
-     *     'D:/dist/styles/popup.css',
-     *     'D:/dist/styles/popup.css.map',
-     *     'D:/dist/manifest.json',
-     *     'D:/test.txt'
-     *   ]
-     * };
+     * Input:
+     * directories: [
+     *   'D:/dist/styles/css',
+     *   'D:/dist/js/scripts',
+     *   'D:/dist/styles',
+     *   'D:/test',
+     *   'C:/test/test_1'
+     * ]
+     * files: [
+     *   'D:/dist/styles/popup.css',
+     *   'D:/dist/styles/popup.css.map',
+     *   'D:/dist/manifest.json',
+     *   'D:/test.txt',
+     *   'D:/dist/js/scripts/test.js'
+     * ]
      *
-     * After cropUnnecessaryItems() will be:
-     * this = {
-     *   directories: [
-     *     'D:/dist/js/scripts',
-     *     'D:/dist/styles',
-     *     'D:/test'
-     *   ],
-     *   files: [
-     *     'D:/dist/manifest.json',
-     *     'D:/test.txt'
-     *   ]
-     * };
-     *
-     * because entire styles folder will be removed.
+     * Output:
+     * // there is no point in 'D:/dist/styles/css'
+     * // because entire 'D:/dist/styles' will be removed.
+     * directories: [
+     *   'D:/dist/js/scripts',
+     *   'D:/dist/styles',
+     *   'D:/test',
+     *   'C:/test/test_1'
+     * ]
+     * // there is no point in 'D:/dist/styles/popup.css' and
+     * // 'D:/dist/styles/popup.css.map' because entire 'D:/dist/styles'
+     * // will be removed.
+     * // there is no point in 'D:/dist/js/scripts/test.js' because entire
+     * // 'D:/dist/js/scripts' will be removed.
+     * files: [
+     *   'D:/dist/manifest.json',
+     *   'D:/test.txt'
+     * ]
      */
-    cropUnnecessaryItems() {
+    removeUnnecessary() {
         if (!this.directories.length) {
             return;
         }
 
-        const rightItems = new Items();
+        /** @type {Set<string>} */
         const unnecessaryIndexes = new Set();
 
+        /** @type {string[]} */
+        const rightDirectories = [];
+
+        /** @type {string[]} */
+        const rightFiles = [];
+
         /**
-         * - at the moment it is duplicates `isSave()` from `plugin.js`,
-         * which leads to big issues with performance and quality of code.
-         * So, we need to do refactoring of this.
-         *
          * @param {string[]} firstGroup
          * @param {string[]} secondGroup
          * @param {Set<string>} indexes
          */
         const addToUnnecessaryIndexes = (firstGroup, secondGroup, indexes) => {
-            for (let itemFirst of firstGroup) {
-                itemFirst = Utils.escape(
-                    path.resolve(itemFirst)
-                );
+            const path = new Path();
 
-                const regexpForFile = new RegExp(`(^${itemFirst})`, 'm');
-                const regexpForFolder = new RegExp(`(^${itemFirst})(.+)`, 'm');
-
-                // eslint-disable-next-line guard-for-in
-                for (const itemSecond in secondGroup) {
-                    const item = path.resolve(
-                        secondGroup[itemSecond]
-                    );
-                    const stat = fs.statSync(item);
-
-                    if (stat.isFile()) {
-                        const newItem = path.dirname(item);
-
-                        if (regexpForFile.test(newItem)) {
-                            indexes.add(itemSecond);
-                        }
-                    } else {
-                        if (regexpForFolder.test(item)) {
-                            indexes.add(itemSecond);
-                        }
+            for (const itemFirst of firstGroup) {
+                for (const indexSecond in secondGroup) {
+                    if (path.isSave(itemFirst, secondGroup[indexSecond])) {
+                        indexes.add(indexSecond);
                     }
                 }
             }
         };
 
         /**
-         * @param {string[]} firstGroup
-         * @param {string[]} secondGroup
+         * @param {string[]} rightGroup
+         * @param {string[]} itemsGroup
          * @param {Set<string>} indexes
          */
         const addToRightGroup = (rightGroup, itemsGroup, indexes) => {
-            for (const index in itemsGroup) {
-                if (!indexes.has(index)) {
-                    rightGroup.push(itemsGroup[index]);
+            for (const itemIndex in itemsGroup) {
+                if (!indexes.has(itemIndex)) {
+                    rightGroup.push(itemsGroup[itemIndex]);
                 }
             }
         };
 
-        addToUnnecessaryIndexes(this.directories, this.directories, unnecessaryIndexes);
-        addToRightGroup(rightItems.directories, this.directories, unnecessaryIndexes);
+        addToUnnecessaryIndexes(
+            this.directories,
+            this.directories,
+            unnecessaryIndexes
+        );
+        addToRightGroup(
+            rightDirectories,
+            this.directories,
+            unnecessaryIndexes
+        );
 
         unnecessaryIndexes.clear();
 
-        addToUnnecessaryIndexes(rightItems.directories, this.files, unnecessaryIndexes);
-        addToRightGroup(rightItems.files, this.files, unnecessaryIndexes);
+        addToUnnecessaryIndexes(
+            rightDirectories,
+            this.files,
+            unnecessaryIndexes
+        );
+        addToRightGroup(
+            rightFiles,
+            this.files,
+            unnecessaryIndexes
+        );
 
-        this.directories = rightItems.directories.slice();
-        this.files = rightItems.files.slice();
+        this.directories = rightDirectories.slice();
+        this.files = rightFiles.slice();
     }
 
     /**
      * Trims a root.
      *
-     * - should be used only for pretty printing;
      * - changes `this.directories` and `this.files`.
      *
      * @param {string} root
-     * A root value that should be trimmed.
+     * A root value that should be removed.
      */
-    trimRoot(root) {
+    removeRoot(root) {
         const method = (value) => {
             if (value.indexOf(root) === 0) {
                 value = value.replace(root, '');
@@ -195,6 +196,16 @@ class Items {
 
         this.directories = this.directories.map(method);
         this.files = this.files.map(method);
+    }
+
+    /**
+     * Sorts items in ascending, ASCII character order.
+     *
+     * - changes `this.directories` and `this.files`.
+     */
+    sort() {
+        this.directories = this.directories.sort();
+        this.files = this.files.sort();
     }
 }
 

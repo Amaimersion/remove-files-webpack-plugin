@@ -13,9 +13,12 @@
 - [Installation](#installation)
 - [Support](#support)
 - [Usage](#usage)
+- [Notes for Windows users](#notes-for-windows-users)
+  - [Single backward slash](#single-backward-slash)
+  - [Segment separator](#segment-separator)
+  - [Per-drive working directory](#per-drive-working-directory)
 - [Parameters](#parameters)
     - [How to set](#how-to-set)
-    - [Example](#example)
 - [Examples](#examples)
 - [Contribution](#contribution)
 - [License](#license)
@@ -59,24 +62,42 @@ module.exports = {
 ```
 
 
+## Notes for Windows users
+
+### Single backward slash
+
+JavaScript uses it for escaping. If you want to use backward slash, then use double backward slash. Example: `C:\\Windows\\System32\\cmd.exe`. By the way, single forward slashes are also supported.
+
+### Segment separator
+
+All paths that you get or see from the plugin will contain platform-specific segment separator (i.e. slash): `\\` on Windows and `/` on POSIX. So, for example, even if you passed folders or files with `/` as separator, `TestObject.method` will give you a path with `\\` as segment separator.
+
+### Per-drive working directory
+
+From [Node.js documentation](https://nodejs.org/api/path.html#path_windows_vs_posix):
+> On Windows Node.js follows the concept of per-drive working directory. This behavior can be observed when using a drive path without a backslash. For example, `path.resolve('c:\\')` can potentially return a different result than `path.resolve('c:')`. For more information, see [this MSDN page](https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file#fully-qualified-vs-relative-paths).
+
+
 ## Parameters
 
-|         Name         |              Type               | Default  |                                                                       Description                                                                       |
-| :------------------: | :-----------------------------: | :------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------: |
-|         root         |            `string`             |   `.`    |            A root directory.  Not absolute paths will be appended to this.  Defaults to where `package.json` and `node_modules` are located.            |
-|       include        |           `string[]`            |   `[]`   |                                                            A folders or files for removing.                                                             |
-|       exclude        |           `string[]`            |   `[]`   |                                                                 A files for excluding.                                                                  |
-|         test         |         `TestObject[]`          |   `[]`   |                                                                 A folders for testing.                                                                  |
-|  TestObject.folder   |            `string`             | Required |                                                                  A path to the folder.                                                                  |
-|  TestObject.method   | `(filePath: string) => boolean` | Required |      A method that accepts file path (`root` + directoryPath + fileName) and  returns value that indicates should be this file be removed or not.       |
-| TestObject.recursive |            `boolean`            | `false`  |                                                Test in all subfolders, not just in `TestObject.folder`.                                                 |
-|        trash         |            `boolean`            |  `true`  |                                       Move folders or files to trash (recycle bin) instead of permanent removing.                                       |
-|         log          |            `boolean`            |  `true`  |                                 Print messages of "info" level  (example: "Which folders or files have been removed").                                  |
-|      logWarning      |            `boolean`            |  `true`  |                                    Print messages of "warning" level  (example: "An items for removing not found").                                     |
-|       logError       |            `boolean`            | `false`  |                                        Print messages of "error" level  (example: "No such file or directory").                                         |
-|       logDebug       |            `boolean`            | `false`  |                                          Print messages of "debug" level  (used for developers of the plugin).                                          |
-|       emulate        |            `boolean`            | `false`  |               Emulate remove process.  Print which folders or files will be removed without actually removing them.  Ignores `log` value.               |
-| allowRootAndOutside  |            `boolean`            | `false`  | Allow removing of `root` directory or outside `root` directory.  It is kind of safe mode.  **Don't turn it on if you don't know what you actually do!** |
+|         Name         |                                             Type                                             |   Default   |                                                                                                                            Description                                                                                                                             |
+| :------------------: | :------------------------------------------------------------------------------------------: | :---------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|         root         |                                           `string`                                           |     `.`     |                                                               A root directory.<br>Not absolute paths will be appended to this.<br>Defaults to where `package.json` and `node_modules` are located.                                                                |
+|       include        |                                          `string[]`                                          |    `[]`     |                                                                                                                 A folders and files for removing.                                                                                                                  |
+|       exclude        |                                          `string[]`                                          |    `[]`     |                                                                                                                 A folders and files for excluding.                                                                                                                 |
+|         test         |                                        `TestObject[]`                                        |    `[]`     |                                                                                                                       A folders for testing.                                                                                                                       |
+|  TestObject.folder   |                                           `string`                                           |  Required   |                                                                                                             A path to the folder (relative to `root`).                                                                                                             |
+|  TestObject.method   |                             `(absolutePath: string) => boolean`                              |  Required   |                                                          A method that accepts an item path (`root` + folderPath + fileName) and<br>returns value that indicates should this item be removed or not.<br>                                                           |
+| TestObject.recursive |                                          `boolean`                                           |   `false`   |                                                                                                         Apply this method to all items in subdirectories.                                                                                                          |
+|     beforeRemove     | `(`<br>`absoluteFoldersPaths: string[],`<br>`absoluteFilesPaths: string[]`<br>`) => boolean` | `undefined` | If specified, will be called before removing.<br>Absolute paths of folders and files that<br>will be removed will be passed into this function.<br>If returned value is `true`,<br>then remove process will be canceled.<br>Will be not called if `emulate` is on. |
+|     afterRemove      |  `(`<br>`absoluteFoldersPaths: string[],`<br>`absoluteFilesPaths: string[]`<br>`) => void`   | `undefined` |                                                          If specified, will be called after removing.<br>Absolute paths of folders and files<br>that have been removed will be passed into this function.                                                          |
+|        trash         |                                          `boolean`                                           |   `false`   |                                                                    Move folders and files to trash (recycle bin) instead of permanent removing.<br>Requires Windows 8+, macOS 10.12+ or Linux.                                                                     |
+|         log          |                                          `boolean`                                           |   `true`    |                                                                                      Print messages of "info" level<br>(example: "Which folders or files have been removed").                                                                                      |
+|      logWarning      |                                          `boolean`                                           |   `true`    |                                                                                         Print messages of "warning" level<br>(example: "An items for removing not found").                                                                                         |
+|       logError       |                                          `boolean`                                           |   `false`   |                                                                                             Print messages of "error" level<br>(example: "No such file or directory").                                                                                             |
+|       logDebug       |                                          `boolean`                                           |   `false`   |                                                                                                      Print messages of "debug" level<br>(used for debugging).                                                                                                      |
+|       emulate        |                                          `boolean`                                           |   `false`   |                                                                Emulate remove process.<br>Print which folders and files will be removed without actually removing them.<br>Ignores `log` parameter.                                                                |
+| allowRootAndOutside  |                                          `boolean`                                           |   `false`   |                                                    Allow removing of `root` directory or outside `root` directory.<br>It is kind of safe mode.<br>**Don't turn it on if you don't know what you actually do!**                                                     |
 
 #### How to set
 
@@ -85,75 +106,18 @@ You can pass these parameters into both `before` and `after` keys. Each key is o
 - `before` - executes before compilation; 
 - `after` - executes after compilation.
 
-#### Example
-
-```javascript
-const RemovePlugin = require('remove-files-webpack-plugin');
-
-module.exports = {
-    plugins: [
-        new RemovePlugin({
-            /**
-             * Before compilation removes entire 
-             * `./dist` folder to trash.
-             */
-            before: {
-                include: [
-                    'dist'
-                ]
-            },
-
-            /**
-             * After compilation removes all files in 
-             * `./dist/styles` folder that have `.map` extension
-             * to trash.
-             */
-            after: {
-                test: [
-                    {
-                        folder: 'dist/styles',
-                        method: (filePath) => {
-                            return new RegExp(/\.map$/, 'm').test(filePath);
-                        }
-                    } 
-                ]
-            }
-        })
-    ]
-};
-```
-
 
 ## Examples
 
 ```javascript
 new RemovePlugin({
     /**
-     * Before compilation removes entire 
-     * `./dist` folder to trash.
+     * Before compilation permanently removes
+     * entire `./dist` folder.
      */
     before: {
         include: [
-            'dist'
-        ]
-    },
-
-    /**
-     * After compilation removes all css maps 
-     * in `./dist/styles` folder to trash except 
-     * `popup.css.map` file.
-     */
-    after: {
-        exclude: [
-            'dist/styles/popup.css.map'
-        ],
-        test: [
-            {
-                folder: 'dist/styles',
-                method: (filePath) => {
-                    return new RegExp(/\.map$/, 'm').test(filePath);
-                }
-            }
+            './dist'
         ]
     }
 })
@@ -162,66 +126,17 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * After compilation removes all css maps in 
-     * `./dist/styles` folder to trash and all subfolders 
-     * (e.g. `./dist/styles/header`).
+     * After compilation removes both 
+     * `./dist/manifest.json` file and 
+     * `./dist/maps` folder to trash.
      */
     after: {
-        test: [
-            {
-                folder: 'dist/styles',
-                method: (filePath) => {
-                    return new RegExp(/\.map$/, 'm').test(filePath);
-                },
-                recursive: true
-            }
-        ]
-    }
-})
-```
-
-```javascript
-new RemovePlugin({
-    /**
-     * Before compilation removes both 
-     * `./dist/manifest.json` file and `./dist/js` folder
-     * to trash.
-     */
-    before: {
         root: './dist',
         include: [
             'manifest.json',
-            'js'
-        ]
-    }
-})
-```
-
-```javascript
-new RemovePlugin({
-    /**
-     * After compilation:
-     * - removes all css maps in `./dist/styles` folder to trash.
-     * - removes all js maps in `./dist/scripts` folder to trash and 
-     * all subfolders (e.g. `./dist/scripts/header`).
-     */
-    after: {
-        root: './dist',
-        test: [
-            {
-                folder: './styles',
-                method: (filePath) => {
-                    return new RegExp(/\.map$/, 'm').test(filePath);
-                }
-            },
-            {
-                folder: './scripts',
-                method: (filePath) => {
-                    return new RegExp(/\.js.map$/, 'm').test(filePath);
-                },
-                recursive: true
-            }
-        ]
+            'maps'
+        ],
+        trash: true
     }
 })
 ```
@@ -230,16 +145,14 @@ new RemovePlugin({
 new RemovePlugin({
     /**
      * Before compilation permanently removes both 
-     * `./dist/manifest.json` file and `./dist/js` folder.
+     * `./dist/manifest.json` file and `./dist/maps` folder.
      * Log only works for warnings and errors.
      */
     before: {
-        root: './dist',
         include: [
-            'manifest.json',
-            'js'
+            'dist/manifest.json',
+            './dist/maps'
         ],
-        trash: false,
         log: false,
         logWarning: true,
         logError: true,
@@ -251,9 +164,106 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
+     * After compilation permanently removes 
+     * all maps files in `./dist/styles` folder and 
+     * all subfolders (e.g. `./dist/styles/header`).
+     */
+    after: {
+        test: [
+            {
+                folder: 'dist/styles',
+                method: (absoluteItemPath) => {
+                    return new RegExp(/\.map$/, 'm').test(absoluteItemPath);
+                },
+                recursive: true
+            }
+        ]
+    }
+})
+```
+
+```javascript
+new RemovePlugin({
+    /**
+     * After compilation:
+     * - permanently removes all css maps in `./dist/styles` folder.
+     * - permanently removes all js maps in `./dist/scripts` folder and 
+     * all subfolders (e.g. `./dist/scripts/header`).
+     */
+    after: {
+        root: './dist',
+        test: [
+            {
+                folder: './styles',
+                method: (absoluteItemPath) => {
+                    return new RegExp(/\.css\.map$/, 'm').test(absoluteItemPath);
+                }
+            },
+            {
+                folder: './scripts',
+                method: (absoluteItemPath) => {
+                    return new RegExp(/\.js\.map$/, 'm').test(absoluteItemPath);
+                },
+                recursive: true
+            }
+        ]
+    }
+})
+```
+
+```javascript
+new RemovePlugin({
+    /**
+     * Before compilation permanently removes all
+     * folders, subfolders and files from `./dist/maps`
+     * except `./dist/maps/main.map.js` file.
+     */
+    before: {
+        root: './dist'
+        /**
+         * You should do like this
+         * instead of `include: ['./maps']`.
+         */
+        test: [
+            {
+                folder: './maps',
+                method: () => true,
+                recursive: true
+            }
+        ],
+        exclude: [
+            './maps/main.map.js'
+        ]
+    },
+
+    /**
+     * After compilation permanently removes 
+     * all css maps in `./dist/styles` folder 
+     * except `popup.css.map` file.
+     */
+    after: {
+        test: [
+            {
+                folder: 'dist/styles',
+                method: (absoluteItemPath) => {
+                    return new RegExp(/\.css\.map$/, 'm').test(absoluteItemPath);
+                }
+            }
+        ],
+        exclude: [
+            'dist/styles/popup.css.map'
+        ]
+    }
+})
+```
+
+```javascript
+new RemovePlugin({
+    /**
      * Before compilation emulates remove process
-     * for a file that outside of the root directory.
-     * That file will be removed in trash.
+     * for a file that is outside of the root directory.
+     * That file will be removed in trash in case of
+     * not emulation.
      */
     before: {
         root: '.', // "D:\\remove-files-webpack-plugin-master"
@@ -267,10 +277,52 @@ new RemovePlugin({
 })
 ```
 
+```javascript
+new RemovePlugin({
+    /**
+     * After compilation grabs all files from
+     * all subdirectories and decides should
+     * remove process be continued or not.
+     * If removed process is continued,
+     * then logs results with custom logger.
+     */
+    after: {
+        root: './dist',
+        test: [
+            {
+                folder: '.',
+                method: () => true,
+                recursive: true
+            }
+        ],
+        beforeRemove: (absoluteFoldersPaths, absoluteFilesPaths) => {
+            // cancel removing if there at least one folder.
+            if (absoluteFoldersPaths.length) {
+                return true;
+            }
+
+            // cancel removing if there at least one `.txt` file.
+            for (const item of absoluteFilesPaths) {
+                if (item.includes('.txt')) {
+                    return true;
+                }
+            }
+        },
+        afterRemove: (absoluteFoldersPaths, absoluteFilesPaths) => {
+            // replacing plugin logger with custom logger.
+            console.log('Successfully removed:');
+            console.log(`Folders – [${absoluteFoldersPaths}]`);
+            console.log(`Files – [${absoluteFilesPaths}]`);
+        },
+        log: false
+    }
+})
+```
+
 
 ## Contribution
 
-Feel free to use [issues](https://github.com/Amaimersion/remove-files-webpack-plugin/issues). [Pull requests](https://github.com/Amaimersion/remove-files-webpack-plugin/pulls) are also always welcome!
+Feel free to use [issues](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/new/choose). [Pull requests](https://github.com/Amaimersion/remove-files-webpack-plugin/compare) are also always welcome!
 
 
 ## License

@@ -1,4 +1,4 @@
-// Type definitions for remove-files-webpack-plugin 1.2
+// Type definitions for remove-files-webpack-plugin 1.3
 // Project: https://github.com/Amaimersion/remove-files-webpack-plugin/blob/master/README.md
 // Definitions by: Sergey Kuznetsov <https://github.com/Amaimersion>
 // Definitions: https://github.com/Amaimersion/remove-files-webpack-plugin
@@ -44,14 +44,14 @@ interface RemoveParameters {
     root?: string;
 
     /**
-     * A folders or files for removing.
+     * A folders and files for removing.
      *
      * Defaults to `[]`.
      */
     include?: ReadonlyArray<string>;
 
     /**
-     * A files for excluding.
+     * A folders and files for excluding.
      *
      * Defaults to `[]`.
      */
@@ -65,10 +65,35 @@ interface RemoveParameters {
     test?: ReadonlyArray<TestObject>;
 
     /**
-     * Move folders or files to trash (recycle bin)
+     * If specified, will be called before removing.
+     * Absolute paths of folders and files that will be removed
+     * will be passed into this function.
+     * If returned value is `true`, then
+     * remove process will be canceled.
+     * Will be not called if `emulate` is on.
+     * Defaults to `undefined`.
+     */
+    beforeRemove?: (
+        absoluteFoldersPaths: string[],
+        absoluteFilesPaths: string[]
+    ) => boolean;
+
+    /**
+     * If specified, will be called after removing.
+     * Absolute paths of folders and files that have been removed
+     * will be passed into this function.
+     * Defaults to `undefined`.
+     */
+    afterRemove?: (
+        absoluteFoldersPaths: string[],
+        absoluteFilesPaths: string[]
+    ) => void;
+
+    /**
+     * Move folders and files to trash (recycle bin)
      * instead of permanent removing.
      *
-     * Defaults to `true`.
+     * Defaults to `false`.
      */
     trash?: boolean;
 
@@ -98,7 +123,7 @@ interface RemoveParameters {
 
     /**
      * Print messages of "debug" level
-     * (used for developers of the plugin).
+     * (used for debugging).
      *
      * Defaults to `false`.
      */
@@ -106,9 +131,9 @@ interface RemoveParameters {
 
     /**
      * Emulate remove process.
-     * Print which folders or files will be removed
+     * Print which folders and files will be removed
      * without actually removing them.
-     * Ignores `log` value.
+     * Ignores `log` parameter.
      *
      * Defaults to `false`.
      */
@@ -125,24 +150,22 @@ interface RemoveParameters {
 }
 
 /**
- * A folder for testing of files that should be removed.
+ * A folder for testing of items (folders and files) that should be removed.
  */
 interface TestObject {
     /**
-     * A path to the folder.
+     * A path to the folder (relative to `root`).
      */
     folder: string;
 
     /**
-     * A method that accepts file path
-     * (root + directoryPath + fileName) and
-     * returns value that indicates should be
-     * this file be removed or not.
+     * A method that accepts an item path (`root` + folderPath + fileName) and
+     * returns value that indicates should this item be removed or not.
      */
-    method: (filePath: string) => boolean;
+    method: (absolutePath: string) => boolean;
 
     /**
-     * Test in all subfolders, not just in `folder`.
+     * Apply this method to all items in subdirectories.
      *
      * Defaults to `false`.
      */

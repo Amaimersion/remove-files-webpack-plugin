@@ -1,7 +1,12 @@
-node_modules
+.github
 .vscode
-.prettierrc.yaml
+.nyc_output
+node_modules
+coverage
+test
 .eslintrc.yaml
 .gitignore
+.prettierrc.yaml
+TODO
 yarn.lock
 *.log

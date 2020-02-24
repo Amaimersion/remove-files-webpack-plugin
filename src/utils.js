@@ -6,7 +6,12 @@
  */
 class Utils {
     /**
-     * Escapes a string.
+     * Escapes a string for pasting in RegExp.
+     *
+     * - means `\` will be in RegExp, like this
+     * `/D:\/\(test/`.
+     * - you should insert result in RegExp like
+     * a string, not like expression.
      *
      * @param {string} string
      * A string for escaping.
@@ -14,7 +19,7 @@ class Utils {
      * @returns {string}
      * Escaped string.
      */
-    static escape(string) {
+    static escapeForRegExp(string) {
         return string.replace(
             // eslint-disable-next-line no-useless-escape
             /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,

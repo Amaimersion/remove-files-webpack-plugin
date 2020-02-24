@@ -5,17 +5,17 @@
 
 /**
  * @typedef {Object} TestObject
- * A folder for testing of files that should be removed.
+ * A folder for testing of folders and files that should be removed.
  *
  * @property {string} folder
- * A path to the folder.
+ * A path to the folder (relative to `root`).
  *
- * @property {(filePath: string) => boolean} method
- * A method that accepts a file path (`root` + directoryPath + filePath) and
- * returns value that indicates should be this file be removed or not.
+ * @property {(absolutePath: string) => boolean} method
+ * A method that accepts an item path (`root` + folderPath + fileName) and
+ * returns value that indicates should this item be removed or not.
  *
  * @property {boolean} recursive
- * Apply this method to files in subdirectories.
+ * Apply this method to all items in subdirectories.
  */
 
 /**
@@ -28,21 +28,42 @@
  * Defaults to `.` (where `package.json` and `node_modules` are located).
  *
  * @property {string[]} include
- * A folders or files for removing.
+ * A folders and files for removing.
  * Defaults to `[]`.
  *
  * @property {string[]} exclude
- * A files for excluding.
+ * A folders and files for excluding.
  * Defaults to `[]`.
  *
  * @property {TestObject[]} test
  * A folders for testing.
  * Defaults to `[]`.
  *
+ * @property {(
+ *  absoluteFoldersPaths: string[],
+ *  absoluteFilesPaths: string[]
+ * ) => boolean} beforeRemove
+ * If specified, will be called before removing.
+ * Absolute paths of folders and files that will be removed
+ * will be passed into this function.
+ * If returned value is `true`, then
+ * remove process will be canceled.
+ * Will be not called if `emulate` is on.
+ * Defaults to `undefined`.
+ *
+ * @property {(
+ *  absoluteFoldersPaths: string[],
+ *  absoluteFilesPaths: string[]
+ * ) => void} afterRemove
+ * If specified, will be called after removing.
+ * Absolute paths of folders and files that have been removed
+ * will be passed into this function.
+ * Defaults to `undefined`.
+ *
  * @property {boolean} trash
- * Move folders or files to trash (recycle bin)
+ * Move folders and files to trash (recycle bin)
  * instead of permanent deleting.
- * Defaults to `true`.
+ * Defaults to `false`.
  *
  * @property {boolean} log
  * Print messages of "info" level
@@ -61,20 +82,24 @@
  *
  * @property {boolean} logDebug
  * Print messages of "debug" level
- * (used for developers of the plugin).
+ * (used for debugging).
  * Defaults to `false`.
  *
  * @property {boolean} emulate
  * Emulate remove process.
- * Print which folders or files will be removed without actually removing them.
- * Ignores `log`.
+ * Print which folders and files will be removed without actually removing them.
+ * Ignores `log` parameter.
  * Defaults to `false`.
  *
  * @property {boolean} allowRootAndOutside
  * Allow removing of the `root` directory or outside the `root` directory.
  * It's kind of safe mode.
- * Don't turn it on, if you don't know what you actually do!
+ * Don't turn it on if you don't know what you actually do!
  * Defaults to `false`.
+ *
+ * @property {PathType} _pathType
+ * Type of `path` module.
+ * Defaults to `''` (will be selected based on OS).
  */
 
 /**
@@ -101,11 +126,11 @@
 //#endregion
 
 
-const fs = require('fs');
-const path = require('path');
-const trash = require('trash');
+const os = require('os');
+const process = require('process');
+const Fs = require('./fs');
+const Path = require('./path');
 const Items = require('./items');
-const Utils = require('./utils');
 const Logger = require('./logger');
 const Info = require('./info');
 
@@ -134,6 +159,8 @@ class Plugin {
             );
         }
 
+        this.fs = new Fs();
+        this.path = new Path();
         this.loggerError = new Logger.ErrorLogger();
         this.loggerWarning = new Logger.WarningLogger();
         this.loggerInfo = new Logger.InfoLogger();
@@ -141,17 +168,20 @@ class Plugin {
 
         /** @type {RemovingParameters} */
         const defaultParams = {
-            root: path.resolve('.'),
+            root: this.path.path.resolve('.'),
             include: [],
             exclude: [],
             test: [],
-            trash: true,
+            trash: false,
+            beforeRemove: undefined,
+            afterRemove: undefined,
             log: true,
             logWarning: true,
             logError: false,
             logDebug: false,
             emulate: false,
-            allowRootAndOutside: false
+            allowRootAndOutside: false,
+            _pathType: ''
         };
 
         /** @type {RemovingParameters} */
@@ -173,48 +203,91 @@ class Plugin {
      *
      * @param {Compiler} main
      * "Represents the fully configured webpack environment.".
+     *
+     * @throws
+     * Throws an error if webpack is not able to register the plugin.
      */
     apply(cmplr) {
+        const debugName = 'apply: ';
+
+        this.loggerDebug.add(
+            debugName +
+            '"apply" method is called'
+        );
+        this.loggerDebug.add(
+            debugName +
+            `platform – "${os.platform()}"`
+        );
+        this.loggerDebug.add(
+            debugName +
+            `type – "${os.type()}"`
+        );
+        this.loggerDebug.add(
+            debugName +
+            `release – "${os.release()}"`
+        );
+        this.loggerDebug.add(
+            debugName +
+            `node – "${process.version}"`
+        );
+        this.loggerDebug.add(
+            debugName +
+            `cwd – "${process.cwd()}"`
+        );
+        this.loggerDebug.add(
+            debugName +
+            `before parameters – "${JSON.stringify(this.beforeParams)}"`
+        );
+        this.loggerDebug.add(
+            debugName +
+            `after parameters – "${JSON.stringify(this.afterParams)}"`
+        );
+
         /**
          * webpack 4+ comes with a new plugin system.
          * Checking for hooks in order to support old plugin system.
          */
-        const applyHook = (compiler, v4Hook, v3Hook, params, method) => {
+        const applyHook = (compiler, v4Hook, v3Hook, params) => {
             if (!params || !Object.keys(params).length) {
+                this.loggerDebug.add(
+                    debugName +
+                    'skipped registering, because "params" is empty'
+                );
+
                 return;
             }
 
+            const method = (compilerOrCompilation, callback) => {
+                this.loggerDebug.add(`${debugName}hook started – "${v4Hook}"`);
+                this.handleHook(params, callback);
+                this.loggerDebug.add(`${debugName}hook ended – "${v4Hook}"`);
+                this.log(compilerOrCompilation, params);
+            };
+
             if (compiler.hooks) {
                 compiler.hooks[v4Hook].tapAsync(Info.fullName, method);
-                this.loggerDebug.add(`v4 hook registered – "${v4Hook}"`);
-            } else {
+                this.loggerDebug.add(
+                    debugName +
+                    `v4 hook registered – "${v4Hook}"`
+                );
+            } else if (compiler.plugin) {
                 compiler.plugin(v3Hook, method);
-                this.loggerDebug.add(`v3 hook registered – "${v3Hook}"`);
+                this.loggerDebug.add(
+                    debugName +
+                    `v3 hook registered – "${v3Hook}"`
+                );
+            } else {
+                throw new Error('webpack is not able to register the plugin');
             }
         };
 
-        applyHook(cmplr, 'beforeRun', 'before-run', this.beforeParams, (compiler, callback) => {
-            this.loggerDebug.add('Hook started – "beforeRun"');
-            this.handleHook(this.beforeParams, callback);
-            this.loggerDebug.add('Hook ended – "beforeRun"');
-            this.log(compiler, this.beforeParams);
-        });
-        applyHook(cmplr, 'watchRun', 'watch-run', this.beforeParams, (compiler, callback) => {
-            this.loggerDebug.add('Hook started – "watchRun"');
-            this.handleHook(this.beforeParams, callback);
-            this.loggerDebug.add('Hook ended – "watchRun"');
-            this.log(compiler, this.beforeParams);
-        });
-        applyHook(cmplr, 'afterEmit', 'after-emit', this.afterParams, (compilation, callback) => {
-            this.loggerDebug.add('Hook started – "afterEmit"');
-            this.handleHook(this.afterParams, callback);
-            this.loggerDebug.add('Hook ended – "afterEmit"');
-            this.log(compilation, this.afterParams);
-        });
+        applyHook(cmplr, 'beforeRun', 'before-run', this.beforeParams);
+        applyHook(cmplr, 'watchRun', 'watch-run', this.beforeParams);
+        applyHook(cmplr, 'afterEmit', 'after-emit', this.afterParams);
     }
 
     /**
-     * Handles `beforeRun` and `afterEmit` hooks.
+     * Handles webpack hooks.
      *
      * @param {RemovingParameters} params
      * A parameters of removing.
@@ -226,26 +299,70 @@ class Plugin {
      * when your plugin is finished running".
      */
     handleHook(params, callback) {
+        const debugName = 'handle-hook: ';
+
+        this.path.type = params._pathType;
+
+        this.loggerDebug.add(
+            debugName +
+            `path – "${this.path.type || 'auto'}"`
+        );
         this.handleRemove(params);
+
         callback();
     }
 
     /**
-     * Synchronously removes folders or files.
+     * Removes folders or files.
+     *
+     * - if `trash` is on, then it will be async removing.
      *
      * @param {RemovingParameters} params
      * A parameters of removing.
      * Either `this.beforeParams` or `this.afterParams`.
      */
     handleRemove(params) {
+        const debugName = 'handle-remove: ';
+
         if (
             !params.include.length &&
             !params.test.length
         ) {
+            /**
+             * I think we shouldn't add warning message in warning
+             * logger, because this can be intended behavior.
+             */
+
+            this.loggerDebug.add(
+                debugName +
+                'include and test is empty'
+            );
+
             return;
         }
 
+        /**
+         * After that call values of `params` properties will be changed.
+         * It is bad pattern, but intended behavior.
+         */
         const items = this.getItemsForRemoving(params);
+        const enablePrettyPrinting = () => {
+            items.sort();
+
+            if (params.allowRootAndOutside) {
+                return;
+            }
+
+            let root = params.root;
+
+            // we removed only relative items, so,
+            // we don't want print absolute paths.
+            if (!root.endsWith(this.path.path.sep)) {
+                root += this.path.path.sep;
+            }
+
+            items.removeRoot(root);
+        };
 
         if (
             !Object.keys(items.directories).length &&
@@ -257,7 +374,7 @@ class Plugin {
                 ' not found'
             );
 
-            this.loggerDebug.add(message);
+            this.loggerDebug.add(`${debugName}${message}`);
             this.loggerWarning.add(message);
 
             return;
@@ -270,33 +387,68 @@ class Plugin {
                 ' in case of not emulation:'
             );
 
+            enablePrettyPrinting();
             this.loggerInfo.add(message, items);
 
             return;
+        }
+
+        if (params.beforeRemove) {
+            this.loggerDebug.add(
+                debugName +
+                'user beforeRemove is called'
+            );
+
+            const shouldStop = params.beforeRemove(
+                items.directories,
+                items.files
+            );
+
+            if (shouldStop) {
+                const message = 'Stopped by user';
+
+                this.loggerDebug.add(`${debugName}${message}`);
+                this.loggerInfo.add(message);
+
+                return;
+            }
         }
 
         for (const file of items.files) {
             try {
                 this.unlinkFileSync(file, params.trash);
             } catch (error) {
-                this.loggerDebug.add(error.message || error);
-                this.loggerError.add(error.message || error);
+                const message = error.message || error;
+
+                this.loggerDebug.add(`${debugName}${message}`);
+                this.loggerError.add(message);
             }
         }
 
-        for (const dir of items.directories) {
+        for (const directory of items.directories) {
             try {
-                this.unlinkFolderSync(dir, params.trash);
+                this.unlinkFolderSync(directory, params.trash);
             } catch (error) {
-                this.loggerDebug.add(error.message || error);
-                this.loggerError.add(error.message || error);
+                const message = error.message || error;
+
+                this.loggerDebug.add(`${debugName}${message}`);
+                this.loggerError.add(message);
             }
         }
 
-        // trim root for pretty printing.
-        if (!params.allowRootAndOutside) {
-            items.trimRoot(params.root);
+        if (params.afterRemove) {
+            this.loggerDebug.add(
+                debugName +
+                'user afterRemove is called'
+            );
+
+            params.afterRemove(
+                items.directories,
+                items.files
+            );
         }
+
+        enablePrettyPrinting();
 
         const message = (
             'Following items have been ' +
@@ -313,78 +465,190 @@ class Plugin {
      * @param {RemovingParameters} params
      * A parameters of removing.
      * Either `this.beforeParams` or `this.afterParams`.
+     *
+     * @returns {Items}
+     * An items for removing.
      */
     getItemsForRemoving(params) {
+        const debugName = 'get-items-for-removing: ';
+        const handleRoot = (root) => {
+            this.loggerDebug.add(
+                debugName +
+                `root before handling – "${root}"`
+            );
+
+            root = this.path.path.resolve(root);
+
+            this.loggerDebug.add(
+                debugName +
+                `root after handling – "${root}"`
+            );
+
+            return root;
+        };
+        const normalize = (items, name) => {
+            this.loggerDebug.add(
+                debugName +
+                `${name} before handling – [${items}]`
+            );
+
+            items = items.map((pth) => this.path.path.normalize(pth));
+            items = this.path.toAbsoluteS(
+                params.root,
+                items
+            );
+
+            this.loggerDebug.add(
+                debugName +
+                `${name} after handling – [${items}]`
+            );
+
+            return items;
+        };
+        const checkExistence = (items, name) => {
+            this.loggerDebug.add(
+                debugName +
+                `${name} before existence check – [${items}]`
+            );
+
+            items = items.filter((pth) => {
+                const exists = this.fs.fs.existsSync(pth);
+
+                if (!exists) {
+                    const message = `Skipped, because not exists – "${pth}"`;
+
+                    this.loggerWarning.add(message);
+                    this.loggerDebug.add(`${debugName}${message}`);
+                }
+
+                return exists;
+            });
+
+            this.loggerDebug.add(
+                debugName +
+                `${name} after existence check – [${items}]`
+            );
+
+            return items;
+        };
+        const handleTest = (items, name) => {
+            this.loggerDebug.add(
+                debugName +
+                `${name} before testing – [${items}]`
+            );
+
+            items = items.concat(
+                this.handleTest(params)
+            );
+
+            this.loggerDebug.add(
+                debugName +
+                `${name} after testing – [${items}]`
+            );
+
+            return items;
+        };
+        const filter = (include, exclude, name) => {
+            this.loggerDebug.add(
+                debugName +
+                `${name} before filtering – [${include}]`
+            );
+
+            include = include.filter((includeItem, index) => {
+                // duplicates check.
+                if (include.indexOf(includeItem) !== index) {
+                    this.loggerDebug.add(
+                        debugName +
+                        `duplicate – "${includeItem}"`
+                    );
+
+                    return false;
+                }
+
+                if (exclude.includes(includeItem)) {
+                    this.loggerDebug.add(
+                        debugName +
+                        `explicitly excluded – "${includeItem}"`
+                    );
+
+                    return false;
+                }
+
+                // for cases like `include: ['/test']; exclude: ['/test/test']`.
+                // i.e., we trying to delete "root" of excluded item.
+                const keepRootInExcluded = !(exclude.every((excludeItem) => {
+                    const save = this.path.isSave(includeItem, excludeItem);
+
+                    if (save) {
+                        this.loggerDebug.add(
+                            debugName +
+                            `unexplicitly excluded – "${includeItem}" because of – "${excludeItem}"`
+                        );
+                    }
+
+                    return !save;
+                }));
+
+                if (keepRootInExcluded) {
+                    return false;
+                }
+
+                if (
+                    !params.allowRootAndOutside &&
+                    !this.isSave(params.root, includeItem)
+                ) {
+                    const message = `Skipped, because unsafe removing – "${includeItem}"`;
+
+                    this.loggerDebug.add(`${debugName}${message}`);
+                    this.loggerWarning.add(message);
+
+                    return false;
+                }
+
+                return true;
+            });
+
+            this.loggerDebug.add(
+                debugName +
+                `${name} after filtering – [${include}]`
+            );
+
+            return include;
+        };
+
+        // order is matter.
+        params.root = handleRoot(params.root);
+        params.include = normalize(params.include, 'include');
+        params.exclude = normalize(params.exclude, 'exclude');
+        params.include = checkExistence(params.include, 'include');
+        params.exclude = checkExistence(params.exclude, 'exclude');
+        params.include = handleTest(params.include, 'include');
+        params.include = filter(params.include, params.exclude, 'include');
+
         const items = new Items();
 
-        params.include = this.toAbsolutePaths(params.root, params.include);
-        params.exclude = this.toAbsolutePaths(params.root, params.exclude);
-
-        // handle unexplicit files or folders, and add it to explicit.
-        params.include = params.include.concat(
-            this.handleTest(params)
-        );
-
-        // handle explicit files or folders.
         for (const item of params.include) {
-            if (params.exclude.includes(item)) {
-                this.loggerDebug.add(
-                    `Skipped, because item excluded – "${item}"`
-                );
-
-                continue;
-            }
-
-            if (!fs.existsSync(item)) {
-                const message = `Skipped, because not exists – "${item}"`;
-
-                this.loggerDebug.add(message);
-                this.loggerWarning.add(message);
-
-                continue;
-            }
-
-            if (
-                !params.allowRootAndOutside &&
-                !this.isSave(params.root, item)
-            ) {
-                const message = `Skipped, because unsafe removing – "${item}"`;
-
-                this.loggerDebug.add(message);
-                this.loggerWarning.add(message);
-
-                continue;
-            }
-
-            const stat = this.getStatSync(item);
+            /** @type {'files' | 'directories'} */
             let group = undefined;
+            const stat = this.fs.getStatSync(item);
 
             if (!stat) {
                 this.loggerDebug.add(
-                    `Cannot get stat – "${item}"`
+                    debugName +
+                    `skipped, because cannot get stat – "${item}"`
                 );
 
                 continue;
             } else if (stat.isFile()) {
                 group = 'files';
-                this.loggerDebug.add(
-                    `It is file – "${item}"`
-                );
             } else if (stat.isDirectory()) {
                 group = 'directories';
-                this.loggerDebug.add(
-                    `It is directory – "${item}"`
-                );
             } else {
                 const message = `Skipped, because invalid stat – "${item}"`;
 
-                this.loggerDebug.add(message);
+                this.loggerDebug.add(`${debugName}${message}`);
                 this.loggerWarning.add(message);
 
-                continue;
-            }
-
-            if (items[group].includes(item)) {
                 continue;
             }
 
@@ -392,142 +656,136 @@ class Plugin {
         }
 
         this.loggerDebug.add(
-            `Directories before cropping – ${items.directories}`
+            debugName +
+            `directories before cropping – ${items.directories}`
         );
         this.loggerDebug.add(
-            `Files before cropping – ${items.files}`
+            debugName +
+            `files before cropping – ${items.files}`
         );
 
-        items.cropUnnecessaryItems();
+        items.removeUnnecessary();
 
         this.loggerDebug.add(
-            `Directories after cropping – ${items.directories}`
+            debugName +
+            `directories after cropping – ${items.directories}`
         );
         this.loggerDebug.add(
-            `Files after cropping – ${items.files}`
+            debugName +
+            `files after cropping – ${items.files}`
         );
 
         return items;
     }
 
     /**
-     * Performs a testing of files or folders for removing.
+     * Performs a testing of files and folders for removing.
      *
      * @param {RemovingParameters} params
      * A parameters of removing.
      * Either `this.beforeParams` or `this.afterParams`.
      *
      * @returns {string[]}
-     * An array of absolute paths of folders or
+     * An array of absolute paths of folders and
      * files that should be removed.
      */
     handleTest(params) {
         /** @type {string[]} */
-        const paths = [];
+        let paths = [];
+        const debugName = 'handle-test: ';
 
-        if (!params.test || !params.test.length) {
+        if (
+            !params.test ||
+            !params.test.length
+        ) {
             this.loggerDebug.add(
-                'Testing skipped, because params.test is empty'
+                debugName +
+                'testing skipped, because params.test is empty'
             );
 
             return paths;
         }
 
+        params.root = this.path.path.resolve(params.root);
+
         for (const test of params.test) {
-            test.folder = this.toAbsolutePath(
+            test.folder = this.path.path.normalize(test.folder);
+            test.folder = this.path.toAbsolute(
                 params.root,
-                test.folder
+                test.folder,
+                (oldPath, newPath) => {
+                    this.loggerDebug.add(
+                        debugName +
+                        `"${oldPath}" converted to "${newPath}"`
+                    );
+                }
             );
 
-            if (!fs.existsSync(test.folder)) {
+            if (!this.fs.fs.existsSync(test.folder)) {
                 const message = `Skipped, because not exists – "${test.folder}"`;
 
-                this.loggerDebug.add(message);
+                this.loggerDebug.add(`${debugName}${message}`);
                 this.loggerWarning.add(message);
 
                 continue;
             }
 
-            if (
-                !params.allowRootAndOutside &&
-                !this.isSave(params.root, test.folder)
-            ) {
-                const message = `Skipped, because unsafe removing – "${test.folder}"`;
-
-                this.loggerDebug.add(message);
-                this.loggerWarning.add(message);
-
-                continue;
-            }
-
-            const itemStat = this.getStatSync(test.folder);
+            const itemStat = this.fs.getStatSync(test.folder);
 
             if (!itemStat) {
                 this.loggerDebug.add(
-                    `Cannot get stat for ${test.folder}`
+                    debugName +
+                    `skipped, because cannot get stat – "${test.folder}"`
                 );
 
                 continue;
             } else if (!itemStat.isDirectory()) {
                 const message = `Skipped, because test folder not a directory – "${test.folder}"`;
 
-                this.loggerDebug.add(message);
+                this.loggerDebug.add(`${debugName}${message}`);
                 this.loggerWarning.add(message);
 
                 continue;
             }
 
-            /**
-             * @param {string} dirPath
-             */
-            const getFilesRecursiveSync = (dirPath) => {
-                /** @type {string[]} */
-                let files = [];
+            paths = paths.concat(
+                this.fs.getItemsSync({
+                    pth: test.folder,
+                    join: this.path.path.join,
+                    recursive: test.recursive,
+                    test: (absolutePath) => {
+                        if (
+                            !params.allowRootAndOutside &&
+                            !this.isSave(params.root, absolutePath)
+                        ) {
+                            const message = `Skipped, because unsafe removing – "${absolutePath}"`;
 
-                try {
-                    files = fs.readdirSync(dirPath);
-                } catch (error) {
-                    this.loggerDebug.add(error.message || error);
-                    this.loggerError.add(error.message || error);
+                            this.loggerDebug.add(`${debugName}${message}`);
+                            this.loggerWarning.add(message);
 
-                    return;
-                }
-
-                for (let file of files) {
-                    file = path.join(dirPath, file);
-                    const stat = this.getStatSync(file);
-
-                    if (!stat) {
-                        this.loggerDebug.add(
-                            `Cannot get stat – "${file}"`
-                        );
-
-                        continue;
-                    } else if (stat.isFile()) {
-                        const passed = test.method(file);
-
-                        if (passed) {
-                            paths.push(file);
-                            this.loggerDebug.add(
-                                `Test passed, added for removing – "${file}"`
-                            );
-                        } else {
-                            this.loggerDebug.add(
-                                `Test not passed – "${file}"`
-                            );
+                            return false;
                         }
-                    } else if (stat.isDirectory() && test.recursive) {
-                        getFilesRecursiveSync(file);
-                    } else if (!stat.isDirectory() && !stat.isFile()) {
-                        const message = `Skipped, because invalid stat – "${file}"`;
 
-                        this.loggerDebug.add(message);
-                        this.loggerWarning.add(message);
+                        return test.method(absolutePath);
+                    },
+                    onTestSuccess: (file) => {
+                        this.loggerDebug.add(
+                            debugName +
+                            `test passed, added for removing – "${file}"`
+                        );
+                    },
+                    onTestFail: (file) => {
+                        this.loggerDebug.add(
+                            debugName +
+                            `test not passed, skipped – "${file}"`
+                        );
+                    },
+                    onItemError: (errorMessage) => {
+                        this.loggerDebug.add(`${debugName}${errorMessage}`);
+                        this.loggerError.add(errorMessage);
                     }
-                }
-            };
-
-            getFilesRecursiveSync(test.folder);
+                })
+            );
         }
 
         return paths;
@@ -536,187 +794,103 @@ class Plugin {
     /**
      * Removes a file.
      *
-     * @param {string} filePath
+     * - if `toTrash` is on, then it will be async removing.
+     *
+     * @param {string} absoluteFilePath
      * An absolute path to the file.
      *
-     * @param {boolean} inTrash
+     * @param {boolean} toTrash
      * Move item to trash.
      */
-    unlinkFileSync(filePath, inTrash) {
-        if (!fs.existsSync(filePath)) {
-            this.loggerDebug.add(
-                `Skipped, because file doesn't exists – "${filePath}"`
-            );
+    unlinkFileSync(absoluteFilePath, toTrash) {
+        const debugName = 'unlink-file-sync: ';
 
-            return;
-        }
-
-        if (inTrash) {
-            trash(filePath).catch((error) => {
-                this.loggerError.add(error.message || error);
-                this.loggerDebug.add(error.message || error);
-            });
-
-            return;
-        }
-
-        try {
-            fs.unlinkSync(filePath);
-        } catch (error) {
-            this.loggerError.add(error.message || error);
-            this.loggerDebug.add(error.message || error);
-        }
+        this.fs.unlinkFileSync({
+            pth: absoluteFilePath,
+            toTrash: toTrash,
+            rightTrashCallbacks: false,
+            onSuccess: (pth) => {
+                this.loggerDebug.add(
+                    debugName +
+                    'File' +
+                    `${toTrash ? '' : ' permanently'}` +
+                    ' removed' +
+                    `${toTrash ? ' to trash' : ''}` +
+                    ` – ${pth}`
+                );
+            },
+            onError: (errorMessage) => {
+                this.loggerError.add(errorMessage);
+                this.loggerDebug.add(`${debugName}${errorMessage}`);
+            }
+        });
     }
 
     /**
      * Removes a folder.
      *
-     * @param {string} folderPath
+     * - if `toTrash` is on, then it will be async removing.
+     *
+     * @param {string} absoluteFolderPath
      * An absolute path to the folder.
      *
-     * @param {boolean} inTrash
+     * @param {boolean} toTrash
      * Move item to trash.
      */
-    unlinkFolderSync(folderPath, inTrash) {
-        if (!fs.existsSync(folderPath)) {
-            this.loggerDebug.add(
-                `Skipped, because folder doesn't exists – "${folderPath}"`
-            );
+    unlinkFolderSync(absoluteFolderPath, toTrash) {
+        const debugName = 'unlink-folder-sync: ';
 
-            return;
-        }
-
-        if (inTrash) {
-            trash(folderPath).catch((error) => {
-                this.loggerError.add(error.message || error);
-                this.loggerDebug.add(error.message || error);
-            });
-
-            return;
-        }
-
-        let files = fs.readdirSync(folderPath);
-        files = this.toAbsolutePaths(folderPath, files);
-
-        for (const file of files) {
-            const stat = this.getStatSync(file);
-
-            if (!stat) {
-                this.loggerDebug.add(
-                    `Cannot get stat – "${file}"`
-                );
-
-                continue;
-            } else if (stat.isFile()) {
-                try {
-                    this.unlinkFileSync(file, false);
-                    this.loggerDebug.add(
-                        `File removed – "${file}"`
-                    );
-                } catch (error) {
-                    this.loggerDebug.add(error.message || error);
-                    this.loggerError.add(error.message || error);
-                }
-            } else if (stat.isDirectory()) {
-                this.unlinkFolderSync(file, false);
-            } else {
-                const message = `Skipped, because invalid stat – "${file}"`;
-
-                this.loggerDebug.add(message);
-                this.loggerWarning.add(message);
-            }
-        }
-
-        try {
-            fs.rmdirSync(folderPath);
-            this.loggerDebug.add(
-                `Folder removed – "${folderPath}"`
-            );
-        } catch (error) {
-            this.loggerDebug.add(error.message || error);
-            this.loggerError.add(error.message || error);
-        }
-    }
-
-    /**
-     * Gets a stat for an item.
-     *
-     * @param {string} pth
-     * An absolute path to the folder or file.
-     *
-     * @returns {fs.Stats}
-     * An item stat or `undefined` if cannot get.
-     *
-     * @see https://nodejs.org/api/fs.html#fs_fs_lstatsync_path_options
-     */
-    getStatSync(pth) {
-        let stat = undefined;
-
-        try {
-            stat = fs.lstatSync(pth);
-        } catch (error) {
-            this.loggerDebug.add(error.message || error);
-            this.loggerError.add(error.message || error);
-        }
-
-        return stat;
-    }
-
-    /**
-     * Converts path to absolute path.
-     *
-     * @param {string} root
-     * A root that will be appended to non absolute path.
-     *
-     * @param {string} path
-     * A path for converting.
-     *
-     * @returns {string}
-     * An absolute path.
-     */
-    toAbsolutePath(root, pth) {
-        let newPath = pth;
-
-        if (!path.isAbsolute(pth)) {
-            newPath = path.join(root, pth);
-            this.loggerDebug.add(
-                `"${pth}" converted to "${newPath}"`
-            );
-        }
-
-        return newPath;
-    }
-
-    /**
-     * Converts all paths to absolute paths.
-     *
-     * @param {string} root
-     * A root that will be appended to non absolute paths.
-     *
-     * @param {string[]} paths
-     * A paths for converting.
-     *
-     * @returns {string[]}
-     * An absolute paths.
-     */
-    toAbsolutePaths(root, paths) {
-        const newPaths = [];
-
-        for (const item of paths) {
-            newPaths.push(this.toAbsolutePath(
+        this.fs.unlinkFolderSync({
+            pth: absoluteFolderPath,
+            toTrash: toTrash,
+            rightTrashCallbacks: false,
+            toAbsoluteS: (root, files) => this.path.toAbsoluteS(
                 root,
-                item
-            ));
-        }
-
-        return newPaths;
+                files,
+                (oldPath, newPath) => {
+                    this.loggerDebug.add(
+                        debugName +
+                        `"${oldPath}" converted to "${newPath}"`
+                    );
+                }
+            ),
+            onFileSuccess: (pth) => {
+                this.loggerDebug.add(
+                    debugName +
+                    'File' +
+                    `${toTrash ? '' : ' permanently'}` +
+                    ' removed' +
+                    `${toTrash ? ' to trash' : ''}` +
+                    ` – ${pth}`
+                );
+            },
+            onFileError: (errorMessage) => {
+                this.loggerError.add(errorMessage);
+                this.loggerDebug.add(`${debugName}${errorMessage}`);
+            },
+            onFolderSuccess: (pth) => {
+                this.loggerDebug.add(
+                    debugName +
+                    'Folder' +
+                    `${toTrash ? '' : ' permanently'}` +
+                    ' removed' +
+                    `${toTrash ? ' to trash' : ''}` +
+                    ` – ${pth}`
+                );
+            },
+            onFolderError: (errorMessage) => {
+                this.loggerError.add(errorMessage);
+                this.loggerDebug.add(`${debugName}${errorMessage}`);
+            }
+        });
     }
 
     /**
      * Checks a path for safety.
      *
-     * Checking for either exit beyond the root
-     * or similarity with the root.
+     * - checks for either exit beyond the root
+     * or identicality with the root.
+     * - see `Path.isSave()` documentation for more.
      *
      * @param {string} root
      * A root directory.
@@ -727,124 +901,49 @@ class Plugin {
      * @returns {boolean}
      * `true` – save,
      * `false` – not save.
-     *
-     * @example
-     * root = 'D:/dist'
-     * pth = 'D:/dist/chromium'
-     * Returns – true
-     *
-     * root = 'D:/dist'
-     * pth = 'D:/dist'
-     * Returns – false
-     *
-     * root = 'D:/dist'
-     * pth = 'D:/'
-     * Returns – false
-     *
-     * root = './dist'
-     * pth = 'dist/scripts'
-     * Returns – true
-     *
-     * root = '.'
-     * pth = './dist/scripts'
-     * Returns - true
-     *
-     * root = 'D:\\Desktop\\test'
-     * pth = 'D:\\Desktop\\test.txt'
-     * Returns - false
-     *
-     * root = 'D:/te)st-tes(t and te[s]t {df} df+g.df^g&t'
-     * pth = 'D:/te)st-tes(t and te[s]t {df} df+g.df^g&t/chromium'
-     * Returns – true
-     */
+    */
     isSave(root, pth) {
-        const format = (string, escape, replaceDoubleSlash) => {
-            const result = {
-                string: string,
-                initiallyFile: false,
-                continue: false
-            };
+        const debugName = 'is-save: ';
 
-            try {
-                string = path.resolve(string);
-            } catch (error) {
-                this.loggerError.add(error.message || error);
-                this.loggerDebug.add(error.message || error);
+        this.loggerDebug.add(
+            debugName +
+            `root – "${root}"`
+        );
+        this.loggerDebug.add(
+            debugName +
+            `path – "${pth}"`
+        );
 
-                result.continue = false;
-
-                return result;
-            }
-
-            const stat = this.getStatSync(string);
-
-            if (!stat) {
-                this.loggerDebug.add(
-                    `Cannot get stat – "${string}"`
-                );
-
-                result.continue = false;
-
-                return result;
-            }
-
-            if (stat.isFile()) {
-                result.initiallyFile = true;
-                string = path.dirname(string);
-            }
-
-            // in order to keep `\\` as string in a path.
-            // this should go before actual escaping.
-            if (replaceDoubleSlash) {
-                string = string.replace(/\\/g, '\\\\');
-            }
-
-            // we need to escape special regexp characters
-            // in order to treat them as string.
-            if (escape) {
-                string = Utils.escape(string);
-            }
-
-            result.string = string;
-            result.continue = true;
-
-            return result;
-        };
-
-        /**
-         * We should escape root because this will be pasted in RegExp.
-         * We shouldn't escape pth because this will be compared as a plain string.
-         */
-        const rootFormat = format(root, true, true);
-        const pthFormat = format(pth, false, true);
-
-        if (
-            !rootFormat.continue ||
-            !pthFormat.continue
-        ) {
-            this.loggerDebug.add('Cannot continue');
-
-            return false;
-        }
-
-        this.loggerDebug.add('Before formatting:');
-        this.loggerDebug.add(`Root – "${root}"`);
-        this.loggerDebug.add(`Path – "${pth}"`);
-
-        root = rootFormat.string;
-        pth = pthFormat.string;
         let save = false;
 
-        if (pthFormat.initiallyFile) {
-            save = new RegExp(`(^${root})`, 'm').test(pth);
-        } else {
-            save = new RegExp(`(^${root})(.+)`, 'm').test(pth);
+        try {
+            save = this.path.isSave(
+                root,
+                pth,
+                (comparedRoot, comparedPth) => {
+                    this.loggerDebug.add(
+                        debugName +
+                        `compared root – "${comparedRoot}"`
+                    );
+                    this.loggerDebug.add(
+                        debugName +
+                        `compared path – "${comparedPth}"`
+                    );
+                }
+            );
+        } catch (error) {
+            const message = error.message || error;
+
+            this.loggerDebug.add(`${debugName}${message}`);
+            this.loggerError.add(message);
+
+            return save;
         }
 
-        this.loggerDebug.add('After formatting:');
-        this.loggerDebug.add(`Root – "${root}"`);
-        this.loggerDebug.add(`Path – "${pth}"`);
-        this.loggerDebug.add(`Save – "${save}"`);
+        this.loggerDebug.add(
+            debugName +
+            `save – "${save}"`
+        );
 
         return save;
     }
@@ -852,7 +951,11 @@ class Plugin {
     /**
      * Logs logger messages in console.
      *
-     * - after logging logger data will be cleared.
+     * - after logging logger data will be cleared,
+     * because this function will be executed later if
+     * specified both `before` and `after` params.
+     * So, we need to remove old data in order to
+     * avoid duplicate messages.
      *
      * @param {Compiler | Compilation} main
      * Current process.
@@ -902,10 +1005,6 @@ class Plugin {
             );
         }
 
-        // this function will be executed later if
-        // specified both `before` and `after` params.
-        // so, we need to remove old data in order to
-        // avoid duplicate messages.
         this.loggerError.clear();
         this.loggerWarning.clear();
         this.loggerInfo.clear();

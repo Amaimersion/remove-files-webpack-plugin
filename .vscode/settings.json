@@ -1,9 +1,12 @@
 {
     "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
     "files.insertFinalNewline": true,
     "files.exclude": {
         "**/node_modules": true,
-        "**/.vscode": true
+        "**/.nyc_output": true
     },
     "search.exclude": {
         "**/node_modules": true

@@ -20,12 +20,18 @@ declare class RemovePlugin extends Plugin {
  */
 interface PluginParameters {
     /**
-     * Executes before compilation.
+     * Executes once before "normal" compilation.
      */
     before?: RemoveParameters;
 
     /**
-     * Executes after compilation.
+     * Executes every time before "watch" compilation.
+     */
+    watch?: RemoveParameters;
+
+    /**
+     * Executes once after "normal" compilation or
+     * every time after "watch" compilation.
      */
     after?: RemoveParameters;
 }

@@ -51,10 +51,13 @@ module.exports = {
     plugins: [
         new RemovePlugin({
             before: {
-                // parameters for "before compilation" stage.
+                // parameters for "before normal compilation" stage.
+            },
+            watch: {
+                // parameters for "before watch compilation" stage.
             },
             after: {
-                // parameters for "after compilation" stage.
+                // parameters for "after normal or watch compilation" stage.
             }
         })
     ]
@@ -101,10 +104,11 @@ From [Node.js documentation](https://nodejs.org/api/path.html#path_windows_vs_po
 
 #### How to set
 
-You can pass these parameters into both `before` and `after` keys. Each key is optional, but at least one should be specified. 
+You can pass these parameters into any of the following keys: `before`, `watch` or `after`. Each key is optional, but at least one should be specified. 
 
-- `before` - executes before compilation; 
-- `after` - executes after compilation.
+- `before` – executes once before "normal" compilation; 
+- `watch` – executes every time before "watch" compilation;
+- `after` – executes once after "normal" compilation or every time after "watch" compilation.
 
 
 ## Examples

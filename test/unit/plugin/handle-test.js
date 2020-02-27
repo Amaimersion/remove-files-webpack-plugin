@@ -77,7 +77,7 @@ describe('unit', function () {
 
             it('should allow unsafe removing', function () {
                 const instance = new Plugin({
-                    before: {
+                    watch: {
                         root: '.',
                         allowRootAndOutside: true,
                         test: [
@@ -88,7 +88,7 @@ describe('unit', function () {
                         ]
                     }
                 });
-                const result = instance.handleTest(instance.beforeParams);
+                const result = instance.handleTest(instance.watchParams);
 
                 expect(result).not.to.have.lengthOf(0);
             });
@@ -132,7 +132,7 @@ describe('unit', function () {
 
             it('should handle several tests', function () {
                 const instance = new Plugin({
-                    before: {
+                    watch: {
                         root: '.',
                         allowRootAndOutside: true,
                         test: [
@@ -153,7 +153,7 @@ describe('unit', function () {
                         ]
                     }
                 });
-                const result = instance.handleTest(instance.beforeParams);
+                const result = instance.handleTest(instance.watchParams);
 
                 expect(result).to.have.lengthOf(5);
             });

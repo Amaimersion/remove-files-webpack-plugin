@@ -1,3 +1,10 @@
+# 1.3.1
+
+## Fixed
+
+- A bug when old `include` and old `exclude` were mixed with new `include` and `exclude` in "watch" mode. It had no effect, because the plugin checks an items for existence before removing. Just strange messages were presented in warning log.
+
+
 # 1.3.0 (February 24, 2020)
 
 ## Improved

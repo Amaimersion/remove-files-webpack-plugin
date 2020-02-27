@@ -1,4 +1,8 @@
-# 1.3.1
+# 1.4.0
+
+## Added
+
+- New key: `watch`. Parameters of that key will be applied in "watch" mode. **Parameters of `before` key will no longer be applied in "watch" mode. So, make sure your current configuration still have expected behavior.** [#22](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/22)
 
 ## Fixed
 

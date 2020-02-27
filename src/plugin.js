@@ -262,6 +262,7 @@ class Plugin {
                 this.handleHook(params, callback);
                 this.loggerDebug.add(`${debugName}hook ended – "${v4Hook}"`);
                 this.log(compilerOrCompilation, params);
+                this.clear(params);
             };
 
             if (compiler.hooks) {
@@ -951,12 +952,6 @@ class Plugin {
     /**
      * Logs logger messages in console.
      *
-     * - after logging logger data will be cleared,
-     * because this function will be executed later if
-     * specified both `before` and `after` params.
-     * So, we need to remove old data in order to
-     * avoid duplicate messages.
-     *
      * @param {Compiler | Compilation} main
      * Current process.
      *
@@ -1004,6 +999,22 @@ class Plugin {
                 !(wllBPrntd.error || wllBPrntd.warning || wllBPrntd.info)
             );
         }
+    }
+
+    /**
+     * Clears collected data (include, exclude, loggers, etc.).
+     *
+     * - it is needed because same instance of plugin
+     * can be executed several times (if specified both `before`
+     * and `after` params, or if in watch mode).
+     *
+     * @param {RemovingParameters} params
+     * A parameters of removing.
+     * Either `this.beforeParams` or `this.afterParams`.
+     */
+    clear(params) {
+        params.include = [];
+        params.exclude = [];
 
         this.loggerError.clear();
         this.loggerWarning.clear();

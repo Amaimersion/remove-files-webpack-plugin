@@ -30,7 +30,7 @@ interface PluginParameters {
     watch?: RemoveParameters;
 
     /**
-     * Executes once after "normal" compilation or
+     * Executes once after "normal" compilation and
      * every time after "watch" compilation.
      */
     after?: RemoveParameters;

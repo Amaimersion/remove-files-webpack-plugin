@@ -57,7 +57,7 @@ module.exports = {
                 // parameters for "before watch compilation" stage.
             },
             after: {
-                // parameters for "after normal or watch compilation" stage.
+                // parameters for "after normal and watch compilation" stage.
             }
         })
     ]
@@ -108,7 +108,7 @@ You can pass these parameters into any of the following keys: `before`, `watch` 
 
 - `before` – executes once before "normal" compilation; 
 - `watch` – executes every time before "watch" compilation;
-- `after` – executes once after "normal" compilation or every time after "watch" compilation.
+- `after` – executes once after "normal" compilation and every time after "watch" compilation.
 
 
 ## Examples

@@ -1,3 +1,14 @@
+# 1.4.0 (February 27, 2020)
+
+## Added
+
+- New key: `watch`. Parameters of that key will be applied in "watch" mode. **Parameters of `before` key will no longer be applied in "watch" mode. So, make sure your current configuration still have expected behavior.** [#22](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/22)
+
+## Fixed
+
+- A bug when old `include` and old `exclude` were mixed with new `include` and `exclude` in "watch" mode. It had no effect, because the plugin checks an items for existence before removing. Just strange messages were presented in warning log.
+
+
 # 1.3.0 (February 24, 2020)
 
 ## Improved

@@ -107,10 +107,13 @@
  * A parameters for plugin.
  *
  * @property {RemovingParameters} before
- * Removing before compilation.
+ * Removing before "normal" compilation.
+ *
+ * @property {RemovingParameters} watch
+ * Removing before "watch" compilation.
  *
  * @property {RemovingParameters} after
- * Removing after compilation.
+ * Removing after "normal" and "watch" compilation.
  */
 
 /**
@@ -145,16 +148,19 @@ class Plugin {
      *
      * @param {PluginParameters} params
      * A plugin parameters.
-     * Contains two keys: `before` (compilation) and `after` (compilation).
-     * At least one should be presented.
-     * All properties are the same for these two keys.
+     * At least one key should be presented.
+     * All properties are the same for these keys.
      */
     constructor(params) {
         params = params || {};
 
-        if (!params.before && !params.after) {
+        if (
+            !params.before &&
+            !params.watch &&
+            !params.after
+        ) {
             throw new Error(
-                'No "before" or "after" parameters specified. ' +
+                'No "before", "watch" or "after" parameters specified. ' +
                 'See https://github.com/Amaimersion/remove-files-webpack-plugin#parameters'
             );
         }
@@ -188,6 +194,12 @@ class Plugin {
         this.beforeParams = {
             ...defaultParams,
             ...params.before
+        };
+
+        /** @type {RemovingParameters} */
+        this.watchParams = {
+            ...defaultParams,
+            ...params.watch
         };
 
         /** @type {RemovingParameters} */
@@ -240,6 +252,10 @@ class Plugin {
         );
         this.loggerDebug.add(
             debugName +
+            `watch parameters – "${JSON.stringify(this.watchParams)}"`
+        );
+        this.loggerDebug.add(
+            debugName +
             `after parameters – "${JSON.stringify(this.afterParams)}"`
         );
 
@@ -258,10 +274,22 @@ class Plugin {
             }
 
             const method = (compilerOrCompilation, callback) => {
+                /**
+                 * `params` will be changed during the program lifecycle.
+                 * It is bad pattern, but intended behavior because of
+                 * bad architecture. It is fine for single-run hooks like
+                 * `before` or `after`, but for `watch` hook it can lose
+                 * data in `include` and `exclude`.
+                 */
+                const paramsCopy = {
+                    ...params
+                };
+
                 this.loggerDebug.add(`${debugName}hook started – "${v4Hook}"`);
-                this.handleHook(params, callback);
+                this.handleHook(paramsCopy, callback);
                 this.loggerDebug.add(`${debugName}hook ended – "${v4Hook}"`);
-                this.log(compilerOrCompilation, params);
+                this.log(compilerOrCompilation, paramsCopy);
+                this.clear();
             };
 
             if (compiler.hooks) {
@@ -282,7 +310,7 @@ class Plugin {
         };
 
         applyHook(cmplr, 'beforeRun', 'before-run', this.beforeParams);
-        applyHook(cmplr, 'watchRun', 'watch-run', this.beforeParams);
+        applyHook(cmplr, 'watchRun', 'watch-run', this.watchParams);
         applyHook(cmplr, 'afterEmit', 'after-emit', this.afterParams);
     }
 
@@ -291,7 +319,6 @@ class Plugin {
      *
      * @param {RemovingParameters} params
      * A parameters of removing.
-     * Either `this.beforeParams` or `this.afterParams`.
      *
      * @param {Function} callback
      * "Some compilation plugin steps are asynchronous,
@@ -319,7 +346,6 @@ class Plugin {
      *
      * @param {RemovingParameters} params
      * A parameters of removing.
-     * Either `this.beforeParams` or `this.afterParams`.
      */
     handleRemove(params) {
         const debugName = 'handle-remove: ';
@@ -341,10 +367,6 @@ class Plugin {
             return;
         }
 
-        /**
-         * After that call values of `params` properties will be changed.
-         * It is bad pattern, but intended behavior.
-         */
         const items = this.getItemsForRemoving(params);
         const enablePrettyPrinting = () => {
             items.sort();
@@ -464,7 +486,6 @@ class Plugin {
      *
      * @param {RemovingParameters} params
      * A parameters of removing.
-     * Either `this.beforeParams` or `this.afterParams`.
      *
      * @returns {Items}
      * An items for removing.
@@ -683,7 +704,6 @@ class Plugin {
      *
      * @param {RemovingParameters} params
      * A parameters of removing.
-     * Either `this.beforeParams` or `this.afterParams`.
      *
      * @returns {string[]}
      * An array of absolute paths of folders and
@@ -951,18 +971,11 @@ class Plugin {
     /**
      * Logs logger messages in console.
      *
-     * - after logging logger data will be cleared,
-     * because this function will be executed later if
-     * specified both `before` and `after` params.
-     * So, we need to remove old data in order to
-     * avoid duplicate messages.
-     *
      * @param {Compiler | Compilation} main
      * Current process.
      *
      * @param {RemovingParameters} params
      * A parameters of removing.
-     * Either `this.beforeParams` or `this.afterParams`.
      */
     log(main, params) {
         /**
@@ -1004,7 +1017,16 @@ class Plugin {
                 !(wllBPrntd.error || wllBPrntd.warning || wllBPrntd.info)
             );
         }
+    }
 
+    /**
+     * Clears collected data (loggers, etc.).
+     *
+     * - it is needed because same instance of plugin
+     * can be executed several times (if specified both
+     * `before` and `after` params, or if in "watch" mode).
+     */
+    clear() {
         this.loggerError.clear();
         this.loggerWarning.clear();
         this.loggerInfo.clear();

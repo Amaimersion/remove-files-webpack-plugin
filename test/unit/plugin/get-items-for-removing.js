@@ -58,7 +58,7 @@ describe('unit', function () {
 
             it('should correctly handle exclude', function () {
                 const instance = new Plugin({
-                    before: {
+                    watch: {
                         root: 'plugin_test',
                         include: [
                             'test.txt',
@@ -82,7 +82,7 @@ describe('unit', function () {
                         ]
                     }
                 });
-                const result = instance.getItemsForRemoving(instance.beforeParams);
+                const result = instance.getItemsForRemoving(instance.watchParams);
 
                 expect(result.directories).to.have.members([]);
                 expect(result.files).to.have.members([
@@ -173,7 +173,7 @@ describe('unit', function () {
 
             it('should handle tricky paths', function () {
                 const instance = new Plugin({
-                    after: {
+                    watch: {
                         root: './plugin_test\\..',
                         allowRootAndOutside: false,
                         include: [
@@ -199,7 +199,7 @@ describe('unit', function () {
                         ]
                     }
                 });
-                const result = instance.getItemsForRemoving(instance.afterParams);
+                const result = instance.getItemsForRemoving(instance.watchParams);
 
                 expect(result.directories).to.have.members([
                     toAbsolute(['plugin_test', 'test', 'test'])

@@ -13,7 +13,7 @@ describe('unit', function () {
                 expect(test).to.throw();
             });
 
-            it('should throw error when calling without either "before" or "after" parameters', function () {
+            it('should throw error when calling without either "before", "after" or "watch" parameters', function () {
                 const test = () => {
                     new Plugin({
                         test: {}
@@ -43,11 +43,22 @@ describe('unit', function () {
                 expect(test).not.to.throw();
             });
 
-            it('should create when calling with both "before" and "after" parameters', function () {
+            it('should create when calling with "watch" parameter', function () {
+                const test = () => {
+                    new Plugin({
+                        watch: {}
+                    });
+                };
+
+                expect(test).not.to.throw();
+            });
+
+            it('should create when calling with all "before", "after" and "watch" parameters', function () {
                 const test = () => {
                     new Plugin({
                         before: {},
-                        after: {}
+                        after: {},
+                        watch: {}
                     });
                 };
 

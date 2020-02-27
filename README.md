@@ -51,10 +51,13 @@ module.exports = {
     plugins: [
         new RemovePlugin({
             before: {
-                // parameters for "before compilation" stage.
+                // parameters for "before normal compilation" stage.
+            },
+            watch: {
+                // parameters for "before watch compilation" stage.
             },
             after: {
-                // parameters for "after compilation" stage.
+                // parameters for "after normal and watch compilation" stage.
             }
         })
     ]
@@ -101,10 +104,11 @@ From [Node.js documentation](https://nodejs.org/api/path.html#path_windows_vs_po
 
 #### How to set
 
-You can pass these parameters into both `before` and `after` keys. Each key is optional, but at least one should be specified. 
+You can pass these parameters into any of the following keys: `before`, `watch` or `after`. Each key is optional, but at least one should be specified. 
 
-- `before` - executes before compilation; 
-- `after` - executes after compilation.
+- `before` – executes once before "normal" compilation; 
+- `watch` – executes every time before "watch" compilation;
+- `after` – executes once after "normal" compilation and every time after "watch" compilation.
 
 
 ## Examples
@@ -118,6 +122,20 @@ new RemovePlugin({
     before: {
         include: [
             './dist'
+        ]
+    }
+})
+```
+
+```javascript
+new RemovePlugin({
+    /**
+     * Every time before "watch" compilation
+     * permanently removes `./dist/js/entry.js` file.
+     */
+    watch: {
+        include: [
+            './dist/js/entry.js'
         ]
     }
 })
@@ -253,6 +271,46 @@ new RemovePlugin({
         exclude: [
             'dist/styles/popup.css.map'
         ]
+    }
+})
+```
+
+```javascript
+new RemovePlugin({
+    /**
+     * Before "normal" compilation permanently 
+     * removes entire `./dist` folder.
+     */
+    before: {
+        include: [
+            './dist'
+        ]
+    },
+
+    /**
+     * Every time before compilation in "watch"
+     * mode (`webpack --watch`) permanently removes JS files 
+     * with hash in the name (like "entry-vqlr39sdvl12.js").
+     */
+    watch: {
+        test: [
+            {
+                folder: './dist/js',
+                method: (absPath) => new RegExp(/(.*)-([^-\\\/]+)\.js/).test(absPath)
+            }
+        ]
+    },
+
+    /**
+     * Once after "normal" compilation or every time
+     * after "watch" compilation removes `./dist/log.txt`
+     * file in trash.
+     */
+    after: {
+        include: [
+            './dist/log.txt'
+        ],
+        trash: true
     }
 })
 ```

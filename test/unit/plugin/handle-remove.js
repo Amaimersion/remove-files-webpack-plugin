@@ -66,7 +66,7 @@ describe('unit', function () {
 
             it('should remove folders and files', function () {
                 const instance = new Plugin({
-                    before: {
+                    watch: {
                         root: './plugin_test_remove',
                         allowRootAndOutside: false,
                         emulate: false,
@@ -84,7 +84,7 @@ describe('unit', function () {
                     }
                 });
 
-                instance.handleRemove(instance.beforeParams);
+                instance.handleRemove(instance.watchParams);
 
                 const folderExists = fs.existsSync('./plugin_test_remove/test2');
                 const fileExists = fs.existsSync('./plugin_test_remove/test2.txt');
@@ -178,7 +178,7 @@ describe('unit', function () {
             it('should call beforeRemove and cancel removing', function () {
                 let beforeRemoveIsCalled = false;
                 const instance = new Plugin({
-                    after: {
+                    watch: {
                         root: './plugin_test_remove',
                         trash: false,
                         include: [
@@ -195,7 +195,7 @@ describe('unit', function () {
                     }
                 });
 
-                instance.handleRemove(instance.afterParams);
+                instance.handleRemove(instance.watchParams);
 
                 const fileExists = fs.existsSync('./plugin_test_remove/test6.txt');
 

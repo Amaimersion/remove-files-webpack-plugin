@@ -1,4 +1,4 @@
-// Type definitions for remove-files-webpack-plugin 1.3
+// Type definitions for remove-files-webpack-plugin 1.4
 // Project: https://github.com/Amaimersion/remove-files-webpack-plugin/blob/master/README.md
 // Definitions by: Sergey Kuznetsov <https://github.com/Amaimersion>
 // Definitions: https://github.com/Amaimersion/remove-files-webpack-plugin
@@ -20,12 +20,18 @@ declare class RemovePlugin extends Plugin {
  */
 interface PluginParameters {
     /**
-     * Executes before compilation.
+     * Executes once before "normal" compilation.
      */
     before?: RemoveParameters;
 
     /**
-     * Executes after compilation.
+     * Executes every time before "watch" compilation.
+     */
+    watch?: RemoveParameters;
+
+    /**
+     * Executes once after "normal" compilation and
+     * every time after "watch" compilation.
      */
     after?: RemoveParameters;
 }

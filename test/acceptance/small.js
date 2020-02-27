@@ -54,7 +54,7 @@ describe('acceptance', function () {
 
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({
-                before: {
+                watch: {
                     include: [
                         './acceptance_test_remove/test2.txt',
                         './acceptance_test_remove/test2'

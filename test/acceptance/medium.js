@@ -49,7 +49,41 @@ describe('acceptance', function () {
             expect(beforeIsSuccess).to.equal(true);
         });
 
-        it('should pass example № 2', function (done) {
+        it('should pass example № 2', function () {
+            const webpack = new Webpack.EmulatedWebpackCompiler.v4();
+            const instance = new RemovePlugin({
+                watch: {
+                    root: './acceptance_test_remove',
+                    include: [
+                        './dist9/js/entry.js'
+                    ],
+                    ...logs
+                }
+            });
+
+            instance.apply(webpack);
+            webpack.runWatchRun();
+
+            const watchIsSuccess = (
+                !exists(
+                    '.',
+                    'acceptance_test_remove',
+                    'dist9',
+                    'js',
+                    'entry.js'
+                ) &&
+                exists(
+                    '.',
+                    'acceptance_test_remove',
+                    'dist9',
+                    'js'
+                )
+            );
+
+            expect(watchIsSuccess).to.equal(true);
+        });
+
+        it('should pass example № 3', function (done) {
             this.timeout(1000);
 
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
@@ -98,7 +132,7 @@ describe('acceptance', function () {
             }, 800);
         });
 
-        it('should pass example № 3', function () {
+        it('should pass example № 4', function () {
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({
                 before: {
@@ -138,7 +172,7 @@ describe('acceptance', function () {
             expect(beforeIsSuccess).to.equal(true);
         });
 
-        it('should pass example № 4', function () {
+        it('should pass example № 5', function () {
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({
                 after: {
@@ -219,7 +253,7 @@ describe('acceptance', function () {
             expect(afterIsSuccess).to.equal(true);
         });
 
-        it('should pass example № 5', function () {
+        it('should pass example № 6', function () {
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({
                 after: {
@@ -336,7 +370,7 @@ describe('acceptance', function () {
             expect(afterIsSuccess).to.equal(true);
         });
 
-        it('should pass example № 6', function () {
+        it('should pass example № 7', function () {
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({
                 before: {
@@ -468,7 +502,120 @@ describe('acceptance', function () {
             expect(afterIsSuccess).to.equal(true);
         });
 
-        it('should pass example № 7', function () {
+        it('should pass example № 8', function (done) {
+            this.timeout(1000);
+
+            const webpack = new Webpack.EmulatedWebpackCompiler.v4();
+            const instance = new RemovePlugin({
+                before: {
+                    root: './acceptance_test_remove/dist10',
+                    include: [
+                        './dist1'
+                    ],
+                    ...logs
+                },
+                watch: {
+                    root: './acceptance_test_remove/dist10',
+                    test: [
+                        {
+                            folder: './dist2/js',
+                            method: (absPath) => new RegExp(/(.*)-([^-\\\/]+)\.js/).test(absPath)
+                        }
+                    ],
+                    ...logs
+                },
+                after: {
+                    root: './acceptance_test_remove/dist10',
+                    include: [
+                        './dist3/log.txt'
+                    ],
+                    trash: true,
+                    ...logs
+                }
+            });
+
+            instance.apply(webpack);
+            webpack.runBeforeRun();
+            webpack.runWatchRun();
+            webpack.runAfterEmit();
+
+            setTimeout(() => {
+                const beforeIsSuccess = (
+                    !exists(
+                        '.',
+                        'acceptance_test_remove',
+                        'dist10',
+                        'dist1'
+                    )
+                );
+                const watchIsSuccess = (
+                    exists(
+                        '.',
+                        'acceptance_test_remove',
+                        'dist10',
+                        'dist2',
+                        'js'
+                    ) &&
+                    exists(
+                        '.',
+                        'acceptance_test_remove',
+                        'dist10',
+                        'dist2',
+                        'js',
+                        'test.js'
+                    ) &&
+                    !exists(
+                        '.',
+                        'acceptance_test_remove',
+                        'dist10',
+                        'dist2',
+                        'js',
+                        'test-nvsdl1234.js'
+                    )
+                );
+                const afterIsSuccess = (
+                    exists(
+                        '.',
+                        'acceptance_test_remove',
+                        'dist10',
+                        'dist3'
+                    ) &&
+                    exists(
+                        '.',
+                        'acceptance_test_remove',
+                        'dist10',
+                        'dist3',
+                        'test'
+                    ) &&
+                    exists(
+                        '.',
+                        'acceptance_test_remove',
+                        'dist10',
+                        'dist3',
+                        'test.txt'
+                    ) &&
+                    !exists(
+                        '.',
+                        'acceptance_test_remove',
+                        'dist10',
+                        'dist3',
+                        'log.txt'
+                    )
+                );
+
+                if (!beforeIsSuccess) {
+                    done(new Error("Before is not success"));
+                } else if (!watchIsSuccess) {
+                    done(new Error("Watch is not success"));
+                } else if (!afterIsSuccess) {
+                    done(new Error("After is not success"));
+                } else {
+                    done();
+                }
+            }, 800);
+        });
+
+        it('should pass example № 9', function () {
             const webpack = new Webpack.EmulatedWebpackCompiler.v4();
             const instance = new RemovePlugin({
                 before: {
@@ -495,7 +642,7 @@ describe('acceptance', function () {
             expect(beforeIsSuccess).to.equal(true);
         });
 
-        it('should pass example № 8', function () {
+        it('should pass example № 10', function () {
             const callbackCalled = {
                 beforeRemove: false,
                 afterRemove: false

@@ -130,6 +130,20 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
+     * Every time before "watch" compilation
+     * permanently removes `./dist/js/entry.js` file.
+     */
+    watch: {
+        include: [
+            './dist/js/entry.js'
+        ]
+    }
+})
+```
+
+```javascript
+new RemovePlugin({
+    /**
      * After compilation removes both 
      * `./dist/manifest.json` file and 
      * `./dist/maps` folder to trash.
@@ -257,6 +271,46 @@ new RemovePlugin({
         exclude: [
             'dist/styles/popup.css.map'
         ]
+    }
+})
+```
+
+```javascript
+new RemovePlugin({
+    /**
+     * Before "normal" compilation permanently 
+     * removes entire `./dist` folder.
+     */
+    before: {
+        include: [
+            './dist'
+        ]
+    },
+
+    /**
+     * Every time before compilation in "watch"
+     * mode (`webpack --watch`) permanently removes JS files 
+     * with hash in the name (like "entry-vqlr39sdvl12.js").
+     */
+    watch: {
+        test: [
+            {
+                folder: './dist/js',
+                method: (absPath) => new RegExp(/(.*)-([^-\\\/]+)\.js/).test(absPath)
+            }
+        ]
+    },
+
+    /**
+     * Once after "normal" compilation or every time
+     * after "watch" compilation removes `./dist/log.txt`
+     * file in trash.
+     */
+    after: {
+        include: [
+            './dist/log.txt'
+        ],
+        trash: true
     }
 })
 ```

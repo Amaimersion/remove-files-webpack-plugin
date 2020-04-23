@@ -1,6 +1,6 @@
 {
     "name": "remove-files-webpack-plugin",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "description": "A plugin for webpack that removes files and folders before and after compilation.",
     "main": "./src/index.js",
     "types": "./types/index.d.ts",

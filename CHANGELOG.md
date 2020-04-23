@@ -1,3 +1,10 @@
+# 1.4.1
+
+## Changed
+
+- Upgrade `@types/webpack` dependency to `4.41.12` version.
+
+
 # 1.4.0 (February 27, 2020)
 
 ## Added

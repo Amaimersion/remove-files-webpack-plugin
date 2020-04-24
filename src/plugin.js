@@ -48,7 +48,8 @@
  * will be passed into this function.
  * If returned value is `true`, then
  * remove process will be canceled.
- * Will be not called if `emulate` is on.
+ * Will be not called if items for removing
+ * not found or `emulate` is on.
  * Defaults to `undefined`.
  *
  * @property {(

@@ -127,6 +127,16 @@
  * Webpack environment.
  */
 
+/**
+ * @typedef {{
+ *  name: {
+ *      v4: string;
+ *      v3: string;
+ *  };
+ * }} WebpackHook
+ * Information about Webpack hook.
+ */
+
 //#endregion
 
 
@@ -208,6 +218,28 @@ class Plugin {
             ...defaultParams,
             ...params.after
         };
+
+        /** @type {{[key: string]: WebpackHook}} */
+        this.webpackHooks = {
+            beforeRun: {
+                name: {
+                    v4: 'beforeRun',
+                    v3: 'before-run'
+                }
+            },
+            watchRun: {
+                name: {
+                    v4: 'watchRun',
+                    v3: 'watch-run'
+                }
+            },
+            afterEmit: {
+                name: {
+                    v4: 'afterEmit',
+                    v3: 'after-emit'
+                }
+            }
+        };
     }
 
     /**
@@ -262,20 +294,17 @@ class Plugin {
 
         this.applyHook(
             compiler,
-            'beforeRun',
-            'before-run',
+            this.webpackHooks.beforeRun,
             this.beforeParams
         );
         this.applyHook(
             compiler,
-            'watchRun',
-            'watch-run',
+            this.webpackHooks.watchRun,
             this.watchParams
         );
         this.applyHook(
             compiler,
-            'afterEmit',
-            'after-emit',
+            this.webpackHooks.afterEmit,
             this.afterParams
         );
     }
@@ -286,14 +315,8 @@ class Plugin {
      * @param {Compiler} compiler
      * "Represents the fully configured webpack environment.".
      *
-     * @param {string} v4Hook
-     * Hook name in webpack 4.x version.
-     *
-     * @param {string} v3Hook
-     * Hook name in webpack 3.x version.
-     * webpack 4+ comes with a new plugin system.
-     * There will be a check for `hooks` support in
-     * order to support old plugin system.
+     * @param {WebpackHook} hook
+     * Webpack hook to apply remove method.
      *
      * @param {RemovingParameters} params
      * A parameters of removing to apply.
@@ -301,7 +324,7 @@ class Plugin {
      * @throws
      * Throws an error if webpack is not able to register the plugin.
      */
-    applyHook(compiler, v4Hook, v3Hook, params) {
+    applyHook(compiler, hook, params) {
         const debugName = 'apply-hook: ';
 
         if (!params || !Object.keys(params).length) {
@@ -325,24 +348,28 @@ class Plugin {
                 ...params
             };
 
-            this.loggerDebug.add(`${debugName}hook started – "${v4Hook}"`);
+            this.loggerDebug.add(`${debugName}hook started – "${hook.name.v4}"`);
             this.handleHook(paramsCopy, callback);
-            this.loggerDebug.add(`${debugName}hook ended – "${v4Hook}"`);
+            this.loggerDebug.add(`${debugName}hook ended – "${hook.name.v4}"`);
             this.log(compilerOrCompilation, paramsCopy);
             this.clear();
         };
 
+        /**
+         * webpack 4+ comes with a new plugin system.
+         * Checking for `hooks` in order to support old plugin system.
+         */
         if (compiler.hooks) {
-            compiler.hooks[v4Hook].tapAsync(Info.fullName, method);
+            compiler.hooks[hook.name.v4].tapAsync(Info.fullName, method);
             this.loggerDebug.add(
                 debugName +
-                `v4 hook registered – "${v4Hook}"`
+                `v4 hook registered – "${hook.name.v4}"`
             );
         } else if (compiler.plugin) {
-            compiler.plugin(v3Hook, method);
+            compiler.plugin(hook.name.v3, method);
             this.loggerDebug.add(
                 debugName +
-                `v3 hook registered – "${v3Hook}"`
+                `v3 hook registered – "${hook.name.v3}"`
             );
         } else {
             throw new Error('webpack is not able to register the plugin');

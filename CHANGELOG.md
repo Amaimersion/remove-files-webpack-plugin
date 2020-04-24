@@ -1,5 +1,9 @@
 # 1.4.1
 
+## Improved
+
+- Documentation for `beforeRemove` parameter.
+
 ## Changed
 
 - Upgrade `@types/webpack` dependency to `4.41.12` version.

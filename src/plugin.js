@@ -214,13 +214,13 @@ class Plugin {
      * "This method is called once by the webpack
      * compiler while installing the plugin.".
      *
-     * @param {Compiler} main
+     * @param {Compiler} compiler
      * "Represents the fully configured webpack environment.".
      *
      * @throws
      * Throws an error if webpack is not able to register the plugin.
      */
-    apply(cmplr) {
+    apply(compiler) {
         const debugName = 'apply: ';
 
         this.loggerDebug.add(
@@ -260,63 +260,97 @@ class Plugin {
             `after parameters – "${JSON.stringify(this.afterParams)}"`
         );
 
-        /**
-         * webpack 4+ comes with a new plugin system.
-         * Checking for hooks in order to support old plugin system.
-         */
-        const applyHook = (compiler, v4Hook, v3Hook, params) => {
-            if (!params || !Object.keys(params).length) {
-                this.loggerDebug.add(
-                    debugName +
-                    'skipped registering, because "params" is empty'
-                );
-
-                return;
-            }
-
-            const method = (compilerOrCompilation, callback) => {
-                /**
-                 * `params` will be changed during the program lifecycle.
-                 * It is bad pattern, but intended behavior because of
-                 * bad architecture. It is fine for single-run hooks like
-                 * `before` or `after`, but for `watch` hook it can lose
-                 * data in `include` and `exclude`.
-                 */
-                const paramsCopy = {
-                    ...params
-                };
-
-                this.loggerDebug.add(`${debugName}hook started – "${v4Hook}"`);
-                this.handleHook(paramsCopy, callback);
-                this.loggerDebug.add(`${debugName}hook ended – "${v4Hook}"`);
-                this.log(compilerOrCompilation, paramsCopy);
-                this.clear();
-            };
-
-            if (compiler.hooks) {
-                compiler.hooks[v4Hook].tapAsync(Info.fullName, method);
-                this.loggerDebug.add(
-                    debugName +
-                    `v4 hook registered – "${v4Hook}"`
-                );
-            } else if (compiler.plugin) {
-                compiler.plugin(v3Hook, method);
-                this.loggerDebug.add(
-                    debugName +
-                    `v3 hook registered – "${v3Hook}"`
-                );
-            } else {
-                throw new Error('webpack is not able to register the plugin');
-            }
-        };
-
-        applyHook(cmplr, 'beforeRun', 'before-run', this.beforeParams);
-        applyHook(cmplr, 'watchRun', 'watch-run', this.watchParams);
-        applyHook(cmplr, 'afterEmit', 'after-emit', this.afterParams);
+        this.applyHook(
+            compiler,
+            'beforeRun',
+            'before-run',
+            this.beforeParams
+        );
+        this.applyHook(
+            compiler,
+            'watchRun',
+            'watch-run',
+            this.watchParams
+        );
+        this.applyHook(
+            compiler,
+            'afterEmit',
+            'after-emit',
+            this.afterParams
+        );
     }
 
     /**
-     * Handles webpack hooks.
+     * Applies hook to webpack compiler.
+     *
+     * @param {Compiler} compiler
+     * "Represents the fully configured webpack environment.".
+     *
+     * @param {string} v4Hook
+     * Hook name in webpack 4.x version.
+     *
+     * @param {string} v3Hook
+     * Hook name in webpack 3.x version.
+     * webpack 4+ comes with a new plugin system.
+     * There will be a check for `hooks` support in
+     * order to support old plugin system.
+     *
+     * @param {RemovingParameters} params
+     * A parameters of removing to apply.
+     *
+     * @throws
+     * Throws an error if webpack is not able to register the plugin.
+     */
+    applyHook(compiler, v4Hook, v3Hook, params) {
+        const debugName = 'apply-hook: ';
+
+        if (!params || !Object.keys(params).length) {
+            this.loggerDebug.add(
+                debugName +
+                'skipped registering, because "params" is empty'
+            );
+
+            return;
+        }
+
+        const method = (compilerOrCompilation, callback) => {
+            /**
+             * `params` will be changed during the program lifecycle.
+             * It is bad pattern, but intended behavior because of
+             * bad architecture. It is fine for single-run hooks like
+             * `before` or `after`, but for `watch` hook it can lose
+             * data in `include` and `exclude`.
+             */
+            const paramsCopy = {
+                ...params
+            };
+
+            this.loggerDebug.add(`${debugName}hook started – "${v4Hook}"`);
+            this.handleHook(paramsCopy, callback);
+            this.loggerDebug.add(`${debugName}hook ended – "${v4Hook}"`);
+            this.log(compilerOrCompilation, paramsCopy);
+            this.clear();
+        };
+
+        if (compiler.hooks) {
+            compiler.hooks[v4Hook].tapAsync(Info.fullName, method);
+            this.loggerDebug.add(
+                debugName +
+                `v4 hook registered – "${v4Hook}"`
+            );
+        } else if (compiler.plugin) {
+            compiler.plugin(v3Hook, method);
+            this.loggerDebug.add(
+                debugName +
+                `v3 hook registered – "${v3Hook}"`
+            );
+        } else {
+            throw new Error('webpack is not able to register the plugin');
+        }
+    }
+
+    /**
+     * Handles webpack hook.
      *
      * @param {RemovingParameters} params
      * A parameters of removing.

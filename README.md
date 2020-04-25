@@ -18,7 +18,8 @@
   - [Segment separator](#segment-separator)
   - [Per-drive working directory](#per-drive-working-directory)
 - [Parameters](#parameters)
-    - [How to set](#how-to-set)
+  - [How to set](#how-to-set)
+  - [Compilation modes](#compilation-modes)
 - [Examples](#examples)
 - [Contribution](#contribution)
 - [License](#license)
@@ -102,13 +103,18 @@ From [Node.js documentation](https://nodejs.org/api/path.html#path_windows_vs_po
 |       emulate        |                                          `boolean`                                           |   `false`   |                                                                                Emulate remove process.<br>Print which folders and files will be removed<br>without actually removing them.<br>Ignores `log` parameter.                                                                                |
 | allowRootAndOutside  |                                          `boolean`                                           |   `false`   |                                                                    Allow removing of `root` directory or outside `root` directory.<br>It is kind of safe mode.<br>**Don't turn it on if you don't know<br>what you actually do!**                                                                     |  |
 
-#### How to set
+### How to set
 
 You can pass these parameters into any of the following keys: `before`, `watch` or `after`. Each key is optional, but at least one should be specified. 
 
-- `before` – executes once before "normal" compilation; 
-- `watch` – executes every time before "watch" compilation;
+- `before` – executes once before "normal" compilation.
+- `watch` – executes every time before "watch" compilation.
 - `after` – executes once after "normal" compilation and every time after "watch" compilation.
+
+### Compilation modes
+
+- "normal" compilation means full compilation.
+- "watch" compilation means first build is a full compilation and subsequent builds is a short rebuilds of changed files. 
 
 
 ## Examples

@@ -125,7 +125,9 @@ const FOLDERS = [
     path.resolve('.', 'acceptance_test_remove/large_test/pa)t-h (t [e]s {t} +'),
     path.resolve('.', 'acceptance_test_remove/large_test/maps/test'),
     path.resolve('.', 'acceptance_test_remove/large_test/test'),
-    path.resolve('.', 'acceptance_test_remove/large_test/styles/test')
+    path.resolve('.', 'acceptance_test_remove/large_test/styles/test'),
+    path.resolve('.', 'plugin_test_remove'),
+    path.resolve('.', 'plugin_test_remove/apply-hook')
 ];
 
 /**
@@ -281,7 +283,14 @@ const FILES = [
     path.resolve('.', 'acceptance_test_remove/large_test/maps/test/1.map'),
     path.resolve('.', 'acceptance_test_remove/large_test/maps/test/file.map'),
     path.resolve('.', 'acceptance_test_remove/large_test/pa)t-h (t [e]s {t} +/test.txt'),
-    path.resolve('.', 'acceptance_test_remove/large_test/pa)t-h (t [e]s {t} +/1.map')
+    path.resolve('.', 'acceptance_test_remove/large_test/pa)t-h (t [e]s {t} +/1.map'),
+    path.resolve('.', 'plugin_test_remove/apply-hook/test1.txt'),
+    path.resolve('.', 'plugin_test_remove/apply-hook/test2.txt'),
+    path.resolve('.', 'plugin_test_remove/apply-hook/test3.txt'),
+    path.resolve('.', 'plugin_test_remove/apply-hook/test4.txt'),
+    path.resolve('.', 'plugin_test_remove/apply-hook/test5.txt'),
+    path.resolve('.', 'plugin_test_remove/apply-hook/test5.txt'),
+    path.resolve('.', 'plugin_test_remove/apply-hook/test6.txt'),
 ];
 
 

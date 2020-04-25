@@ -1,3 +1,20 @@
+# 1.4.1 (April 25, 2020)
+
+## Improved
+
+- Documentation for `beforeRemove`, `afterRemove` parameters.
+
+## Added
+
+- Namespace documentation for every parameter.
+- New feature: `beforeForFirstBuild`. For first build `before` parameters will be applied, for subsequent builds `watch` parameters will be applied.Works only in `watch` key. [#25](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/25)
+- New feature: `skipFirstBuild`. First build will be skipped. Works only in `watch` key.
+
+## Changed
+
+- Upgrade `@types/webpack` dependency to `4.41.12` version.
+
+
 # 1.4.0 (February 27, 2020)
 
 ## Added

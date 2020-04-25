@@ -2,7 +2,7 @@
 
 ## Improved
 
-- Documentation for `beforeRemove` parameter.
+- Documentation for `beforeRemove`, `afterRemove` parameters.
 
 ## Added
 

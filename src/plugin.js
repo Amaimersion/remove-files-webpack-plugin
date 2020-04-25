@@ -67,6 +67,7 @@
  * If specified, will be called after removing.
  * Absolute paths of folders and files that have been removed
  * will be passed into this function.
+ * Will be not called if `emulate: true` or `skipFirstBuild: true`.
  * Defaults to `undefined`.
  * Namespace: all.
  *

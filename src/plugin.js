@@ -383,15 +383,27 @@ class Plugin {
     applyHook(compiler, hook) {
         const debugName = 'apply-hook: ';
 
+        /**
+         * This method will be called by webpack.
+         *
+         * @param {Compiler | Compilation} compilerOrCompilation
+         * Webpack compiler object or compilation object.
+         * It depends on hook.
+         *
+         * @param {Function} callback
+         * "Some compilation plugin steps are asynchronous,
+         * and pass a callback function that must be invoked
+         * when your plugin is finished running".
+         */
         const method = (compilerOrCompilation, callback) => {
             const params = hook.getParams();
+            const cllbck = () => {
+                hook.increaseCallsCount();
+                callback();
+            };
 
             if (!params || !Object.keys(params).length) {
-                this.loggerDebug.add(
-                    debugName +
-                    `skipped starting – "${hook.name.v4}", ` +
-                    'because "params" is empty'
-                );
+                cllbck();
 
                 return;
             }
@@ -408,11 +420,11 @@ class Plugin {
             };
 
             this.loggerDebug.add(`${debugName}hook started – "${hook.name.v4}"`);
-            this.handleHook(paramsCopy, callback);
+            this.handleHook(paramsCopy);
             this.loggerDebug.add(`${debugName}hook ended – "${hook.name.v4}"`);
-            hook.increaseCallsCount();
             this.log(compilerOrCompilation, paramsCopy);
             this.clear();
+            cllbck();
         };
 
         /**
@@ -441,13 +453,8 @@ class Plugin {
      *
      * @param {RemovingParameters} params
      * A parameters of removing.
-     *
-     * @param {Function} callback
-     * "Some compilation plugin steps are asynchronous,
-     * and pass a callback function that must be invoked
-     * when your plugin is finished running".
      */
-    handleHook(params, callback) {
+    handleHook(params) {
         const debugName = 'handle-hook: ';
 
         this.path.type = params._pathType;
@@ -457,8 +464,6 @@ class Plugin {
             `path – "${this.path.type || 'auto'}"`
         );
         this.handleRemove(params);
-
-        callback();
     }
 
     /**

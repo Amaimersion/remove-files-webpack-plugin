@@ -191,7 +191,7 @@ interface RemoveParameters {
      * 
      * Namespace: `watch`.
      */
-    beforeForFirstBuild: boolean;
+    beforeForFirstBuild?: boolean;
 }
 
 /**

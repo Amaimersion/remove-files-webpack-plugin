@@ -115,6 +115,27 @@ describe('unit', function () {
 
                 expect(result).to.have.ordered.members(["before", "watch"]);
             });
+
+            it('"skipFirstBuild: true" skips first build', function () {
+                const webpackV4 = new Webpack.EmulatedWebpackCompiler.v4();
+                let removed = false;
+                const instance = new Plugin({
+                    watch: {
+                        include: [
+                            './plugin_test_remove/apply-hook/test6.txt'
+                        ],
+                        skipFirstBuild: true,
+                        afterRemove: () => {
+                            removed = true;
+                        }
+                    }
+                });
+
+                instance.apply(webpackV4);
+                webpackV4.runWatchRun();
+
+                expect(removed).to.equal(false);
+            });
         });
     });
 });

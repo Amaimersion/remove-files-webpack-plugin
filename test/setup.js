@@ -288,7 +288,9 @@ const FILES = [
     path.resolve('.', 'plugin_test_remove/apply-hook/test2.txt'),
     path.resolve('.', 'plugin_test_remove/apply-hook/test3.txt'),
     path.resolve('.', 'plugin_test_remove/apply-hook/test4.txt'),
-    path.resolve('.', 'plugin_test_remove/apply-hook/test5.txt')
+    path.resolve('.', 'plugin_test_remove/apply-hook/test5.txt'),
+    path.resolve('.', 'plugin_test_remove/apply-hook/test5.txt'),
+    path.resolve('.', 'plugin_test_remove/apply-hook/test6.txt'),
 ];
 
 

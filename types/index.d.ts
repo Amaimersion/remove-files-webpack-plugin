@@ -85,7 +85,7 @@ interface RemoveParameters {
      * If returned value is `true`, then
      * remove process will be canceled.
      * Will be not called if items for removing 
-     * not found or `emulate` is on.
+     * not found, `emulate: true` or `skipFirstBuild: true`.
      * 
      * Defaults to `undefined`.
      * 
@@ -182,6 +182,15 @@ interface RemoveParameters {
      * Namespace: all.
      */
     allowRootAndOutside?: boolean;
+
+    /**
+     * First build will be skipped.
+     * 
+     * Defaults to `false`.
+     * 
+     * Namespace: `watch`.
+     */
+    skipFirstBuild?: boolean;
 
     /**
      * For first build `before` parameters will be applied,

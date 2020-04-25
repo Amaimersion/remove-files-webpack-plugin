@@ -56,7 +56,7 @@
  * If returned value is `true`, then
  * remove process will be canceled.
  * Will be not called if items for removing
- * not found or `emulate` is on.
+ * not found, `emulate: true` or `skipFirstBuild: true`.
  * Defaults to `undefined`.
  * Namespace: all.
  *
@@ -118,6 +118,11 @@
  * Type of `path` module.
  * Defaults to `''` (will be selected based on OS).
  * Namespace: all.
+ *
+ * @property {boolean} skipFirstBuild
+ * First build will be skipped.
+ * Defaults to `false`.
+ * Namespace: `watch`.
  *
  * @property {boolean} beforeForFirstBuild
  * For first build `before` parameters will be applied,
@@ -228,6 +233,7 @@ class Plugin {
             _pathType: '',
 
             /* `watch` parameters */
+            skipFirstBuild: false,
             beforeForFirstBuild: false
         };
 
@@ -272,11 +278,12 @@ class Plugin {
                     this.webpackHooks.watchRun.callsCount++;
                 },
                 getParams: () => {
-                    if (
-                        this.watchParams.beforeForFirstBuild &&
-                        this.webpackHooks.watchRun.callsCount === 0
-                    ) {
-                        return this.webpackHooks.beforeRun.getParams();
+                    if (this.webpackHooks.watchRun.callsCount === 0) {
+                        if (this.watchParams.skipFirstBuild) {
+                            return undefined;
+                        } else if (this.watchParams.beforeForFirstBuild) {
+                            return this.webpackHooks.beforeRun.getParams();
+                        }
                     }
 
                     return this.watchParams;

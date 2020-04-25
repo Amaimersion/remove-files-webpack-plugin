@@ -4,6 +4,11 @@
 
 - Documentation for `beforeRemove` parameter.
 
+## Added
+
+- Namespace documentation for every parameter.
+- New feature: `beforeForFirstBuild`. For first build `before` parameters will be applied, for subsequent builds `watch` parameters will be applied.Works only in `watch` key. [#25](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/25)
+
 ## Changed
 
 - Upgrade `@types/webpack` dependency to `4.41.12` version.

@@ -46,6 +46,8 @@ interface RemoveParameters {
      *
      * Defaults to `.` (where package.json and
      * node_modules are located).
+     * 
+     * Namespace: all.
      */
     root?: string;
 
@@ -53,6 +55,8 @@ interface RemoveParameters {
      * A folders and files for removing.
      *
      * Defaults to `[]`.
+     * 
+     * Namespace: all.
      */
     include?: ReadonlyArray<string>;
 
@@ -60,6 +64,8 @@ interface RemoveParameters {
      * A folders and files for excluding.
      *
      * Defaults to `[]`.
+     * 
+     * Namespace: all.
      */
     exclude?: ReadonlyArray<string>;
 
@@ -67,6 +73,8 @@ interface RemoveParameters {
      * A folders for testing.
      *
      * Defaults to `[]`.
+     * 
+     * Namespace: all.
      */
     test?: ReadonlyArray<TestObject>;
 
@@ -78,7 +86,10 @@ interface RemoveParameters {
      * remove process will be canceled.
      * Will be not called if items for removing 
      * not found or `emulate` is on.
+     * 
      * Defaults to `undefined`.
+     * 
+     * Namespace: all.
      */
     beforeRemove?: (
         absoluteFoldersPaths: string[],
@@ -89,7 +100,10 @@ interface RemoveParameters {
      * If specified, will be called after removing.
      * Absolute paths of folders and files that have been removed
      * will be passed into this function.
+     * 
      * Defaults to `undefined`.
+     * 
+     * Namespace: all.
      */
     afterRemove?: (
         absoluteFoldersPaths: string[],
@@ -101,6 +115,8 @@ interface RemoveParameters {
      * instead of permanent removing.
      *
      * Defaults to `false`.
+     * 
+     * Namespace: all.
      */
     trash?: boolean;
 
@@ -109,6 +125,8 @@ interface RemoveParameters {
      * (example: "Which folders or files have been removed").
      *
      * Defaults to `true`.
+     * 
+     * Namespace: all.
      */
     log?: boolean;
 
@@ -117,6 +135,8 @@ interface RemoveParameters {
      * (example: "An items for removing not found").
      *
      * Defaults to `true`.
+     * 
+     * Namespace: all.
      */
     logWarning?: boolean;
 
@@ -125,6 +145,8 @@ interface RemoveParameters {
      * (example: "No such file or directory").
      *
      * Defaults to `false`.
+     * 
+     * Namespace: all.
      */
     logError?: boolean;
 
@@ -133,6 +155,8 @@ interface RemoveParameters {
      * (used for debugging).
      *
      * Defaults to `false`.
+     * 
+     * Namespace: all.
      */
     logDebug?: boolean;
 
@@ -143,6 +167,8 @@ interface RemoveParameters {
      * Ignores `log` parameter.
      *
      * Defaults to `false`.
+     * 
+     * Namespace: all.
      */
     emulate?: boolean;
 
@@ -152,8 +178,20 @@ interface RemoveParameters {
      * **Don't turn it on if you don't know what you actually do!**
      *
      * Defaults to `false`.
+     * 
+     * Namespace: all.
      */
     allowRootAndOutside?: boolean;
+
+    /**
+     * For first build `before` parameters will be applied,
+     * for subsequent builds `watch` parameters will be applied.
+     * 
+     * Defaults to `false`.
+     * 
+     * Namespace: `watch`.
+     */
+    beforeForFirstBuild: boolean;
 }
 
 /**
@@ -162,12 +200,16 @@ interface RemoveParameters {
 interface TestObject {
     /**
      * A path to the folder (relative to `root`).
+     * 
+     * Namespace: all.
      */
     folder: string;
 
     /**
      * A method that accepts an item path (`root` + folderPath + fileName) and
      * returns value that indicates should this item be removed or not.
+     * 
+     * Namespace: all.
      */
     method: (absolutePath: string) => boolean;
 
@@ -175,6 +217,8 @@ interface TestObject {
      * Apply this method to all items in subdirectories.
      *
      * Defaults to `false`.
+     * 
+     * Namespace: all.
      */
     recursive?: boolean;
 }

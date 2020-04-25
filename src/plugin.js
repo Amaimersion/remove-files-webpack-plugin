@@ -9,13 +9,16 @@
  *
  * @property {string} folder
  * A path to the folder (relative to `root`).
+ * Namespace: all.
  *
  * @property {(absolutePath: string) => boolean} method
  * A method that accepts an item path (`root` + folderPath + fileName) and
  * returns value that indicates should this item be removed or not.
+ * Namespace: all.
  *
  * @property {boolean} recursive
  * Apply this method to all items in subdirectories.
+ * Namespace: all.
  */
 
 /**
@@ -26,18 +29,22 @@
  * A root directory.
  * Not absolute paths will be appended to this.
  * Defaults to `.` (where `package.json` and `node_modules` are located).
+ * Namespace: all.
  *
  * @property {string[]} include
  * A folders and files for removing.
  * Defaults to `[]`.
+ * Namespace: all.
  *
  * @property {string[]} exclude
  * A folders and files for excluding.
  * Defaults to `[]`.
+ * Namespace: all.
  *
  * @property {TestObject[]} test
  * A folders for testing.
  * Defaults to `[]`.
+ * Namespace: all.
  *
  * @property {(
  *  absoluteFoldersPaths: string[],
@@ -51,6 +58,7 @@
  * Will be not called if items for removing
  * not found or `emulate` is on.
  * Defaults to `undefined`.
+ * Namespace: all.
  *
  * @property {(
  *  absoluteFoldersPaths: string[],
@@ -60,47 +68,62 @@
  * Absolute paths of folders and files that have been removed
  * will be passed into this function.
  * Defaults to `undefined`.
+ * Namespace: all.
  *
  * @property {boolean} trash
  * Move folders and files to trash (recycle bin)
  * instead of permanent deleting.
  * Defaults to `false`.
+ * Namespace: all.
  *
  * @property {boolean} log
  * Print messages of "info" level
  * (example: "Which folders or files have been removed").
  * Defaults to `true`.
+ * Namespace: all.
  *
  * @property {boolean} logWarning
  * Print messages of "warning" level
  * (example: "An items for removing not found").
  * Defaults to `true`.
+ * Namespace: all.
  *
  * @property {boolean} logError
  * Print messages of "error" level
  * (example: "No such file or directory").
  * Defaults to `false`.
+ * Namespace: all.
  *
  * @property {boolean} logDebug
  * Print messages of "debug" level
  * (used for debugging).
  * Defaults to `false`.
+ * Namespace: all.
  *
  * @property {boolean} emulate
  * Emulate remove process.
  * Print which folders and files will be removed without actually removing them.
  * Ignores `log` parameter.
  * Defaults to `false`.
+ * Namespace: all.
  *
  * @property {boolean} allowRootAndOutside
  * Allow removing of the `root` directory or outside the `root` directory.
  * It's kind of safe mode.
  * Don't turn it on if you don't know what you actually do!
  * Defaults to `false`.
+ * Namespace: all.
  *
  * @property {PathType} _pathType
  * Type of `path` module.
  * Defaults to `''` (will be selected based on OS).
+ * Namespace: all.
+ *
+ * @property {boolean} beforeForFirstBuild
+ * For first build `before` parameters will be applied,
+ * for subsequent builds `watch` parameters will be applied.
+ * Defaults to `false`.
+ * Namespace: `watch`.
  */
 
 /**
@@ -133,6 +156,9 @@
  *      v4: string;
  *      v3: string;
  *  };
+ *  callsCount: int;
+ *  increaseCallsCount: () => void;
+ *  getParams: () => RemovingParameters;
  * }} WebpackHook
  * Information about Webpack hook.
  */
@@ -185,6 +211,7 @@ class Plugin {
 
         /** @type {RemovingParameters} */
         const defaultParams = {
+            /* Common parameters */
             root: this.path.path.resolve('.'),
             include: [],
             exclude: [],
@@ -198,7 +225,10 @@ class Plugin {
             logDebug: false,
             emulate: false,
             allowRootAndOutside: false,
-            _pathType: ''
+            _pathType: '',
+
+            /* `watch` parameters */
+            beforeForFirstBuild: false
         };
 
         /** @type {RemovingParameters} */
@@ -225,19 +255,43 @@ class Plugin {
                 name: {
                     v4: 'beforeRun',
                     v3: 'before-run'
-                }
+                },
+                callsCount: 0,
+                increaseCallsCount: () => {
+                    this.webpackHooks.beforeRun.callsCount++;
+                },
+                getParams: () => this.beforeParams
             },
             watchRun: {
                 name: {
                     v4: 'watchRun',
                     v3: 'watch-run'
+                },
+                callsCount: 0,
+                increaseCallsCount: () => {
+                    this.webpackHooks.watchRun.callsCount++;
+                },
+                getParams: () => {
+                    if (
+                        this.watchParams.beforeForFirstBuild &&
+                        this.webpackHooks.watchRun.callsCount === 0
+                    ) {
+                        return this.webpackHooks.beforeRun.getParams();
+                    }
+
+                    return this.watchParams;
                 }
             },
             afterEmit: {
                 name: {
                     v4: 'afterEmit',
                     v3: 'after-emit'
-                }
+                },
+                callsCount: 0,
+                increaseCallsCount: () => {
+                    this.webpackHooks.afterEmit.callsCount++;
+                },
+                getParams: () => this.afterParams
             }
         };
     }
@@ -294,18 +348,15 @@ class Plugin {
 
         this.applyHook(
             compiler,
-            this.webpackHooks.beforeRun,
-            this.beforeParams
+            this.webpackHooks.beforeRun
         );
         this.applyHook(
             compiler,
-            this.webpackHooks.watchRun,
-            this.watchParams
+            this.webpackHooks.watchRun
         );
         this.applyHook(
             compiler,
-            this.webpackHooks.afterEmit,
-            this.afterParams
+            this.webpackHooks.afterEmit
         );
     }
 
@@ -318,25 +369,25 @@ class Plugin {
      * @param {WebpackHook} hook
      * Webpack hook to apply remove method.
      *
-     * @param {RemovingParameters} params
-     * A parameters of removing to apply.
-     *
      * @throws
      * Throws an error if webpack is not able to register the plugin.
      */
-    applyHook(compiler, hook, params) {
+    applyHook(compiler, hook) {
         const debugName = 'apply-hook: ';
 
-        if (!params || !Object.keys(params).length) {
-            this.loggerDebug.add(
-                debugName +
-                'skipped registering, because "params" is empty'
-            );
-
-            return;
-        }
-
         const method = (compilerOrCompilation, callback) => {
+            const params = hook.getParams();
+
+            if (!params || !Object.keys(params).length) {
+                this.loggerDebug.add(
+                    debugName +
+                    `skipped starting – "${hook.name.v4}", ` +
+                    'because "params" is empty'
+                );
+
+                return;
+            }
+
             /**
              * `params` will be changed during the program lifecycle.
              * It is bad pattern, but intended behavior because of
@@ -351,6 +402,7 @@ class Plugin {
             this.loggerDebug.add(`${debugName}hook started – "${hook.name.v4}"`);
             this.handleHook(paramsCopy, callback);
             this.loggerDebug.add(`${debugName}hook ended – "${hook.name.v4}"`);
+            hook.increaseCallsCount();
             this.log(compilerOrCompilation, paramsCopy);
             this.clear();
         };

@@ -1,3 +1,10 @@
+# 1.4.2
+
+## Improved
+
+- Little refactoring (related to English language, not information) of documentation.
+
+
 # 1.4.1 (April 25, 2020)
 
 ## Improved

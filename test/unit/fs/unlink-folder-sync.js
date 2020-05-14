@@ -71,7 +71,7 @@ describe('unit', function () {
                 expect(result).to.be.equal(correct);
             });
 
-            it('should remove in trash empty folder', function (done) {
+            it('should move to trash empty folder', function (done) {
                 instance.unlinkFolderSync({
                     pth: 'D:/fs_test_folder_remove_5',
                     toAbsoluteS: (...args) => customPath.toAbsoluteS(...args),
@@ -90,7 +90,7 @@ describe('unit', function () {
                 });
             });
 
-            it('should remove in trash folder with files', function (done) {
+            it('should move to trash folder with files', function (done) {
                 instance.unlinkFolderSync({
                     pth: 'D:/fs_test_folder_remove_6',
                     toAbsoluteS: (...args) => customPath.toAbsoluteS(...args),
@@ -109,7 +109,7 @@ describe('unit', function () {
                 });
             });
 
-            it('should remove in trash folder with empty folders', function (done) {
+            it('should move to trash folder with empty folders', function (done) {
                 instance.unlinkFolderSync({
                     pth: 'D:/fs_test_folder_remove_7',
                     toAbsoluteS: (...args) => customPath.toAbsoluteS(...args),
@@ -128,7 +128,7 @@ describe('unit', function () {
                 });
             });
 
-            it('should remove in trash folder with folders', function (done) {
+            it('should move to trash folder with folders', function (done) {
                 instance.unlinkFolderSync({
                     pth: 'D:/fs_test_folder_remove_8',
                     toAbsoluteS: (...args) => customPath.toAbsoluteS(...args),

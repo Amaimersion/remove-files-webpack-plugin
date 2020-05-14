@@ -17,7 +17,7 @@ describe('unit', function () {
                 expect(method).to.not.throw();
             });
 
-            it('should not throw error in case of removing in trash if file not exists', function () {
+            it('should not throw error in case of moving to trash if file not exists', function () {
                 const method = () => instance.unlinkFileSync({
                     pth: 'D:/fs_test_file_remove/not exists.txt',
                     toTrash: true
@@ -41,7 +41,7 @@ describe('unit', function () {
                 expect(result).to.be.equal(correct);
             });
 
-            it('should remove file in trash', function (done) {
+            it('should move file to trash', function (done) {
                 instance.unlinkFileSync({
                     pth: 'D:/fs_test_file_remove/2 pa)t-h (t [e]s {t} + file.name.txt',
                     toTrash: true,

@@ -12,7 +12,7 @@ As an open source project with busy owner, it can sometimes take a long time to 
 
 # Bug Report
 
-<!-- Please provide a general summary of the issue in the title field above. -->
+<!-- Please provide a general summary of the issue in the title field. -->
 
 
 ## Environment
@@ -42,6 +42,7 @@ As an open source project with busy owner, it can sometimes take a long time to 
 ```javascript
 new RemovePlugin({
     before: {},
+    watch: {},
     after: {}
 })
 ```

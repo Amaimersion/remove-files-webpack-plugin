@@ -151,7 +151,7 @@ class Fs {
      * Removes a file.
      *
      * - don't throws an error if file not exists.
-     * - in case of removing in trash this becomes an
+     * - in case of moving to the trash this becomes an
      * async function and you should use callbacks
      * (consider `rightTrashCallbacks` parameter).
      *
@@ -206,10 +206,10 @@ class Fs {
     /**
      * Removes a folder.
      *
-     * - in case of removing in trash this becomes an
+     * - in case of moving to the trash this becomes an
      * async function and you should use callbacks
      * (consider `rightTrashCallbacks` parameter).
-     * - in case of removing in trash
+     * - in case of moving to the trash
      * don't throws an error if folder not exists.
      *
      * @param {UnlinkFolderParams} params
@@ -267,7 +267,7 @@ class Fs {
             const stat = this.getStatSync(item);
 
             if (!stat) {
-                onFileError(`Skipped, because cannot get stat - "${item}"`);
+                onFileError(`Skipped, because unable to get stat - "${item}"`);
 
                 continue;
             } else if (stat.isFile()) {
@@ -286,7 +286,7 @@ class Fs {
                     }
                 });
             } else {
-                onFileError(`Skipped, because invalid stat – "${item}"`);
+                onFileError(`Skipped, because of invalid stat – "${item}"`);
 
                 continue;
             }
@@ -351,7 +351,7 @@ class Fs {
             const stat = this.getStatSync(item);
 
             if (!stat) {
-                onItemError(`Skipped, because cannot get stat - "${item}"`);
+                onItemError(`Skipped, because unable to get stat - "${item}"`);
 
                 continue;
             } else if (stat.isFile()) {
@@ -398,7 +398,7 @@ class Fs {
                     );
                 }
             } else {
-                onItemError(`Skipped, because invalid stat – "${item}"`);
+                onItemError(`Skipped, because of invalid stat – "${item}"`);
 
                 continue;
             }

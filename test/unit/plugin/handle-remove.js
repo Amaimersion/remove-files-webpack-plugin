@@ -93,7 +93,7 @@ describe('unit', function () {
                 expect(fileExists).to.equal(false);
             });
 
-            it('should remove folders and files to trash', function (done) {
+            it('should move folders and files to trash', function (done) {
                 // trash removing is async, not sync.
                 this.timeout(1000);
 

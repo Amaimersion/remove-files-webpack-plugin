@@ -44,15 +44,15 @@ interface RemoveParameters {
      * A root directory.
      * Not absolute paths will be appended to this.
      *
-     * Defaults to `.` (where package.json and
-     * node_modules are located).
+     * Defaults to `.` (where "package.json" and
+     * "node_modules" are located).
      * 
      * Namespace: all.
      */
     root?: string;
 
     /**
-     * A folders and files for removing.
+     * A folders or files for removing.
      *
      * Defaults to `[]`.
      * 
@@ -61,7 +61,7 @@ interface RemoveParameters {
     include?: ReadonlyArray<string>;
 
     /**
-     * A folders and files for excluding.
+     * A folders or files for excluding.
      *
      * Defaults to `[]`.
      * 
@@ -112,7 +112,7 @@ interface RemoveParameters {
     ) => void;
 
     /**
-     * Move folders and files to trash (recycle bin)
+     * Move folders and files to the trash (recycle bin)
      * instead of permanent removing.
      *
      * Defaults to `false`.
@@ -205,7 +205,7 @@ interface RemoveParameters {
 }
 
 /**
- * A folder for testing of items (folders and files) that should be removed.
+ * A folder for testing of items (folders or files) that should be removed.
  */
 interface TestObject {
     /**

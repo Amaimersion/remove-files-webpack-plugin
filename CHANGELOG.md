@@ -1,3 +1,10 @@
+# 1.4.2 (May 15, 2020)
+
+## Improved
+
+- Little refactoring (related to English language, not information) of documentation and log messages. [#27](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/27)
+
+
 # 1.4.1 (April 25, 2020)
 
 ## Improved

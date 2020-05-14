@@ -88,15 +88,15 @@ From [Node.js documentation](https://nodejs.org/api/path.html#path_windows_vs_po
 |         Name         |                                             Type                                             |   Default   | Namespace |                                                                                                                                                          Description                                                                                                                                                          |
 | :------------------: | :------------------------------------------------------------------------------------------: | :---------: | :-------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 |         root         |                                           `string`                                           |     `.`     |    All    |                                                                                             A root directory.<br>Not absolute paths will be appended to this.<br>Defaults to where `package.json` and `node_modules` are located.                                                                                             |
-|       include        |                                          `string[]`                                          |    `[]`     |    All    |                                                                                                                                               A folders and files for removing.                                                                                                                                               |
-|       exclude        |                                          `string[]`                                          |    `[]`     |    All    |                                                                                                                                              A folders and files for excluding.                                                                                                                                               |
+|       include        |                                          `string[]`                                          |    `[]`     |    All    |                                                                                                                                               A folders or files for removing.                                                                                                                                                |
+|       exclude        |                                          `string[]`                                          |    `[]`     |    All    |                                                                                                                                               A folders or files for excluding.                                                                                                                                               |
 |         test         |                                        `TestObject[]`                                        |    `[]`     |    All    |                                                                                                                                                    A folders for testing.                                                                                                                                                     |
 |  TestObject.folder   |                                           `string`                                           |  Required   |    All    |                                                                                                                                          A path to the folder (relative to `root`).                                                                                                                                           |
 |  TestObject.method   |                             `(absolutePath: string) => boolean`                              |  Required   |    All    |                                                                                        A method that accepts an item path (`root` + folderPath + fileName) and<br>returns value that indicates should this item be removed or not.<br>                                                                                        |
 | TestObject.recursive |                                          `boolean`                                           |   `false`   |    All    |                                                                                                                                       Apply this method to all items in subdirectories.                                                                                                                                       |
 |     beforeRemove     | `(`<br>`absoluteFoldersPaths: string[],`<br>`absoluteFilesPaths: string[]`<br>`) => boolean` | `undefined` |    All    | If specified, will be called before removing.<br>Absolute paths of folders and files that<br>will be removed will be passed into this function.<br>If returned value is `true`,<br>then remove process will be canceled.<br>Will be not called if items for removing<br>not found, `emulate: true` or `skipFirstBuild: true`. |
 |     afterRemove      |  `(`<br>`absoluteFoldersPaths: string[],`<br>`absoluteFilesPaths: string[]`<br>`) => void`   | `undefined` |    All    |                                                     If specified, will be called after removing.<br>Absolute paths of folders and files<br>that have been removed will be passed into this function.<br>Will be not called if `emulate: true` or `skipFirstBuild: true`.                                                      |
-|        trash         |                                          `boolean`                                           |   `false`   |    All    |                                                                                                  Move folders and files to trash (recycle bin) instead of permanent removing.<br>Requires Windows 8+, macOS 10.12+ or Linux.                                                                                                  |
+|        trash         |                                          `boolean`                                           |   `false`   |    All    |                                                                                                Move folders and files to the trash (recycle bin) instead of permanent removing.<br>Requires Windows 8+, macOS 10.12+ or Linux.                                                                                                |
 |         log          |                                          `boolean`                                           |   `true`    |    All    |                                                                                                                   Print messages of "info" level<br>(example: "Which folders or files have been removed").                                                                                                                    |
 |      logWarning      |                                          `boolean`                                           |   `true`    |    All    |                                                                                                                      Print messages of "warning" level<br>(example: "An items for removing not found").                                                                                                                       |
 |       logError       |                                          `boolean`                                           |   `false`   |    All    |                                                                                                                          Print messages of "error" level<br>(example: "No such file or directory").                                                                                                                           |
@@ -157,9 +157,9 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * After compilation removes both 
+     * After compilation moves both 
      * `./dist/manifest.json` file and 
-     * `./dist/maps` folder to trash.
+     * `./dist/maps` folder to the trash.
      */
     after: {
         root: './dist',
@@ -316,8 +316,8 @@ new RemovePlugin({
 
     /**
      * Once after "normal" compilation or every time
-     * after "watch" compilation removes `./dist/log.txt`
-     * file in trash.
+     * after "watch" compilation moves `./dist/log.txt`
+     * file to the trash.
      */
     after: {
         include: [
@@ -333,7 +333,7 @@ new RemovePlugin({
     /**
      * Before compilation emulates remove process
      * for a file that is outside of the root directory.
-     * That file will be removed in trash in case of
+     * That file will be moved to the trash in case of
      * not emulation.
      */
     before: {

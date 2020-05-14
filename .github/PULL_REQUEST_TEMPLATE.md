@@ -6,7 +6,7 @@ As an open source project with busy owner, it can sometimes take a long time to 
 
 # Pull Request
 
-<!-- Provide a general summary of the pull request in the title field above. -->
+<!-- Provide a general summary of the pull request in the title field. -->
 
 
 ## Type

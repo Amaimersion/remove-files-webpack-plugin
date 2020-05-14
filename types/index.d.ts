@@ -112,7 +112,7 @@ interface RemoveParameters {
     ) => void;
 
     /**
-     * Move folders and files to trash (recycle bin)
+     * Move folders and files to the trash (recycle bin)
      * instead of permanent removing.
      *
      * Defaults to `false`.

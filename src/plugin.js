@@ -203,7 +203,8 @@ class Plugin {
             !params.after
         ) {
             throw new Error(
-                'No "before", "watch" or "after" parameters specified. ' +
+                'Neither "before", "watch" or "after" parameters is specified. ' +
+                'At least one should be specified. ' +
                 'See https://github.com/Amaimersion/remove-files-webpack-plugin#parameters'
             );
         }
@@ -518,9 +519,8 @@ class Plugin {
             !Object.keys(items.files).length
         ) {
             const message = (
-                'An items for ' +
-                `${params.trash ? 'removing in trash' : 'permanent removing'}` +
-                ' not found'
+                'Could not find any items to ' +
+                `${params.trash ? 'move to the trash' : 'permanently remove'}`
             );
 
             this.loggerDebug.add(`${debugName}${message}`);
@@ -531,9 +531,9 @@ class Plugin {
 
         if (params.emulate) {
             const message = (
-                'Following items will be ' +
-                `${params.trash ? 'removed in trash' : 'permanently removed'}` +
-                ' in case of not emulation:'
+                'The following items would have been ' +
+                `${params.trash ? 'moved to the trash' : 'permanently removed'}` +
+                ' if it hadn\'t been an emulation:'
             );
 
             enablePrettyPrinting();
@@ -600,8 +600,8 @@ class Plugin {
         enablePrettyPrinting();
 
         const message = (
-            'Following items have been ' +
-            `${params.trash ? 'removed in trash' : 'permanently removed'}` +
+            'The following items have been ' +
+            `${params.trash ? 'moved to the trash' : 'permanently removed'}` +
             ':'
         );
 
@@ -783,7 +783,7 @@ class Plugin {
             if (!stat) {
                 this.loggerDebug.add(
                     debugName +
-                    `skipped, because cannot get stat – "${item}"`
+                    `skipped, because unable to get stat – "${item}"`
                 );
 
                 continue;
@@ -792,7 +792,7 @@ class Plugin {
             } else if (stat.isDirectory()) {
                 group = 'directories';
             } else {
-                const message = `Skipped, because invalid stat – "${item}"`;
+                const message = `Skipped, because of invalid stat – "${item}"`;
 
                 this.loggerDebug.add(`${debugName}${message}`);
                 this.loggerWarning.add(message);
@@ -882,7 +882,7 @@ class Plugin {
             if (!itemStat) {
                 this.loggerDebug.add(
                     debugName +
-                    `skipped, because cannot get stat – "${test.folder}"`
+                    `skipped, because unable to get stat – "${test.folder}"`
                 );
 
                 continue;
@@ -959,11 +959,9 @@ class Plugin {
             onSuccess: (pth) => {
                 this.loggerDebug.add(
                     debugName +
-                    'File' +
-                    `${toTrash ? '' : ' permanently'}` +
-                    ' removed' +
-                    `${toTrash ? ' to trash' : ''}` +
-                    ` – ${pth}`
+                    'File ' +
+                    `${toTrash ? 'moved to the trash' : 'permanently removed'} ` +
+                    `– ${pth}`
                 );
             },
             onError: (errorMessage) => {
@@ -1004,11 +1002,9 @@ class Plugin {
             onFileSuccess: (pth) => {
                 this.loggerDebug.add(
                     debugName +
-                    'File' +
-                    `${toTrash ? '' : ' permanently'}` +
-                    ' removed' +
-                    `${toTrash ? ' to trash' : ''}` +
-                    ` – ${pth}`
+                    'File ' +
+                    `${toTrash ? 'moved to the trash' : 'permanently removed'} ` +
+                    `– ${pth}`
                 );
             },
             onFileError: (errorMessage) => {
@@ -1018,11 +1014,9 @@ class Plugin {
             onFolderSuccess: (pth) => {
                 this.loggerDebug.add(
                     debugName +
-                    'Folder' +
-                    `${toTrash ? '' : ' permanently'}` +
-                    ' removed' +
-                    `${toTrash ? ' to trash' : ''}` +
-                    ` – ${pth}`
+                    'Folder ' +
+                    `${toTrash ? 'moved to the trash' : 'permanently removed'} ` +
+                    `– ${pth}`
                 );
             },
             onFolderError: (errorMessage) => {

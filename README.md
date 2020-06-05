@@ -22,6 +22,7 @@
   - [Namespace](#namespace)
   - [Compilation modes](#compilation-modes)
 - [Examples](#examples)
+- [Version naming](#version-naming)
 - [Contribution](#contribution)
 - [License](#license)
 
@@ -389,6 +390,11 @@ new RemovePlugin({
     }
 })
 ```
+
+
+## Version naming
+
+This project uses following structure for version naming: `<MAJOR RELEASE>.<BREAKING CHANGES>.<NOT BREAKING CHANGES>`.
 
 
 ## Contribution

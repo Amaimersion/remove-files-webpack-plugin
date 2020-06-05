@@ -1,3 +1,10 @@
+# 1.4.3
+
+## Added
+
+- Information about version naming in README.
+
+
 # 1.4.2 (May 15, 2020)
 
 ## Improved

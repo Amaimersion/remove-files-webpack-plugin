@@ -422,6 +422,7 @@ class Plugin {
      * @see
      * https://webpack.js.org/configuration
      */
+    // eslint-disable-next-line complexity
     readWebpackConfiguration(parameters, configuration) {
         if (!configuration || !Object.keys(configuration).length) {
             return;
@@ -500,6 +501,30 @@ class Plugin {
 
                 if (stats.all) {
                     detailed();
+                }
+
+                if (Object.prototype.hasOwnProperty.call(stats, 'logging')) {
+                    switch (stats.logging) {
+                        case false:
+                        case 'none':
+                            none();
+                            break;
+
+                        case 'error':
+                            errors();
+                            break;
+
+                        case 'warn':
+                            errorsWarnings();
+                            break;
+
+                        case 'info':
+                        case 'log':
+                        case true:
+                        case 'verbose':
+                            detailed();
+                            break;
+                    }
                 }
             }
         }

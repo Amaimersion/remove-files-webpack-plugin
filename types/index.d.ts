@@ -185,6 +185,21 @@ interface RemoveParameters {
     allowRootAndOutside?: boolean;
 
     /**
+     * Change parameters based on webpack configuration.
+     * Following webpack parameters are supported:
+     * `stats` (controls logging).
+     * These webpack parameters have priority over
+     * the plugin parameters.
+     * See webpack documentation for more - 
+     * https://webpack.js.org/configuration
+     *
+     * Defaults to `false`.
+     * 
+     * Namespace: all.
+     */
+    readWebpackConfiguration?: boolean;
+
+    /**
      * First build will be skipped.
      * 
      * Defaults to `false`.

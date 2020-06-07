@@ -3,6 +3,7 @@
 ## Added
 
 - Information about version naming in README.
+- New feature: `readWebpackConfiguration`. Part of plugin configuration may be controlled with global webpack configuration. [#29](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/29)
 
 
 # 1.4.2 (May 15, 2020)

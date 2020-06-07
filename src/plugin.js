@@ -115,6 +115,15 @@
  * Defaults to `false`.
  * Namespace: all.
  *
+ * @property {boolean} readWebpackConfiguration
+ * Change parameters based on webpack configuration.
+ * Following webpack parameters are supported:
+ * `stats`.
+ * These webpack parameters have priority over
+ * the plugin parameters.
+ * Defaults to `false`.
+ * Namespace: all.
+ *
  * @property {PathType} _pathType
  * Type of `path` module.
  * Defaults to `''` (will be selected based on OS).
@@ -164,7 +173,9 @@
  *  };
  *  callsCount: int;
  *  increaseCallsCount: () => void;
- *  getParams: () => RemovingParameters;
+ *  getParams: (
+ *      webpackConfiguration: Object
+ *  ) => RemovingParameters;
  * }} WebpackHook
  * Information about Webpack hook.
  */
@@ -232,6 +243,7 @@ class Plugin {
             logDebug: false,
             emulate: false,
             allowRootAndOutside: false,
+            readWebpackConfiguration: false,
             _pathType: '',
 
             /* `watch` parameters */
@@ -268,7 +280,16 @@ class Plugin {
                 increaseCallsCount: () => {
                     this.webpackHooks.beforeRun.callsCount++;
                 },
-                getParams: () => this.beforeParams
+                getParams: (webpackConfiguration) => {
+                    if (this.beforeParams.readWebpackConfiguration) {
+                        this.readWebpackConfiguration(
+                            this.beforeParams,
+                            webpackConfiguration
+                        );
+                    }
+
+                    return this.beforeParams;
+                }
             },
             watchRun: {
                 name: {
@@ -279,13 +300,22 @@ class Plugin {
                 increaseCallsCount: () => {
                     this.webpackHooks.watchRun.callsCount++;
                 },
-                getParams: () => {
+                getParams: (webpackConfiguration) => {
                     if (this.webpackHooks.watchRun.callsCount === 0) {
                         if (this.watchParams.skipFirstBuild) {
                             return undefined;
                         } else if (this.watchParams.beforeForFirstBuild) {
-                            return this.webpackHooks.beforeRun.getParams();
+                            return this.webpackHooks.beforeRun.getParams(
+                                webpackConfiguration
+                            );
                         }
+                    }
+
+                    if (this.watchParams.readWebpackConfiguration) {
+                        this.readWebpackConfiguration(
+                            this.watchParams,
+                            webpackConfiguration
+                        );
                     }
 
                     return this.watchParams;
@@ -300,7 +330,16 @@ class Plugin {
                 increaseCallsCount: () => {
                     this.webpackHooks.afterEmit.callsCount++;
                 },
-                getParams: () => this.afterParams
+                getParams: (webpackConfiguration) => {
+                    if (this.afterParams.readWebpackConfiguration) {
+                        this.readWebpackConfiguration(
+                            this.afterParams,
+                            webpackConfiguration
+                        );
+                    }
+
+                    return this.afterParams;
+                }
             }
         };
     }
@@ -370,6 +409,103 @@ class Plugin {
     }
 
     /**
+     * Modifies parameters based on webpack configuration.
+     *
+     * - this function may change values of `parameters`!
+     *
+     * @param {RemovingParameters} parameters
+     * Removing parameters for modifying.
+     *
+     * @param {Object} configuration
+     * Webpack configuration.
+     *
+     * @see
+     * https://webpack.js.org/configuration
+     */
+    readWebpackConfiguration(parameters, configuration) {
+        if (!configuration || !Object.keys(configuration).length) {
+            return;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(configuration, 'stats')) {
+            const stats = configuration.stats;
+            const errors = () => {
+                parameters.log = false;
+                parameters.logWarning = false;
+                parameters.logError = true;
+            };
+            const errorsWarnings = () => {
+                parameters.log = false;
+                parameters.logWarning = true;
+                parameters.logError = true;
+            };
+            const none = () => {
+                parameters.log = false;
+                parameters.logWarning = false;
+                parameters.logError = false;
+            };
+            const normal = () => {
+                parameters.log = true;
+                parameters.logWarning = true;
+                parameters.logError = false;
+            };
+            const detailed = () => {
+                parameters.log = true;
+                parameters.logWarning = true;
+                parameters.logError = true;
+            };
+
+            if (typeof stats === 'string') {
+                switch (stats) {
+                    case 'minimal':
+                    case 'errors-only':
+                        errors();
+                        break;
+
+                    case 'errors-warnings':
+                        errorsWarnings();
+                        break;
+
+                    case 'none':
+                        none();
+                        break;
+
+                    case 'normal':
+                        normal();
+                        break;
+
+                    case 'verbose':
+                    case 'detailed':
+                        detailed();
+                        break;
+                }
+            } else if (typeof stats === 'boolean') {
+                if (stats) {
+                    normal();
+                } else {
+                    none();
+                }
+            } else if (typeof stats === 'object') {
+                if (stats.errors) {
+                    parameters.logError = true;
+                } else {
+                    parameters.logError = false;
+                }
+
+                if (stats.warnings) {
+                    parameters.logWarning = true;
+                } else {
+                    parameters.logWarning = false;
+                }
+
+                if (stats.all) {
+                    detailed();
+                }
+            }
+        }
+    }
+
+    /**
      * Applies hook to webpack compiler.
      *
      * @param {Compiler} compiler
@@ -397,7 +533,7 @@ class Plugin {
          * when your plugin is finished running".
          */
         const method = (compilerOrCompilation, callback) => {
-            const params = hook.getParams();
+            const params = hook.getParams(compilerOrCompilation.options || {});
             const cllbck = () => {
                 hook.increaseCallsCount();
                 callback();
@@ -460,6 +596,10 @@ class Plugin {
 
         this.path.type = params._pathType;
 
+        this.loggerDebug.add(
+            debugName +
+            `used parameters – "${JSON.stringify(params)}"`
+        );
         this.loggerDebug.add(
             debugName +
             `path – "${this.path.type || 'auto'}"`

@@ -1,3 +1,11 @@
+# 1.4.3 (June 7, 2020)
+
+## Added
+
+- Information about version naming in README.
+- New feature: `readWebpackConfiguration`. Part of plugin configuration may be controlled with global webpack configuration. [#29](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/29)
+
+
 # 1.4.2 (May 15, 2020)
 
 ## Improved
@@ -14,7 +22,7 @@
 ## Added
 
 - Namespace documentation for every parameter.
-- New feature: `beforeForFirstBuild`. For first build `before` parameters will be applied, for subsequent builds `watch` parameters will be applied.Works only in `watch` key. [#25](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/25)
+- New feature: `beforeForFirstBuild`. For first build `before` parameters will be applied, for subsequent builds `watch` parameters will be applied. Works only in `watch` key. [#25](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/25)
 - New feature: `skipFirstBuild`. First build will be skipped. Works only in `watch` key.
 
 ## Changed

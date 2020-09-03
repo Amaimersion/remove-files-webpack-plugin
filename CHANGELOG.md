@@ -1,3 +1,6 @@
+# 1.4.4
+
+
 # 1.4.3 (June 7, 2020)
 
 ## Added
@@ -127,7 +130,7 @@ Nothing changed. Had to change the version because of problems with `npm`. See c
 ## Fixed
 
 - No longer necessary set `__dirname` to `root` in order to specify an actual root directory.
-- If you not set `include` and `test` parameters, there will be no more message `An items for removing not found.`. 
+- If you not set `include` and `test` parameters, there will be no more message `An items for removing not found.`.
 
 ## Changed
 

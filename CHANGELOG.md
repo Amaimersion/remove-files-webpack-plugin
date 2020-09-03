@@ -1,5 +1,9 @@
 # 1.4.4
 
+## Improved
+
+- Documentation for `trash` parameter. [#32](https://github.com/Amaimersion/remove-files-webpack-plugin/issues/32)
+
 ## Changed
 
 - Upgrade `@types/webpack` dependency to `4.41.22` version.

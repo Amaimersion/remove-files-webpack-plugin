@@ -114,6 +114,11 @@ interface RemoveParameters {
     /**
      * Move folders and files to the trash (recycle bin)
      * instead of permanent removing.
+     * **It is an async operation and you won't be
+     * able to control an execution chain along with
+     * other webpack plugins!**
+     * `afterRemove` callback behavior is undefined
+     * (it can be executed before, during or after actual execution).
      *
      * Defaults to `false`.
      *

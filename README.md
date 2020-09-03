@@ -110,7 +110,7 @@ From [Node.js documentation](https://nodejs.org/api/path.html#path_windows_vs_po
 
 ### How to set
 
-You can pass these parameters into any of the following keys: `before`, `watch` or `after`. Each key is optional, but at least one should be specified. 
+You can pass these parameters into any of the following keys: `before`, `watch` or `after`. Each key is optional, but at least one should be specified.
 
 - `before` – executes once before "normal" compilation.
 - `watch` – executes every time before "watch" compilation.
@@ -123,7 +123,7 @@ You can pass these parameters into any of the following keys: `before`, `watch` 
 ### Compilation modes
 
 - "normal" compilation means full compilation.
-- "watch" compilation means first build is a full compilation and subsequent builds is a short rebuilds of changed files. 
+- "watch" compilation means first build is a full compilation and subsequent builds is a short rebuilds of changed files.
 
 
 ## Examples
@@ -159,8 +159,8 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * After compilation moves both 
-     * `./dist/manifest.json` file and 
+     * After compilation moves both
+     * `./dist/manifest.json` file and
      * `./dist/maps` folder to the trash.
      */
     after: {
@@ -177,7 +177,7 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * Before compilation permanently removes both 
+     * Before compilation permanently removes both
      * `./dist/manifest.json` file and `./dist/maps` folder.
      * Log only works for warnings and errors.
      */
@@ -197,8 +197,8 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * After compilation permanently removes 
-     * all maps files in `./dist/styles` folder and 
+     * After compilation permanently removes
+     * all maps files in `./dist/styles` folder and
      * all subfolders (e.g. `./dist/styles/header`).
      */
     after: {
@@ -220,7 +220,7 @@ new RemovePlugin({
     /**
      * After compilation:
      * - permanently removes all css maps in `./dist/styles` folder.
-     * - permanently removes all js maps in `./dist/scripts` folder and 
+     * - permanently removes all js maps in `./dist/scripts` folder and
      * all subfolders (e.g. `./dist/scripts/header`).
      */
     after: {
@@ -270,8 +270,8 @@ new RemovePlugin({
     },
 
     /**
-     * After compilation permanently removes 
-     * all css maps in `./dist/styles` folder 
+     * After compilation permanently removes
+     * all css maps in `./dist/styles` folder
      * except `popup.css.map` file.
      */
     after: {
@@ -293,7 +293,7 @@ new RemovePlugin({
 ```javascript
 new RemovePlugin({
     /**
-     * Before "normal" compilation permanently 
+     * Before "normal" compilation permanently
      * removes entire `./dist` folder.
      */
     before: {
@@ -304,7 +304,7 @@ new RemovePlugin({
 
     /**
      * Every time before compilation in "watch"
-     * mode (`webpack --watch`) permanently removes JS files 
+     * mode (`webpack --watch`) permanently removes JS files
      * with hash in the name (like "entry-vqlr39sdvl12.js").
      */
     watch: {

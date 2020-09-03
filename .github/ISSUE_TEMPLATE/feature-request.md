@@ -4,7 +4,7 @@ about: Want to add or change something in the project?
 ---
 
 
-<!--  
+<!--
 Thank you very much for contributing by creating an issue!
 As an open source project with busy owner, it can sometimes take a long time to response. Please be patient if needed :). Thanks!
 -->

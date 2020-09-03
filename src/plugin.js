@@ -74,6 +74,11 @@
  * @property {boolean} trash
  * Move folders and files to trash (recycle bin)
  * instead of permanent deleting.
+ * **It is an async operation and you won't be
+ * able to control an execution chain along with
+ * other webpack plugins!**
+ * `afterRemove` callback behavior is undefined
+ * (it can be executed before, during or after actual execution).
  * Defaults to `false`.
  * Namespace: all.
  *

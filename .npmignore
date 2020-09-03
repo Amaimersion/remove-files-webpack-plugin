@@ -6,7 +6,6 @@ coverage
 test
 .eslintrc.yaml
 .gitignore
-.prettierrc.yaml
 TODO
 yarn.lock
 *.log

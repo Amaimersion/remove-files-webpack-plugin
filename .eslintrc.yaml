@@ -9,7 +9,7 @@ parserOptions:
   ecmaVersion: 9
 
 ignorePatterns:
-  - "test/" 
+  - "test/"
 
 rules:
   # Possible Errors
@@ -37,7 +37,7 @@ rules:
   no-eval: "error"
   no-extend-native: "error"
   no-extra-label: "error"
-  no-implicit-coercion: 
+  no-implicit-coercion:
     - "error"
     - "allow":
       - "!!"
@@ -48,10 +48,10 @@ rules:
   no-labels: "error"
   no-lone-blocks: "error"
   no-loop-func: "error"
-  no-magic-numbers: 
+  no-magic-numbers:
     - "error"
     - "ignore":
-        - 0 
+        - 0
         - 1
       "ignoreArrayIndexes": true
       "enforceConst": true
@@ -78,16 +78,16 @@ rules:
   no-warning-comments: "warn"
   no-with: "error"
   prefer-promise-reject-errors: "error"
-  radix: 
+  radix:
     - "error"
     - "always"
   require-await: "error"
-  wrap-iife: 
+  wrap-iife:
     - "error"
     - "outside"
 
   # Strict
-  strict: 
+  strict:
     - "error"
     - "safe"
 
@@ -119,7 +119,7 @@ rules:
   array-element-newline:
     - "error"
     - "consistent"
-  block-spacing: 
+  block-spacing:
     - "error"
     - "never"
   brace-style:
@@ -248,7 +248,7 @@ rules:
     - "never"
   space-in-parens:
     - "error"
-    - "never" 
+    - "never"
   space-infix-ops: "error"
   space-unary-ops:
     - "error"
@@ -295,7 +295,7 @@ rules:
   prefer-const: "error"
   prefer-spread: "error"
   prefer-template: "off" # disabled because i have to use it in some places.
-  template-curly-spacing: 
+  template-curly-spacing:
     - "error"
     - "never"
   yield-star-spacing:

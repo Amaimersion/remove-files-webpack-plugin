@@ -1,6 +1,6 @@
 /**
  * This script configures things so test scripts can work properly.
- * 
+ *
  * At the moment this script will work only on Windows with both C and D local disks.
  * You should change root directory to D:/remove-files-webpack-plugin in terminal.
  */
@@ -12,9 +12,9 @@ const fs = require('fs');
 
 /**
  * Folders for creating and deleting.
- * 
+ *
  * - add a common root (like `D:/path_test`)
- * before children paths if you want to delete 
+ * before children paths if you want to delete
  * all nested items with one call.
  */
 const FOLDERS = [

@@ -4,7 +4,7 @@ about: Did something not work as expected?
 ---
 
 
-<!--  
+<!--
 Thank you very much for contributing by creating an issue!
 As an open source project with busy owner, it can sometimes take a long time to response. Please be patient if needed :). Thanks!
 -->
@@ -19,8 +19,8 @@ As an open source project with busy owner, it can sometimes take a long time to 
 
 <!-- Tell about your environment. -->
 
-- plugin version: 
-- system and its version: 
+- plugin version:
+- system and its version:
 - webpack version:
 - node version:
 

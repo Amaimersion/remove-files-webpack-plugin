@@ -4,13 +4,13 @@
 // Definitions: https://github.com/Amaimersion/remove-files-webpack-plugin
 // TypeScript Version: 3.7
 
-import { Plugin, Compiler } from "webpack";
+import {Compiler} from "webpack";
 
 /**
  * A plugin for webpack that removes files and
  * folders before and after compilation.
  */
-declare class RemovePlugin extends Plugin {
+declare class RemovePlugin {
     constructor(parameters: PluginParameters);
     apply(compiler: Compiler): void;
 }

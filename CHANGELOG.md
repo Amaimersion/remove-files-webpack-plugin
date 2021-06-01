@@ -1,5 +1,10 @@
 # 1.4.5
 
+## Changed
+
+- Upgrade `@types/webpack` dependency to `5.28.0` version.
+- Upgrade `trash` dependency to `7.1.1` version.
+
 
 # 1.4.4 (September 3, 2020)
 

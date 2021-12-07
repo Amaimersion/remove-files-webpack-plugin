@@ -249,6 +249,7 @@ class Plugin {
             emulate: false,
             allowRootAndOutside: false,
             readWebpackConfiguration: false,
+            symlinks: true,
             _pathType: '',
 
             /* `watch` parameters */

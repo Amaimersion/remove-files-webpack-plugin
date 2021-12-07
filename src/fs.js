@@ -270,7 +270,7 @@ class Fs {
                 onFileError(`Skipped, because unable to get stat - "${item}"`);
 
                 continue;
-            } else if (stat.isFile()) {
+            } else if (stat.isFile() || (stat.isSymbolicLink() && !params.symlinks)) {
                 this.unlinkFileSync({
                     pth: item,
                     toTrash: params.toTrash,

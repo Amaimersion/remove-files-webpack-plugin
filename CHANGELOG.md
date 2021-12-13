@@ -1,5 +1,9 @@
 # 1.5.0
 
+## Changed
+
+- Symbolic links (soft links) will be treated as ordinary files and thus will be removed. Earlier behavior was silent ignore. [#40](https://github.com/Amaimersion/remove-files-webpack-plugin/pull/40)
+
 
 # 1.4.5 (June 1, 2021)
 

@@ -354,7 +354,7 @@ class Fs {
                 onItemError(`Skipped, because unable to get stat - "${item}"`);
 
                 continue;
-            } else if (stat.isFile()) {
+            } else if (stat.isFile() || stat.isSymbolicLink()) {
                 let passed = true;
 
                 if (params.test) {

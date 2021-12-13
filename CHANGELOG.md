@@ -4,6 +4,7 @@
 
 - Symbolic links (soft links) will be treated as ordinary files and thus will be removed. Earlier behavior was silent ignore. [#40](https://github.com/Amaimersion/remove-files-webpack-plugin/pull/40)
 - `TestObject.method` will be called for symbolic links.
+- Upgrade `trash` dependency to `7.2.0` version.
 
 
 # 1.4.5 (June 1, 2021)

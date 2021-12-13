@@ -13,6 +13,8 @@
 - [Installation](#installation)
 - [Support](#support)
 - [Usage](#usage)
+- [Notes](#notes)
+  - [Symbolic links](#symbolic-links)
 - [Notes for Windows users](#notes-for-windows-users)
   - [Single backward slash](#single-backward-slash)
   - [Segment separator](#segment-separator)
@@ -66,6 +68,13 @@ module.exports = {
     ]
 };
 ```
+
+
+## Notes
+
+### Symbolic links
+
+Symbolic links (soft links) will be treated as ordinary files.
 
 
 ## Notes for Windows users
